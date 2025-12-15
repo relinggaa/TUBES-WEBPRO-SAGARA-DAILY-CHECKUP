@@ -1,0 +1,89 @@
+import React from 'react';
+import NavbarAdmin from '../components/NavbarAdmin';
+import { useTheme } from '../contexts/ThemeContext';
+
+const LayoutAdmin = ({ children }) => {
+    const { currentTheme } = useTheme();
+    
+  
+    const getColorClasses = () => {
+        const colorMap = {
+            purple: {
+                orb1: 'bg-purple-500/20',
+                orb2: 'bg-cyan-500/10',
+                orb3: 'bg-purple-600/10',
+                orb4: 'bg-purple-400/5',
+                orb5: 'bg-cyan-400/5',
+                grid: '#8b5cf6'
+            },
+            red: {
+                orb1: 'bg-red-500/20',
+                orb2: 'bg-red-500/10',
+                orb3: 'bg-red-600/10',
+                orb4: 'bg-red-400/5',
+                orb5: 'bg-red-400/5',
+                grid: '#ef4444'
+            },
+            blue: {
+                orb1: 'bg-blue-500/20',
+                orb2: 'bg-blue-500/10',
+                orb3: 'bg-blue-600/10',
+                orb4: 'bg-blue-400/5',
+                orb5: 'bg-blue-400/5',
+                grid: '#3b82f6'
+            },
+            green: {
+                orb1: 'bg-green-500/20',
+                orb2: 'bg-green-500/10',
+                orb3: 'bg-green-600/10',
+                orb4: 'bg-green-400/5',
+                orb5: 'bg-green-400/5',
+                grid: '#22c55e'
+            },
+            yellow: {
+                orb1: 'bg-yellow-500/20',
+                orb2: 'bg-yellow-500/10',
+                orb3: 'bg-yellow-600/10',
+                orb4: 'bg-yellow-400/5',
+                orb5: 'bg-yellow-400/5',
+                grid: '#eab308'
+            }
+        };
+        return colorMap[currentTheme.primary] || colorMap.purple;
+    };
+    
+    const colors = getColorClasses();
+    
+    return (
+        <div className="min-h-screen bg-[#0D0219] relative overflow-hidden">
+            {/* Background Gradient Effects with Animation */}
+            <div className="fixed inset-0 overflow-hidden pointer-events-none">
+                <div className={`absolute -top-40 -right-40 w-80 h-80 ${colors.orb1} rounded-full blur-3xl animate-pulse`}></div>
+                <div className={`absolute top-1/2 -left-40 w-80 h-80 ${colors.orb2} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '1s' }}></div>
+                <div className={`absolute bottom-0 right-1/4 w-96 h-96 ${colors.orb3} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '2s' }}></div>
+                
+             
+                <div className={`absolute top-1/4 right-1/3 w-64 h-64 ${colors.orb4} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '0.5s' }}></div>
+                <div className={`absolute bottom-1/4 left-1/3 w-72 h-72 ${colors.orb5} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '1.5s' }}></div>
+            </div>
+            
+           
+            <div 
+                className="fixed inset-0 pointer-events-none"
+                style={{
+                    backgroundImage: `linear-gradient(to right, rgba(156, 163, 175, 0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(156, 163, 175, 0.1) 1px, transparent 1px)`,
+                    backgroundSize: '4rem 4rem',
+                    opacity: 0.5,
+                    zIndex: 1
+                }}
+            ></div>
+            
+            <NavbarAdmin />
+            <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
+                {children}
+            </main>
+        </div>
+    );
+};
+
+export default LayoutAdmin;
