@@ -9,3 +9,14 @@
     --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
         'Segoe UI Symbol', 'Noto Color Emoji';
 }
+
+/* Hide Inertia.js progress bar */
+[data-inertia-progress],
+.inertia-progress,
+#nprogress,
+.nprogress-bar,
+.nprogress-spinner {
+    display: none !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+}
