@@ -29,3 +29,8 @@ Route::prefix('admin/generate-key')->name('generate-key.')->group(function () {
     Route::put('/{id}', [GenerateKeyController::class, 'update'])->name('update');
     Route::delete('/{id}', [GenerateKeyController::class, 'destroy'])->name('destroy');
 });
+
+
+Route::get('/driver/login', function () {
+    return inertia('Driver/LoginUser');
+});
