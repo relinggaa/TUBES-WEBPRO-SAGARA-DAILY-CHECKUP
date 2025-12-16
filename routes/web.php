@@ -8,6 +8,10 @@ Route::get('/', function () {
     return inertia('Admin/DashboardAdmin');
 });
 
+Route::get('/admin/login', function () {
+    return inertia('Admin/LoginAdmin');
+});
+
 Route::get('/admin/pengajuan-perbaikan', function () {
     return inertia('Admin/PengajuanPerbaikan');
 });
