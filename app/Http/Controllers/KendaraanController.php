@@ -1,0 +1,129 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Kendaraan;
+use App\Models\User;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
+use Illuminate\Database\UniqueConstraintViolationException;
+
+class KendaraanController extends Controller
+{
+    public function index()
+    {
+        $kendaraans = Kendaraan::with('driver')->orderBy('created_at', 'desc')->get();
+        $drivers = User::where('role', 'Driver')->select('id', 'username')->get();
+
+        return Inertia::render('Admin/Kendaraan', [
+            'kendaraans' => $kendaraans,
+            'drivers' => $drivers,
+        ]);
+    }
+
+    public function store(Request $request)
+    {
+        $validated = $request->validate([
+            'merek' => 'required|string|max:255',
+            'plat_nomor' => 'required|string|max:20|unique:kendaraans,plat_nomor',
+            'driver_id' => [
+                'nullable',
+                'exists:users,id',
+                Rule::unique('kendaraans', 'driver_id')
+            ],
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'driver_id.unique' => 'User sudah memiliki kendaraan. Satu user hanya bisa memiliki satu kendaraan.',
+        ]);
+
+        try {
+            if ($request->hasFile('gambar')) {
+                $gambar = $request->file('gambar');
+                $gambarPath = $gambar->store('kendaraan', 'public');
+                $validated['gambar'] = $gambarPath;
+            }
+
+            Kendaraan::create($validated);
+
+            return redirect()->route('kendaraan.index')
+                ->with('success', 'Kendaraan berhasil ditambahkan!');
+        } catch (UniqueConstraintViolationException $e) {
+          
+            if (str_contains($e->getMessage(), 'driver_id') || str_contains($e->getMessage(), 'kendaraans_driver_id_unique')) {
+        
+                if (isset($validated['gambar']) && Storage::disk('public')->exists($validated['gambar'])) {
+                    Storage::disk('public')->delete($validated['gambar']);
+                }
+                
+                return redirect()->route('kendaraan.index')
+                    ->with('error', 'User sudah memiliki kendaraan. Satu user hanya bisa memiliki satu kendaraan.');
+            }
+            
+            
+            throw $e;
+        }
+    }
+
+    public function update(Request $request, $id)
+    {
+        $kendaraan = Kendaraan::findOrFail($id);
+
+        $validated = $request->validate([
+            'merek' => 'required|string|max:255',
+            'plat_nomor' => 'required|string|max:20|unique:kendaraans,plat_nomor,' . $id,
+            'driver_id' => [
+                'nullable',
+                'exists:users,id',
+                Rule::unique('kendaraans', 'driver_id')->ignore($id)->whereNull('deleted_at')
+            ],
+            'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
+        ], [
+            'driver_id.unique' => 'User sudah memiliki kendaraan. Satu user hanya bisa memiliki satu kendaraan.',
+        ]);
+
+        try {
+            if ($request->hasFile('gambar')) {
+                if ($kendaraan->gambar) {
+                    Storage::disk('public')->delete($kendaraan->gambar);
+                }
+                $gambar = $request->file('gambar');
+                $gambarPath = $gambar->store('kendaraan', 'public');
+                $validated['gambar'] = $gambarPath;
+            }
+
+            $kendaraan->update($validated);
+
+            return redirect()->route('kendaraan.index')
+                ->with('success', 'Kendaraan berhasil diupdate!');
+        } catch (UniqueConstraintViolationException $e) {
+            if (str_contains($e->getMessage(), 'driver_id') || str_contains($e->getMessage(), 'kendaraans_driver_id_unique')) {
+              
+                if (isset($validated['gambar']) && Storage::disk('public')->exists($validated['gambar'])) {
+                    Storage::disk('public')->delete($validated['gambar']);
+                }
+                
+                return redirect()->route('kendaraan.index')
+                    ->with('error', 'User sudah memiliki kendaraan. Satu user hanya bisa memiliki satu kendaraan.');
+            }
+            
+    
+            throw $e;
+        }
+    }
+
+    public function destroy($id)
+    {
+        $kendaraan = Kendaraan::findOrFail($id);
+
+        if ($kendaraan->gambar) {
+            Storage::disk('public')->delete($kendaraan->gambar);
+        }
+
+        $kendaraan->delete();
+
+        return redirect()->route('kendaraan.index')
+            ->with('success', 'Kendaraan berhasil dihapus!');
+    }
+}

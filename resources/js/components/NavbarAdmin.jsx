@@ -58,6 +58,7 @@ const NavbarAdmin = () => {
         { name: 'Dashboard', href: '/' },
         { name: 'Pengajuan Perbaikan', href: '/admin/pengajuan-perbaikan' },
         { name: 'Laporan Biaya', href: '/admin/laporan-biaya' },
+        { name: 'Kendaraan', href: '/admin/kendaraan' },
         { name: 'Generate Key', href: '/admin/generate-key' },
     ];
 

@@ -2,6 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GenerateKeyController;
+use App\Http\Controllers\KendaraanController;
 
 Route::get('/', function () {
     return inertia('Admin/DashboardAdmin');
@@ -13,6 +14,13 @@ Route::get('/admin/pengajuan-perbaikan', function () {
 
 Route::get('/admin/laporan-biaya', function () {
     return inertia('Admin/LaporanBiaya');
+});
+
+Route::prefix('admin/kendaraan')->name('kendaraan.')->group(function () {
+    Route::get('/', [KendaraanController::class, 'index'])->name('index');
+    Route::post('/', [KendaraanController::class, 'store'])->name('store');
+    Route::match(['post', 'put'], '/{id}', [KendaraanController::class, 'update'])->name('update');
+    Route::delete('/{id}', [KendaraanController::class, 'destroy'])->name('destroy');
 });
 
 Route::prefix('admin/generate-key')->name('generate-key.')->group(function () {

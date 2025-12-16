@@ -45,4 +45,13 @@ class User extends Authenticatable
             'email_verified_at' => 'datetime',
         ];
     }
+
+    /**
+     * Relasi one-to-one dengan Kendaraan
+     * Satu user hanya bisa menjadi driver untuk satu kendaraan
+     */
+    public function kendaraan()
+    {
+        return $this->hasOne(Kendaraan::class, 'driver_id');
+    }
 }
