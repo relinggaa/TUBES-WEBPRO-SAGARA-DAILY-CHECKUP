@@ -1,6 +1,6 @@
 import React from 'react';
 
-export default function GenerateKeyCreateModal({
+export default function CreateModal({
     isOpen,
     currentTheme,
     formData,

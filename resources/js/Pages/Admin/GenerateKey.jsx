@@ -3,9 +3,9 @@ import LayoutAdmin from '../../layout/LayoutAdmin';
 import { useTheme } from '../../contexts/ThemeContext';
 import { usePage, router } from '@inertiajs/react';
 import DaftarUserTable from '../../components/admin/GenerateKey/DaftarUserTable';
-import GenerateKeyHeader from '../../components/admin/GenerateKey/GenerateKeyHeader';
-import GenerateKeyCreateModal from '../../components/admin/GenerateKey/GenerateKeyCreateModal';
-import GenerateKeyUpdateModal from '../../components/admin/GenerateKey/GenerateKeyUpdateModal';
+import Header from '../../components/admin/GenerateKey/Header';
+import CreateModal from '../../components/admin/GenerateKey/CreateModal';
+import Modal from '../../components/admin/GenerateKey/Modal';
 import { toast } from 'react-toastify';
 
 export default function GenerateKey({ users = { data: [], links: [], current_page: 1, last_page: 1, total: 0 }, filters = { search: '', filter_role: 'all' } }) {
@@ -212,7 +212,7 @@ export default function GenerateKey({ users = { data: [], links: [], current_pag
         <LayoutAdmin>
             <div className="space-y-8">
                 {/* Header Card */}
-                <GenerateKeyHeader 
+                <Header 
                     currentTheme={currentTheme}
                     onAddUserClick={() => setIsModalOpen(true)}
                 />
@@ -233,7 +233,7 @@ export default function GenerateKey({ users = { data: [], links: [], current_pag
                 />
 
                 {/* Create Modal */}
-                <GenerateKeyCreateModal
+                <CreateModal
                     isOpen={isModalOpen}
                     currentTheme={currentTheme}
                     formData={formData}
@@ -245,7 +245,7 @@ export default function GenerateKey({ users = { data: [], links: [], current_pag
                 />
 
                 {/* Update Modal */}
-                <GenerateKeyUpdateModal
+                <Modal
                     isOpen={isUpdateModalOpen}
                     currentTheme={currentTheme}
                     formData={formData}

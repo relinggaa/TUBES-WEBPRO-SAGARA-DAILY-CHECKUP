@@ -6,7 +6,7 @@ import {
     getThemeShadowHover 
 } from '../../../Color/GenerateKeyColor';
 
-export default function GenerateKeyHeader({ currentTheme, onAddUserClick }) {
+export default function Header({ currentTheme, onAddUserClick }) {
     return (
         <div className="relative group">
             {/* Background Glow Effect */}
