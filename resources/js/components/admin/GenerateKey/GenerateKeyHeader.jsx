@@ -4,7 +4,7 @@ import {
     getThemeBorderHover, 
     getThemeShadow, 
     getThemeShadowHover 
-} from '../Color/GenerateKeyColor';
+} from '../../../Color/GenerateKeyColor';
 
 export default function GenerateKeyHeader({ currentTheme, onAddUserClick }) {
     return (

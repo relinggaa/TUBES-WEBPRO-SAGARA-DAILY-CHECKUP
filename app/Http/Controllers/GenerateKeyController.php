@@ -50,9 +50,18 @@ class GenerateKeyController extends Controller
             'key' => 'required|string|size:8|unique:users,key',
         ]);
 
-         User::create($validated);
+        User::create($validated);
 
-        return redirect()->route('generate-key.index')
+        // Preserve search and filter parameters
+        $params = [];
+        if ($request->has('search') && $request->search) {
+            $params['search'] = $request->search;
+        }
+        if ($request->has('filter_role') && $request->filter_role && $request->filter_role !== 'all') {
+            $params['filter_role'] = $request->filter_role;
+        }
+
+        return redirect()->route('generate-key.index', $params)
             ->with('success', 'User berhasil ditambahkan!');
     }
 
@@ -69,16 +78,34 @@ class GenerateKeyController extends Controller
 
         $user->update($validated);
 
-        return redirect()->route('generate-key.index')
+        // Preserve search and filter parameters
+        $params = [];
+        if ($request->has('search') && $request->search) {
+            $params['search'] = $request->search;
+        }
+        if ($request->has('filter_role') && $request->filter_role && $request->filter_role !== 'all') {
+            $params['filter_role'] = $request->filter_role;
+        }
+
+        return redirect()->route('generate-key.index', $params)
             ->with('success', 'User berhasil diupdate!');
     }
 
-    public function destroy($id)
+    public function destroy(Request $request, $id)
     {
         $user = User::findOrFail($id);
         $user->delete();
 
-        return redirect()->route('generate-key.index')
+        // Preserve search and filter parameters
+        $params = [];
+        if ($request->has('search') && $request->search) {
+            $params['search'] = $request->search;
+        }
+        if ($request->has('filter_role') && $request->filter_role && $request->filter_role !== 'all') {
+            $params['filter_role'] = $request->filter_role;
+        }
+
+        return redirect()->route('generate-key.index', $params)
             ->with('success', 'User berhasil dihapus!');
     }
 

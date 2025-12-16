@@ -1,6 +1,8 @@
 import React from 'react';
 import NavbarAdmin from '../components/NavbarAdmin';
 import { useTheme } from '../contexts/ThemeContext';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 
 const LayoutAdmin = ({ children }) => {
     const { currentTheme } = useTheme();
@@ -82,6 +84,33 @@ const LayoutAdmin = ({ children }) => {
             <main className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-8">
                 {children}
             </main>
+            
+            {/* Toast Container */}
+            <ToastContainer
+                position="top-right"
+                autoClose={5000}
+                hideProgressBar={false}
+                newestOnTop={false}
+                closeOnClick
+                rtl={false}
+                pauseOnFocusLoss
+                draggable
+                pauseOnHover
+                theme="dark"
+                style={{
+                    zIndex: 9999
+                }}
+                toastStyle={{
+                    backgroundColor: '#000000',
+                    color: '#ffffff',
+                    border: `1px solid ${currentTheme.hex.primary}40`,
+                    borderRadius: '12px',
+                    boxShadow: `0 4px 12px ${currentTheme.hex.primary}30`
+                }}
+                progressStyle={{
+                    background: `linear-gradient(to right, ${currentTheme.hex.primary}, ${currentTheme.hex.secondary})`
+                }}
+            />
         </div>
     );
 };
