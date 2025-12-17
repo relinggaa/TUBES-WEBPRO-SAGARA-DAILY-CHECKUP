@@ -41,7 +41,7 @@ export default function LoginAdmin() {
                 ></div>
             </div>
 
-            {/* Grid Pattern Overlay */}
+     
            
 
             {/* 2 Column Layout */}
@@ -86,7 +86,7 @@ export default function LoginAdmin() {
                     
                     {/* Main Card */}
                     <div 
-                        className="relative bg-gradient-to-br from-gray-900/90 via-gray-900/80 to-gray-800/90 backdrop-blur-2xl rounded-3xl border shadow-2xl p-8 md:p-10 overflow-hidden"
+                        className=" relative bg-gradient-to-br from-gray-900/90 via-gray-900/80 to-gray-800/90 backdrop-blur-2xl rounded-3xl border shadow-2xl p-8 md:p-10 overflow-hidden"
                         style={{
                             borderColor: `${currentTheme.hex.primary}40`,
                             boxShadow: `0 25px 50px -12px ${currentTheme.hex.primary}30`

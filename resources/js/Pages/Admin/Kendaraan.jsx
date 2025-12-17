@@ -897,7 +897,7 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
                                 </div>
 
                                 {/* Gambar */}
-                                <div>
+                <div>
                                     <label className="block text-sm font-medium text-white mb-2">Gambar</label>
                                     <div className="space-y-4">
                                         {previewImage && (
@@ -959,7 +959,7 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
                                     </button>
                                 </div>
                             </form>
-                        </div>
+                </div>
                     </div>
                 )}
             </div>
