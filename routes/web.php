@@ -32,5 +32,17 @@ Route::prefix('admin/generate-key')->name('generate-key.')->group(function () {
 
 
 Route::get('/driver/login', function () {
-    return inertia('Driver/LoginUser');
+    return inertia('Driver/LoginDriver');
+});
+
+Route::get('/driver/dashboard', function () {
+    return inertia('Driver/DashboardDriver');
+});
+
+Route::get('/driver/listcar', function () {
+    return inertia('Driver/ListCarDriver');
+});
+
+Route::get('/driver/report', function () {
+    return inertia('Driver/ReportDriver');
 });
