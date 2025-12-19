@@ -147,19 +147,19 @@ const TextType = ({
   const textStyle = getCurrentTextColor() 
     ? { color: getCurrentTextColor() }
     : {
-        background: 'linear-gradient(-1deg, #FFFFFF 0%, #F5F5F5 15%, #FFE5E5 25%, #FFCCCC 35%, #FFB3B3 42%, #FF9999 48%, #FF8080 50%, #FF6666 52%, #FF4D4D 58%, #FF3333 65%, #FF1A1A 72%, #DC2626 75%, #FF1A1A 78%, #FF3333 85%, #FF4D4D 92%, #FF8080 95%, #FFB3B3 98%, #FFFFFF 100%)',
+        background: '#ffff',
         WebkitBackgroundClip: 'text',
         WebkitTextFillColor: 'transparent',
         backgroundClip: 'text',
-        textShadow: '0 0 30px rgba(220, 38, 38, 0.5)'
+
       };
 
   return createElement(Component, {
     ref: containerRef,
     className: `inline-block whitespace-pre-wrap tracking-tight ${className}`,
     style: {
-      fontFamily: "'Nunito', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif",
-      fontWeight: 900,
+      fontFamily: "'BBH Bartle', sans-serif",
+      fontWeight: 400,
       fontSize: 'clamp(1.5rem, 4vw, 3rem)',
       letterSpacing: '-0.02em',
       ...props.style
