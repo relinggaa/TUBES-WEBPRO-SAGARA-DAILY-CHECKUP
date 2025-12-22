@@ -1,7 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
 import { Link } from "@inertiajs/react";
 
 export default function DashboardDriver() {
+  const [showModal, setShowModal] = useState(false);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState(null);
+
+  const handleFileChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedFile(file);
+      setPreviewUrl(URL.createObjectURL(file));
+    }
+  };
+
+  const handleUpload = () => {
+    // Handle upload logic here
+    console.log("Uploading file:", selectedFile);
+    setShowModal(false);
+    setSelectedFile(null);
+    setPreviewUrl(null);
+  };
   const vehicles = [
     {
       id: 1,
@@ -44,16 +63,32 @@ export default function DashboardDriver() {
           <div className="absolute -bottom-24 -left-24 w-48 h-48 bg-cyan-400/20 rounded-full blur-3xl animate-pulse delay-700"></div>
 
           <div className="relative flex flex-col items-center">
+            {/* Profile Image with Gradient Border */}
             <div className="relative mb-6">
+              {/* Gradient border ring */}
               <div className="absolute inset-0 bg-gradient-to-br from-blue-400 via-cyan-400 to-blue-500 rounded-full blur-sm opacity-75 animate-pulse"></div>
 
-              <div className="relative w-36 h-36 rounded-full overflow-hidden border-4 border-white/40 shadow-2xl backdrop-blur-sm">
+              {/* Image container */}
+              <div
+                onClick={() => setShowModal(true)}
+                className="relative w-36 h-36 rounded-full overflow-hidden border-4 border-white/40 shadow-2xl backdrop-blur-sm cursor-pointer hover:border-white/50 transition-all"
+              >
                 <img
                   src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_qydwbyfzBseOkXvF2to4jax9f5yN6unb5g&s"
                   alt="Profile picture"
                   className="w-full h-full object-cover"
                 />
               </div>
+
+              {/* Edit Button */}
+              <button
+                onClick={() => setShowModal(true)}
+                className="absolute bottom-0 right-0 w-10 h-10 bg-gradient-to-r from-blue-500 to-cyan-500 rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-all duration-300 border-2 border-white/40"
+              >
+                <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                </svg>
+              </button>
             </div>
 
             {/* Name */}
@@ -114,7 +149,7 @@ export default function DashboardDriver() {
                     <svg xmlns="http://www.w3.org/2000/svg" className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2.5">
                       <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                     </svg>
-                    <span className="text-base">Tambah Kerusakan</span>
+                    <span className="text-base">Tambah Data Kerusakan</span>
                   </div>
                 </button>
               </Link>
@@ -122,6 +157,82 @@ export default function DashboardDriver() {
           ))}
         </div>
       </div>
+
+      {/* Modal for Profile Photo Upload */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 rounded-[28px] p-8 max-w-md w-full border border-white/20 shadow-2xl animate-slide-up">
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setShowModal(false);
+                setSelectedFile(null);
+                setPreviewUrl(null);
+              }}
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all"
+            >
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <h3 className="text-white text-2xl font-bold mb-6">Ganti Foto Profil</h3>
+
+            {/* Preview */}
+            <div className="flex justify-center mb-6">
+              <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white/40 shadow-xl">
+                <img
+                  src={previewUrl || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_qydwbyfzBseOkXvF2to4jax9f5yN6unb5g&s"}
+                  alt="Preview"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+
+            {/* File Input */}
+            <div className="mb-6">
+              <label className="block w-full">
+                <input
+                  type="file"
+                  accept="image/*"
+                  onChange={handleFileChange}
+                  className="hidden"
+                  id="profile-upload"
+                />
+                <div className="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 text-center cursor-pointer hover:bg-white/15 transition-all">
+                  <svg className="w-8 h-8 text-blue-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                  </svg>
+                  <p className="text-blue-200 text-sm">
+                    {selectedFile ? selectedFile.name : "Pilih foto dari perangkat"}
+                  </p>
+                </div>
+              </label>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  setSelectedFile(null);
+                  setPreviewUrl(null);
+                }}
+                className="flex-1 bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold py-3 rounded-full hover:bg-white/15 transition-all"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleUpload}
+                disabled={!selectedFile}
+                className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold py-3 rounded-full hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                Upload
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         @keyframes fade-in {

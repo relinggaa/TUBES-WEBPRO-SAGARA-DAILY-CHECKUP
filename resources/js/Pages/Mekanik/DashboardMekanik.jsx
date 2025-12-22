@@ -1,6 +1,26 @@
-import React from "react";
+import React, { useState } from "react";
+import { Link } from "@inertiajs/react";
 
 export default function DashboardMekanik() {
+    const [showModal, setShowModal] = useState(false);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null);
+
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedFile(file);
+            setPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
+    const handleUpload = () => {
+        // Handle upload logic here
+        console.log("Uploading file:", selectedFile);
+        setShowModal(false);
+        setSelectedFile(null);
+        setPreviewUrl(null);
+    };
     const cars = [
         {
             id: 1,
@@ -8,7 +28,7 @@ export default function DashboardMekanik() {
             jadwal: "17/March/2025",
             status: "FATAL",
             plate: "B 4121 QQ",
-            kerusakan: "Kerusakan berada pada liman",
+            kerusakan: "Kayanya kurang oli deh",
             image: "https://blog.gaadikey.com/wp-content/uploads/2017/01/Nissan-Terrano-2017-Edition.jpg"
         },
         {
@@ -17,7 +37,7 @@ export default function DashboardMekanik() {
             jadwal: "18/March/2025",
             status: "FATAL",
             plate: "B 4121 QQ",
-            kerusakan: "Kerusakan berada pada liman",
+            kerusakan: "Kruk as nya kena kayanya",
             image: "https://blog.gaadikey.com/wp-content/uploads/2017/01/Nissan-Terrano-2017-Edition.jpg"
         }
     ];
@@ -40,12 +60,17 @@ export default function DashboardMekanik() {
                 <div className="bg-white/10 backdrop-blur-xl rounded-[28px] p-6 mb-6 shadow-2xl border border-white/10 animate-fade-in hover:scale-[1.02] hover:border-white/20 hover:shadow-cyan-500/30 transition-all duration-300 cursor-pointer">
                     <div className="flex items-center gap-4 mb-4">
 
-                        <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/20 shadow-lg flex-shrink-0">
-                            <img
-                                src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_qydwbyfzBseOkXvF2to4jax9f5yN6unb5g&s"
-                                alt="Profile"
-                                className="w-full h-full object-cover"
-                            />
+                        <div className="w-16 h-16 flex-shrink-0">
+                            <div
+                                onClick={() => setShowModal(true)}
+                                className="w-full h-full rounded-full overflow-hidden border-2 border-white/20 shadow-lg cursor-pointer hover:border-white/30 transition-all"
+                            >
+                                <img
+                                    src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_qydwbyfzBseOkXvF2to4jax9f5yN6unb5g&s"
+                                    alt="Profile picture"
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
                         </div>
 
                         <div className="flex-1 min-w-0">
@@ -63,11 +88,21 @@ export default function DashboardMekanik() {
                         </div>
                     </div>
 
+                    {/* Edit Profile Button */}
+                    <button
+                        onClick={() => setShowModal(true)}
+                        className="w-full bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold py-2.5 rounded-full hover:bg-white/15 transition-all mb-3 flex items-center justify-center gap-2"
+                    >
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                        </svg>
+                        Edit Profile
+                    </button>
+
                     <button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                         Mark As Full
                     </button>
                 </div>
-
 
                 <div className="flex items-center gap-3 mb-5">
                     <h2 className="text-white text-xl font-bold">
@@ -149,6 +184,78 @@ export default function DashboardMekanik() {
                     ))}
                 </div>
             </div>
+
+            {/* Modal for Profile Photo Upload */}
+            {showModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 rounded-[28px] p-8 max-w-md w-full border border-white/20 shadow-2xl animate-slide-up">
+                        <button
+                            onClick={() => {
+                                setShowModal(false);
+                                setSelectedFile(null);
+                                setPreviewUrl(null);
+                            }}
+                            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all"
+                        >
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        <h3 className="text-white text-2xl font-bold mb-6">Ganti Foto Profil</h3>
+
+                        <div className="flex justify-center mb-6">
+                            <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white/40 shadow-xl">
+                                <img
+                                    src={previewUrl || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_qydwbyfzBseOkXvF2to4jax9f5yN6unb5g&s"}
+                                    alt="Preview"
+                                    className="w-full h-full object-cover"
+                                />
+                            </div>
+                        </div>
+
+                        <div className="mb-6">
+                            <label className="block w-full">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleFileChange}
+                                    className="hidden"
+                                    id="profile-upload-mekanik"
+                                />
+                                <div className="w-full bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-4 text-center cursor-pointer hover:bg-white/15 transition-all">
+                                    <svg className="w-8 h-8 text-blue-300 mx-auto mb-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    <p className="text-blue-200 text-sm">
+                                        {selectedFile ? selectedFile.name : "Pilih foto dari perangkat"}
+                                    </p>
+                                </div>
+                            </label>
+                        </div>
+
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setShowModal(false);
+                                    setSelectedFile(null);
+                                    setPreviewUrl(null);
+                                }}
+                                className="flex-1 bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold py-3 rounded-full hover:bg-white/15 transition-all"
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={handleUpload}
+                                disabled={!selectedFile}
+                                className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold py-3 rounded-full hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                            >
+                                Upload
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
 
             <style jsx>{`
         @keyframes fade-in {

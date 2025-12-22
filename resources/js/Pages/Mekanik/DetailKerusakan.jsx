@@ -140,10 +140,11 @@ export default function DetailKerusakan() {
                     </div>
                 </div>
 
-
-                <button className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-4 rounded-full shadow-2xl hover:shadow-emerald-500/50 hover:scale-105 transition-all duration-300 animate-slide-up">
-                    Done
-                </button>
+                <a href="/mekanik/dashboard">
+                    <button className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-4 rounded-full shadow-2xl hover:shadow-emerald-500/50 hover:scale-105 transition-all duration-300 animate-slide-up">
+                        Done
+                    </button>
+                </a>
             </div>
 
             <style jsx>{`
