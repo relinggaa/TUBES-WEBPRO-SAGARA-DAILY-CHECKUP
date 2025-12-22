@@ -46,3 +46,7 @@ Route::get('/driver/listcar', function () {
 Route::get('/driver/report', function () {
     return inertia('Driver/ReportDriver');
 });
+
+Route::get('/mekanik/dashboard', function () {
+    return inertia('Mekanik/DashboardMekanik');
+});
