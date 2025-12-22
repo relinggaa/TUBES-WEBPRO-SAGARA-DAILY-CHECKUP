@@ -9,7 +9,9 @@ export default defineConfig({
             refresh: true,
         }),
         tailwindcss(),
+
     ],
+    assetsInclude: ['**/*.glb'],
     server: {
         watch: {
             ignored: ['**/storage/framework/views/**'],

@@ -12,14 +12,31 @@ use Illuminate\Database\UniqueConstraintViolationException;
 
 class KendaraanController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $kendaraans = Kendaraan::with('driver')->orderBy('created_at', 'desc')->get();
+        $query = Kendaraan::with('driver')->orderBy('created_at', 'desc');
+        
+        // Search filter
+        if ($request->has('search') && $request->search !== null && $request->search !== '') {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('merek', 'like', '%' . $search . '%')
+                  ->orWhere('plat_nomor', 'like', '%' . $search . '%')
+                  ->orWhereHas('driver', function($driverQuery) use ($search) {
+                      $driverQuery->where('username', 'like', '%' . $search . '%');
+                  });
+            });
+        }
+        
+        $kendaraans = $query->paginate(6)->appends($request->only(['search']));
         $drivers = User::where('role', 'Driver')->select('id', 'username')->get();
 
         return Inertia::render('Admin/Kendaraan', [
             'kendaraans' => $kendaraans,
             'drivers' => $drivers,
+            'filters' => [
+                'search' => $request->search ?? ''
+            ]
         ]);
     }
 
@@ -47,6 +64,9 @@ class KendaraanController extends Controller
 
             Kendaraan::create($validated);
 
+       
+        
+
             return redirect()->route('kendaraan.index')
                 ->with('success', 'Kendaraan berhasil ditambahkan!');
         } catch (UniqueConstraintViolationException $e) {
@@ -57,6 +77,9 @@ class KendaraanController extends Controller
                     Storage::disk('public')->delete($validated['gambar']);
                 }
                 
+                
+              
+
                 return redirect()->route('kendaraan.index')
                     ->with('error', 'User sudah memiliki kendaraan. Satu user hanya bisa memiliki satu kendaraan.');
             }
@@ -76,7 +99,7 @@ class KendaraanController extends Controller
             'driver_id' => [
                 'nullable',
                 'exists:users,id',
-                Rule::unique('kendaraans', 'driver_id')->ignore($id)->whereNull('deleted_at')
+                Rule::unique('kendaraans', 'driver_id')->ignore($id)
             ],
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
@@ -95,6 +118,8 @@ class KendaraanController extends Controller
 
             $kendaraan->update($validated);
 
+ 
+
             return redirect()->route('kendaraan.index')
                 ->with('success', 'Kendaraan berhasil diupdate!');
         } catch (UniqueConstraintViolationException $e) {
@@ -104,6 +129,9 @@ class KendaraanController extends Controller
                     Storage::disk('public')->delete($validated['gambar']);
                 }
                 
+           
+            
+
                 return redirect()->route('kendaraan.index')
                     ->with('error', 'User sudah memiliki kendaraan. Satu user hanya bisa memiliki satu kendaraan.');
             }
@@ -122,6 +150,8 @@ class KendaraanController extends Controller
         }
 
         $kendaraan->delete();
+
+      
 
         return redirect()->route('kendaraan.index')
             ->with('success', 'Kendaraan berhasil dihapus!');

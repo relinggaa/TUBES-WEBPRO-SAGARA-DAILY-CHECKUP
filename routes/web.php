@@ -5,7 +5,15 @@ use App\Http\Controllers\GenerateKeyController;
 use App\Http\Controllers\KendaraanController;
 
 Route::get('/', function () {
+    return inertia('Landing');
+});
+
+Route::get('/admin/dashboard', function () {
     return inertia('Admin/DashboardAdmin');
+});
+
+Route::get('/admin/login', function () {
+    return inertia('Admin/LoginAdmin');
 });
 
 Route::get('/admin/pengajuan-perbaikan', function () {

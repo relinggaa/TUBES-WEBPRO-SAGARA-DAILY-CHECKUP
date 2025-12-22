@@ -52,16 +52,9 @@ class GenerateKeyController extends Controller
 
         User::create($validated);
 
-        // Preserve search and filter parameters
-        $params = [];
-        if ($request->has('search') && $request->search) {
-            $params['search'] = $request->search;
-        }
-        if ($request->has('filter_role') && $request->filter_role && $request->filter_role !== 'all') {
-            $params['filter_role'] = $request->filter_role;
-        }
+    
 
-        return redirect()->route('generate-key.index', $params)
+        return redirect()->route('generate-key.index')
             ->with('success', 'User berhasil ditambahkan!');
     }
 
@@ -78,16 +71,8 @@ class GenerateKeyController extends Controller
 
         $user->update($validated);
 
-        // Preserve search and filter parameters
-        $params = [];
-        if ($request->has('search') && $request->search) {
-            $params['search'] = $request->search;
-        }
-        if ($request->has('filter_role') && $request->filter_role && $request->filter_role !== 'all') {
-            $params['filter_role'] = $request->filter_role;
-        }
 
-        return redirect()->route('generate-key.index', $params)
+        return redirect()->route('generate-key.index')
             ->with('success', 'User berhasil diupdate!');
     }
 
@@ -96,16 +81,9 @@ class GenerateKeyController extends Controller
         $user = User::findOrFail($id);
         $user->delete();
 
-        // Preserve search and filter parameters
-        $params = [];
-        if ($request->has('search') && $request->search) {
-            $params['search'] = $request->search;
-        }
-        if ($request->has('filter_role') && $request->filter_role && $request->filter_role !== 'all') {
-            $params['filter_role'] = $request->filter_role;
-        }
+   
 
-        return redirect()->route('generate-key.index', $params)
+        return redirect()->route('generate-key.index')
             ->with('success', 'User berhasil dihapus!');
     }
 

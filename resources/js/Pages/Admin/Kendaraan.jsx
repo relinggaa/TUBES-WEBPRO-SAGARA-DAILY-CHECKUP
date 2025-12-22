@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import LayoutAdmin from '../../layout/LayoutAdmin';
 import { useTheme } from '../../contexts/ThemeContext';
 import { usePage, router } from '@inertiajs/react';
@@ -13,7 +13,7 @@ import {
     getThemeGradient
 } from '../../Color/KendaraanColor';
 
-export default function Kendaraan({ kendaraans = [], drivers = [] }) {
+export default function Kendaraan({ kendaraans = { data: [], links: [], current_page: 1, last_page: 1, total: 0 }, drivers = [], filters = { search: '' } }) {
     const { currentTheme } = useTheme();
     const { flash } = usePage().props;
     const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,6 +27,8 @@ export default function Kendaraan({ kendaraans = [], drivers = [] }) {
     });
     const [errors, setErrors] = useState({});
     const [previewImage, setPreviewImage] = useState(null);
+    const [searchQuery, setSearchQuery] = useState(filters.search || '');
+    const searchTimeoutRef = useRef(null);
 
 
     useEffect(() => {
@@ -221,6 +223,59 @@ export default function Kendaraan({ kendaraans = [], drivers = [] }) {
         setErrors({});
     };
 
+    // Sync search query dengan filters dari props
+    useEffect(() => {
+        if (filters.search !== undefined) {
+            setSearchQuery(filters.search);
+        }
+    }, [filters]);
+
+    // Fungsi untuk apply filters dan pagination
+    const applyFilters = (search, page = 1) => {
+        const params = {};
+        if (search && search.trim() !== '') {
+            params.search = search.trim();
+        }
+        params.page = page;
+
+        router.get('/admin/kendaraan', params, {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['kendaraans', 'filters'],
+            replace: true
+        });
+    };
+
+    // Handle search change dengan debouncing
+    const handleSearchChange = (value) => {
+        setSearchQuery(value);
+        
+        if (searchTimeoutRef.current) {
+            clearTimeout(searchTimeoutRef.current);
+        }
+        
+        searchTimeoutRef.current = setTimeout(() => {
+            applyFilters(value);
+        }, 500);
+    };
+
+    // Handle pagination click
+    const handlePaginationClick = (url, e) => {
+        if (!url) return;
+        
+        if (e) {
+            e.preventDefault();
+            e.stopPropagation();
+        }
+        
+        router.visit(url, {
+            preserveState: true,
+            preserveScroll: true,
+            only: ['kendaraans', 'filters'],
+            replace: true
+        });
+    };
+
     const handleDelete = (id) => {
         if (confirm('Apakah Anda yakin ingin menghapus kendaraan ini?')) {
             router.delete(`/admin/kendaraan/${id}`, {
@@ -247,8 +302,61 @@ export default function Kendaraan({ kendaraans = [], drivers = [] }) {
                     showBadge={true}
                 />
 
+                {/* Search Bar */}
+                <div className={`relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/60 backdrop-blur-2xl rounded-2xl border ${getThemeBorder(currentTheme, '20')} shadow-xl p-6`}>
+                    <div className="flex items-center space-x-4">
+                        <div className="flex-1 relative">
+                            <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                                <svg className="w-5 h-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
+                            <input
+                                type="text"
+                                value={searchQuery}
+                                onChange={(e) => handleSearchChange(e.target.value)}
+                                placeholder="Cari kendaraan (merek, plat nomor, atau driver)..."
+                                className="w-full pl-12 pr-4 py-3 bg-gray-800/50 border rounded-xl text-white placeholder-gray-500 focus:outline-none transition-all duration-300"
+                                style={{
+                                    borderColor: `${currentTheme.hex.primary}40`,
+                                }}
+                                onFocus={(e) => {
+                                    e.currentTarget.style.borderColor = currentTheme.hex.primary;
+                                    e.currentTarget.style.boxShadow = `0 0 0 3px ${currentTheme.hex.primary}20`;
+                                }}
+                                onBlur={(e) => {
+                                    e.currentTarget.style.borderColor = `${currentTheme.hex.primary}40`;
+                                    e.currentTarget.style.boxShadow = 'none';
+                                }}
+                            />
+                        </div>
+                        {searchQuery && (
+                            <button
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    applyFilters('');
+                                }}
+                                className="px-4 py-3 rounded-xl font-medium transition-all duration-300 border"
+                                style={{
+                                    color: currentTheme.hex.secondary,
+                                    borderColor: `${currentTheme.hex.primary}40`,
+                                    backgroundColor: 'transparent'
+                                }}
+                                onMouseEnter={(e) => {
+                                    e.currentTarget.style.backgroundColor = `${currentTheme.hex.primary}20`;
+                                }}
+                                onMouseLeave={(e) => {
+                                    e.currentTarget.style.backgroundColor = 'transparent';
+                                }}
+                            >
+                                Reset
+                            </button>
+                        )}
+                    </div>
+                </div>
+
                 {/* Kendaraan Cards Grid */}
-                {kendaraans.length === 0 ? (
+                {(!kendaraans.data || kendaraans.data.length === 0) ? (
                     <div className={`relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/60 backdrop-blur-2xl rounded-3xl border ${getThemeBorder(currentTheme, '20')} shadow-2xl p-12 text-center`}>
                         <div className="flex flex-col items-center justify-center space-y-4">
                             <div 
@@ -266,8 +374,9 @@ export default function Kendaraan({ kendaraans = [], drivers = [] }) {
                         </div>
                     </div>
                 ) : (
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        {kendaraans.map((kendaraan) => (
+                    <>
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                            {kendaraans.data.map((kendaraan) => (
                             <div
                                 key={kendaraan.id}
                                 className="group relative"
@@ -373,7 +482,129 @@ export default function Kendaraan({ kendaraans = [], drivers = [] }) {
                                 </div>
                             </div>
                         ))}
-                    </div>
+                        </div>
+
+                        {/* Pagination */}
+                        {kendaraans.last_page > 1 && (
+                            <div className={`mt-8 flex items-center justify-center space-x-2 bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/60 backdrop-blur-2xl rounded-2xl border ${getThemeBorder(currentTheme, '20')} shadow-xl p-6`}>
+                                {/* Previous Button */}
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        if (kendaraans.links && kendaraans.links[0]?.url) {
+                                            handlePaginationClick(kendaraans.links[0].url, e);
+                                        }
+                                    }}
+                                    disabled={!kendaraans.links || !kendaraans.links[0]?.url}
+                                    className="px-4 py-2 rounded-lg font-medium transition-all duration-300 border disabled:opacity-50 disabled:cursor-not-allowed"
+                                    style={{
+                                        color: (!kendaraans.links || !kendaraans.links[0]?.url) ? '#6b7280' : currentTheme.hex.secondary,
+                                        borderColor: `${currentTheme.hex.primary}40`,
+                                        backgroundColor: 'transparent',
+                                        pointerEvents: (!kendaraans.links || !kendaraans.links[0]?.url) ? 'none' : 'auto',
+                                        cursor: (!kendaraans.links || !kendaraans.links[0]?.url) ? 'not-allowed' : 'pointer'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (kendaraans.links && kendaraans.links[0]?.url) {
+                                            e.currentTarget.style.backgroundColor = `${currentTheme.hex.primary}20`;
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (kendaraans.links && kendaraans.links[0]?.url) {
+                                            e.currentTarget.style.backgroundColor = 'transparent';
+                                        }
+                                    }}
+                                >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
+
+                                {/* Page Numbers */}
+                                <div className="flex items-center space-x-2">
+                                    {kendaraans.links && kendaraans.links.slice(1, -1).map((link, index) => {
+                                        if (!link.url) {
+                                            return (
+                                                <span
+                                                    key={index}
+                                                    className="px-4 py-2 text-gray-500"
+                                                >
+                                                    {link.label.replace('&laquo;', '').replace('&raquo;', '').trim()}
+                                                </span>
+                                            );
+                                        }
+                                        const isActive = link.active;
+                                        return (
+                                            <button
+                                                key={index}
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    e.stopPropagation();
+                                                    handlePaginationClick(link.url, e);
+                                                }}
+                                                className="px-4 py-2 rounded-lg font-medium transition-all duration-300 border"
+                                                style={{
+                                                    color: isActive ? '#ffffff' : currentTheme.hex.secondary,
+                                                    borderColor: isActive ? currentTheme.hex.primary : `${currentTheme.hex.primary}40`,
+                                                    backgroundColor: isActive ? `linear-gradient(to right, ${currentTheme.hex.primary}, ${currentTheme.hex.secondary})` : 'transparent',
+                                                    background: isActive ? `linear-gradient(to right, ${currentTheme.hex.primary}, ${currentTheme.hex.secondary})` : 'transparent',
+                                                    boxShadow: isActive ? `0 4px 12px ${currentTheme.hex.primary}30` : 'none'
+                                                }}
+                                                onMouseEnter={(e) => {
+                                                    if (!isActive) {
+                                                        e.currentTarget.style.backgroundColor = `${currentTheme.hex.primary}20`;
+                                                    }
+                                                }}
+                                                onMouseLeave={(e) => {
+                                                    if (!isActive) {
+                                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                                    }
+                                                }}
+                                            >
+                                                {link.label.replace('&laquo;', '').replace('&raquo;', '').trim()}
+                                            </button>
+                                        );
+                                    })}
+                                </div>
+
+                                {/* Next Button */}
+                                <button
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                        const lastLink = kendaraans.links && kendaraans.links[kendaraans.links.length - 1];
+                                        if (lastLink?.url) {
+                                            handlePaginationClick(lastLink.url, e);
+                                        }
+                                    }}
+                                    disabled={!kendaraans.links || !kendaraans.links[kendaraans.links.length - 1]?.url}
+                                    className="px-4 py-2 rounded-lg font-medium transition-all duration-300 border disabled:opacity-50 disabled:cursor-not-allowed"
+                                    style={{
+                                        color: (!kendaraans.links || !kendaraans.links[kendaraans.links.length - 1]?.url) ? '#6b7280' : currentTheme.hex.secondary,
+                                        borderColor: `${currentTheme.hex.primary}40`,
+                                        backgroundColor: 'transparent',
+                                        pointerEvents: (!kendaraans.links || !kendaraans.links[kendaraans.links.length - 1]?.url) ? 'none' : 'auto',
+                                        cursor: (!kendaraans.links || !kendaraans.links[kendaraans.links.length - 1]?.url) ? 'not-allowed' : 'pointer'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        if (kendaraans.links && kendaraans.links[kendaraans.links.length - 1]?.url) {
+                                            e.currentTarget.style.backgroundColor = `${currentTheme.hex.primary}20`;
+                                        }
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        if (kendaraans.links && kendaraans.links[kendaraans.links.length - 1]?.url) {
+                                            e.currentTarget.style.backgroundColor = 'transparent';
+                                        }
+                                    }}
+                                >
+                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </div>
+                        )}
+                    </>
                 )}
 
                 {/* Modal Form Tambah Kendaraan */}
@@ -666,7 +897,7 @@ export default function Kendaraan({ kendaraans = [], drivers = [] }) {
                                 </div>
 
                                 {/* Gambar */}
-                                <div>
+                <div>
                                     <label className="block text-sm font-medium text-white mb-2">Gambar</label>
                                     <div className="space-y-4">
                                         {previewImage && (
@@ -728,7 +959,7 @@ export default function Kendaraan({ kendaraans = [], drivers = [] }) {
                                     </button>
                                 </div>
                             </form>
-                        </div>
+                </div>
                     </div>
                 )}
             </div>
