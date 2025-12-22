@@ -36,10 +36,10 @@ export default function DashboardMekanik() {
                     Dashboard
                 </h1>
 
-                {/* Profile Card - Compact */}
-                <div className="bg-white/10 backdrop-blur-xl rounded-[28px] p-6 mb-6 shadow-2xl border border-white/10 animate-fade-in">
+                {/* Profile Card */}
+                <div className="bg-white/10 backdrop-blur-xl rounded-[28px] p-6 mb-6 shadow-2xl border border-white/10 animate-fade-in hover:scale-[1.02] hover:border-white/20 hover:shadow-cyan-500/30 transition-all duration-300 cursor-pointer">
                     <div className="flex items-center gap-4 mb-4">
-                        {/* Profile Image */}
+
                         <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-white/20 shadow-lg flex-shrink-0">
                             <img
                                 src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_qydwbyfzBseOkXvF2to4jax9f5yN6unb5g&s"
@@ -63,7 +63,7 @@ export default function DashboardMekanik() {
                         </div>
                     </div>
 
-                    <button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-gray-900 font-semibold py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                    <button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                         Mark As Full
                     </button>
                 </div>
@@ -76,7 +76,7 @@ export default function DashboardMekanik() {
                     <div className="flex-1 h-[1px] bg-gradient-to-r from-blue-400/30 to-transparent"></div>
                 </div>
 
-                {/* Vehicle Cards - Modern */}
+                {/* Vehicle Card*/}
                 <div className="space-y-4">
                     {cars.map((car, index) => (
                         <div
@@ -91,7 +91,7 @@ export default function DashboardMekanik() {
                                     alt={car.name}
                                     className="w-full h-full object-cover"
                                 />
-                                {/* Favorite Icon */}
+
                                 <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 transition-all">
                                     <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
@@ -137,7 +137,7 @@ export default function DashboardMekanik() {
                                 {/* Action Button */}
                                 <a
                                     href="/mekanik/detailkerusakan"
-                                    className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-gray-900 font-semibold py-2.5 rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300 text-sm"
+                                    className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold py-2.5 rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300 text-sm"
                                 >
                                     See Detail
                                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">

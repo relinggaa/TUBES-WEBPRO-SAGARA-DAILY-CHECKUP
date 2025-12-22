@@ -158,7 +158,7 @@ export default function BillMekanik() {
                     <div className="max-w-md mx-auto">
                         <button
                             onClick={handleSubmit}
-                            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-gray-900 font-bold py-4 rounded-full shadow-2xl hover:shadow-blue-500/50 hover:scale-105 transition-all duration-300"
+                            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold py-4 rounded-full shadow-2xl hover:shadow-blue-500/50 hover:scale-105 transition-all duration-300"
                         >
                             Send
                         </button>

@@ -23,7 +23,7 @@ export default function ReportDriver() {
       <div className="max-w-2xl mx-auto relative z-10">
         {/* Back Button */}
         <Link
-          href="/driver/listcar"
+          href="/driver/dashboard"
           className="inline-flex items-center justify-center w-14 h-14 bg-white/10 backdrop-blur-xl rounded-full mb-8 border border-white/20 hover:bg-white/15 transition-all duration-300 hover:scale-110 shadow-2xl group"
         >
           <svg
@@ -73,7 +73,7 @@ export default function ReportDriver() {
 
           {/* Kendala Section */}
           <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-blue-300/40 mb-6">
-            <button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-gray-900 font-semibold py-3 rounded-xl shadow-lg hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 active:scale-95 mb-6">
+            <button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 active:scale-95 mb-6">
               Tambah Kendala
             </button>
 
@@ -118,7 +118,7 @@ export default function ReportDriver() {
         </div>
 
         <div className="flex justify-center">
-          <button className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-gray-900 font-bold px-10 py-4 rounded-xl shadow-xl hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 active:scale-95 animate-slide-up">
+          <button className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold px-10 py-4 rounded-xl shadow-xl hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 active:scale-95 animate-slide-up">
             <span>Kirim Laporan</span>
             <svg
               className="w-6 h-6 group-hover:translate-x-1 transition-transform"
