@@ -52,7 +52,7 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
                 }
             });
         }
-        
+
         if (flash?.error) {
             toast.error(flash.error, {
                 position: "top-right",
@@ -111,7 +111,7 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
             },
             onError: (errors) => {
                 setErrors(errors);
-           
+
                 if (errors.driver_id) {
                     toast.error(errors.driver_id, {
                         position: "top-right",
@@ -249,11 +249,11 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
     // Handle search change dengan debouncing
     const handleSearchChange = (value) => {
         setSearchQuery(value);
-        
+
         if (searchTimeoutRef.current) {
             clearTimeout(searchTimeoutRef.current);
         }
-        
+
         searchTimeoutRef.current = setTimeout(() => {
             applyFilters(value);
         }, 500);
@@ -262,12 +262,12 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
     // Handle pagination click
     const handlePaginationClick = (url, e) => {
         if (!url) return;
-        
+
         if (e) {
             e.preventDefault();
             e.stopPropagation();
         }
-        
+
         router.visit(url, {
             preserveState: true,
             preserveScroll: true,
@@ -282,7 +282,7 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
                 preserveScroll: true,
                 preserveState: false,
                 onSuccess: () => {
-                  
+
                 }
             });
         }
@@ -359,7 +359,7 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
                 {(!kendaraans.data || kendaraans.data.length === 0) ? (
                     <div className={`relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/60 backdrop-blur-2xl rounded-3xl border ${getThemeBorder(currentTheme, '20')} shadow-2xl p-12 text-center`}>
                         <div className="flex flex-col items-center justify-center space-y-4">
-                            <div 
+                            <div
                                 className="w-20 h-20 rounded-full flex items-center justify-center"
                                 style={{
                                     backgroundColor: `${currentTheme.hex.primary}20`
@@ -377,111 +377,111 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
                     <>
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                             {kendaraans.data.map((kendaraan) => (
-                            <div
-                                key={kendaraan.id}
-                                className="group relative"
-                            >
-                                <div 
-                                    className="absolute -inset-0.5 rounded-2xl blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500 -z-10"
-                                    style={{
-                                        background: `linear-gradient(to right, ${currentTheme.hex.primary}40, ${currentTheme.hex.secondary}40)`
-                                    }}
-                                ></div>
-                                
-                                <div className={`relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/60 backdrop-blur-2xl rounded-2xl border ${getThemeBorder(currentTheme, '20')} ${getThemeBorderHover(currentTheme, '40')} shadow-xl ${getThemeShadow(currentTheme, '10')} ${getThemeShadowHover(currentTheme, '20')} transition-all duration-500 overflow-hidden`}>
-                                    {/* Image Section */}
-                                    <div className="relative h-48 bg-gradient-to-br from-gray-800 to-gray-900 overflow-hidden">
-                                        {kendaraan.gambar ? (
-                                            <img 
-                                                src={`/storage/${kendaraan.gambar}`} 
-                                                alt={kendaraan.merek}
-                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
-                                            />
-                                        ) : (
-                                            <div className="w-full h-full flex items-center justify-center">
-                                                <svg className="w-20 h-20 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                                </svg>
-                                            </div>
-                                        )}
-                                        <div 
-                                            className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent"
-                                        ></div>
-                                    </div>
+                                <div
+                                    key={kendaraan.id}
+                                    className="group relative"
+                                >
+                                    <div
+                                        className="absolute -inset-0.5 rounded-2xl blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500 -z-10"
+                                        style={{
+                                            background: `linear-gradient(to right, ${currentTheme.hex.primary}40, ${currentTheme.hex.secondary}40)`
+                                        }}
+                                    ></div>
 
-                                    {/* Content Section */}
-                                    <div className="p-6">
-                                        <div className="flex items-start justify-between mb-4">
-                                            <div>
-                                                <h3 className="text-xl font-bold text-white mb-1">{kendaraan.merek}</h3>
-                                                <p className="text-gray-400 text-sm">Plat: {kendaraan.plat_nomor}</p>
-                                            </div>
-                                            <div className="flex items-center space-x-2">
-                                                <button
-                                                    onClick={() => handleOpenUpdateModal(kendaraan)}
-                                                    className="p-2 rounded-lg transition-all duration-300 hover:scale-110"
-                                                    style={{
-                                                        backgroundColor: `${currentTheme.hex.primary}20`,
-                                                        color: currentTheme.hex.primary
-                                                    }}
-                                                    onMouseEnter={(e) => {
-                                                        e.currentTarget.style.backgroundColor = `${currentTheme.hex.primary}30`;
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        e.currentTarget.style.backgroundColor = `${currentTheme.hex.primary}20`;
-                                                    }}
-                                                >
-                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    <div className={`relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/60 backdrop-blur-2xl rounded-2xl border ${getThemeBorder(currentTheme, '20')} ${getThemeBorderHover(currentTheme, '40')} shadow-xl ${getThemeShadow(currentTheme, '10')} ${getThemeShadowHover(currentTheme, '20')} transition-all duration-500 overflow-hidden`}>
+                                        {/* Image Section */}
+                                        <div className="relative h-48 bg-gradient-to-br from-gray-800 to-gray-900 overflow-hidden">
+                                            {kendaraan.gambar ? (
+                                                <img
+                                                    src={`/storage/${kendaraan.gambar}`}
+                                                    alt={kendaraan.merek}
+                                                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                                                />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center">
+                                                    <svg className="w-20 h-20 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                     </svg>
-                                                </button>
-                                                <button
-                                                    onClick={() => handleDelete(kendaraan.id)}
-                                                    className="p-2 rounded-lg transition-all duration-300 hover:scale-110"
-                                                    style={{
-                                                        backgroundColor: `#ef444420`,
-                                                        color: '#ef4444'
-                                                    }}
-                                                    onMouseEnter={(e) => {
-                                                        e.currentTarget.style.backgroundColor = `#ef444430`;
-                                                    }}
-                                                    onMouseLeave={(e) => {
-                                                        e.currentTarget.style.backgroundColor = `#ef444420`;
-                                                    }}
-                                                >
-                                                    <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                                    </svg>
-                                                </button>
-                                            </div>
+                                                </div>
+                                            )}
+                                            <div
+                                                className="absolute inset-0 bg-gradient-to-t from-gray-900/80 via-transparent to-transparent"
+                                            ></div>
                                         </div>
 
-                                        {kendaraan.driver && (
-                                            <div className="flex items-center space-x-2 mb-4">
-                                                <div 
-                                                    className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
-                                                    style={{
-                                                        background: `linear-gradient(to bottom right, ${currentTheme.hex.primary}, ${currentTheme.hex.secondary})`
-                                                    }}
-                                                >
-                                                    {kendaraan.driver.username?.charAt(0).toUpperCase() || 'D'}
-                                                </div>
+                                        {/* Content Section */}
+                                        <div className="p-6">
+                                            <div className="flex items-start justify-between mb-4">
                                                 <div>
-                                                    <p className="text-white text-sm font-medium">{kendaraan.driver.username}</p>
-                                                    <p className="text-gray-400 text-xs">Driver</p>
+                                                    <h3 className="text-xl font-bold text-white mb-1">{kendaraan.merek}</h3>
+                                                    <p className="text-gray-400 text-sm">Plat: {kendaraan.plat_nomor}</p>
+                                                </div>
+                                                <div className="flex items-center space-x-2">
+                                                    <button
+                                                        onClick={() => handleOpenUpdateModal(kendaraan)}
+                                                        className="p-2 rounded-lg transition-all duration-300 hover:scale-110"
+                                                        style={{
+                                                            backgroundColor: `${currentTheme.hex.primary}20`,
+                                                            color: currentTheme.hex.primary
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.backgroundColor = `${currentTheme.hex.primary}30`;
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.backgroundColor = `${currentTheme.hex.primary}20`;
+                                                        }}
+                                                    >
+                                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                                        </svg>
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(kendaraan.id)}
+                                                        className="p-2 rounded-lg transition-all duration-300 hover:scale-110"
+                                                        style={{
+                                                            backgroundColor: `#ef444420`,
+                                                            color: '#ef4444'
+                                                        }}
+                                                        onMouseEnter={(e) => {
+                                                            e.currentTarget.style.backgroundColor = `#ef444430`;
+                                                        }}
+                                                        onMouseLeave={(e) => {
+                                                            e.currentTarget.style.backgroundColor = `#ef444420`;
+                                                        }}
+                                                    >
+                                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                        </svg>
+                                                    </button>
                                                 </div>
                                             </div>
-                                        )}
 
-                                        {!kendaraan.driver && (
-                                            <div className="mb-4">
-                                                <span className="text-gray-500 text-sm">Belum ada driver</span>
-                                            </div>
-                                        )}
+                                            {kendaraan.driver && (
+                                                <div className="flex items-center space-x-2 mb-4">
+                                                    <div
+                                                        className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold"
+                                                        style={{
+                                                            background: `linear-gradient(to bottom right, ${currentTheme.hex.primary}, ${currentTheme.hex.secondary})`
+                                                        }}
+                                                    >
+                                                        {kendaraan.driver.username?.charAt(0).toUpperCase() || 'D'}
+                                                    </div>
+                                                    <div>
+                                                        <p className="text-white text-sm font-medium">{kendaraan.driver.username}</p>
+                                                        <p className="text-gray-400 text-xs">Driver</p>
+                                                    </div>
+                                                </div>
+                                            )}
+
+                                            {!kendaraan.driver && (
+                                                <div className="mb-4">
+                                                    <span className="text-gray-500 text-sm">Belum ada driver</span>
+                                                </div>
+                                            )}
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
-                        ))}
+                            ))}
                         </div>
 
                         {/* Pagination */}
@@ -610,7 +610,7 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
                 {/* Modal Form Tambah Kendaraan */}
                 {isModalOpen && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={handleCloseModal}>
-                        <div 
+                        <div
                             className="relative w-full max-w-2xl bg-gradient-to-br from-gray-900/95 via-gray-900/90 to-gray-800/95 backdrop-blur-2xl rounded-3xl border shadow-2xl overflow-hidden"
                             style={{
                                 borderColor: `${currentTheme.hex.primary}40`,
@@ -788,7 +788,7 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
                 {/* Modal Form Update Kendaraan */}
                 {isUpdateModalOpen && editingKendaraan && (
                     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm" onClick={handleCloseUpdateModal}>
-                        <div 
+                        <div
                             className="relative w-full max-w-2xl bg-gradient-to-br from-gray-900/95 via-gray-900/90 to-gray-800/95 backdrop-blur-2xl rounded-3xl border shadow-2xl overflow-hidden"
                             style={{
                                 borderColor: `${currentTheme.hex.primary}40`,
@@ -897,7 +897,7 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
                                 </div>
 
                                 {/* Gambar */}
-                <div>
+                                <div>
                                     <label className="block text-sm font-medium text-white mb-2">Gambar</label>
                                     <div className="space-y-4">
                                         {previewImage && (
@@ -959,7 +959,7 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
                                     </button>
                                 </div>
                             </form>
-                </div>
+                        </div>
                     </div>
                 )}
             </div>

@@ -14,7 +14,7 @@ export default function GenerateKey({ users = { data: [], links: [], current_pag
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
-    
+
     const [formData, setFormData] = useState({
         username: '',
         role: 'Admin',
@@ -44,22 +44,22 @@ export default function GenerateKey({ users = { data: [], links: [], current_pag
     const handleSubmit = (e) => {
         e.preventDefault();
         setErrors({});
-        
-        
+
+
         setIsModalOpen(false);
         const previousFormData = { ...formData };
         setFormData({ username: '', role: 'Admin', key: '' });
-        
+
         router.post('/admin/generate-key', previousFormData, {
             preserveScroll: true,
             preserveState: false,
             onSuccess: () => {
-             
+
             },
             onError: (errors) => {
                 setErrors(errors);
                 setIsModalOpen(true);
-                setFormData(previousFormData); 
+                setFormData(previousFormData);
             }
         });
     };
@@ -84,13 +84,13 @@ export default function GenerateKey({ users = { data: [], links: [], current_pag
     const handleUpdateSubmit = (e) => {
         e.preventDefault();
         setErrors({});
-        
+
         if (!editingUser) return;
-   
+
         setIsUpdateModalOpen(false);
         const previousFormData = { ...formData };
         const previousEditingUser = editingUser;
-        
+
         router.put(`/admin/generate-key/${editingUser.id}`, previousFormData, {
             preserveScroll: true,
             preserveState: false,
@@ -120,13 +120,13 @@ export default function GenerateKey({ users = { data: [], links: [], current_pag
                 preserveScroll: true,
                 preserveState: false,
                 onSuccess: () => {
-                  
+
                 }
             });
         }
     };
 
-   
+
     useEffect(() => {
         if (filters.search !== undefined) {
             setSearchQuery(filters.search);
@@ -160,7 +160,7 @@ export default function GenerateKey({ users = { data: [], links: [], current_pag
         }
     }, [flash?.success, currentTheme]);
 
-   
+
     const applyFilters = (search, role, page = 1) => {
         const params = {};
         if (search && search.trim() !== '') {
@@ -169,7 +169,7 @@ export default function GenerateKey({ users = { data: [], links: [], current_pag
         if (role && role !== 'all') {
             params.filter_role = role;
         }
-  
+
         params.page = page;
 
         router.get('/admin/generate-key', params, {
@@ -180,16 +180,16 @@ export default function GenerateKey({ users = { data: [], links: [], current_pag
         });
     };
 
-   
+
     const handleSearchChange = (value) => {
         setSearchQuery(value);
-        
- 
+
+
         if (searchTimeoutRef.current) {
             clearTimeout(searchTimeoutRef.current);
         }
-        
- 
+
+
         searchTimeoutRef.current = setTimeout(() => {
             applyFilters(value, filterRole);
         }, 500);
@@ -212,7 +212,7 @@ export default function GenerateKey({ users = { data: [], links: [], current_pag
         <LayoutAdmin>
             <div className="space-y-8">
                 {/* Header Card */}
-                <Header 
+                <Header
                     currentTheme={currentTheme}
                     onAddUserClick={() => setIsModalOpen(true)}
                 />
@@ -255,7 +255,7 @@ export default function GenerateKey({ users = { data: [], links: [], current_pag
                     handleClose={handleCloseUpdateModal}
                     generateRandomKey={generateRandomKey}
                 />
-        </div>
+            </div>
         </LayoutAdmin>
     );
 }

@@ -38,7 +38,6 @@ Route::prefix('admin/generate-key')->name('generate-key.')->group(function () {
     Route::delete('/{id}', [GenerateKeyController::class, 'destroy'])->name('destroy');
 });
 
-
 Route::get('/driver/login', function () {
     return inertia('Driver/LoginDriver');
 });
@@ -53,4 +52,16 @@ Route::get('/driver/listcar', function () {
 
 Route::get('/driver/report', function () {
     return inertia('Driver/ReportDriver');
+});
+
+Route::get('/mekanik/dashboard', function () {
+    return inertia('Mekanik/DashboardMekanik');
+});
+
+Route::get('/mekanik/detailkerusakan', function () {
+    return inertia('Mekanik/DetailKerusakan');
+});
+
+Route::get('/mekanik/bill', function () {
+    return inertia('Mekanik/BillMekanik');
 });

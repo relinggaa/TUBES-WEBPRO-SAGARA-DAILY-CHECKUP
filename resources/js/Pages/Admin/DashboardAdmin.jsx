@@ -38,7 +38,7 @@ const DashboardAdmin = () => {
         { id: 3, activity: 'Laporan biaya bulan ini telah dibuat', time: '1 hari lalu', type: 'info' },
         { id: 4, activity: 'Key baru telah di-generate', time: '2 hari lalu', type: 'warning' },
     ];
-   
+
     return (
         <LayoutAdmin>
             <div className="space-y-12">
@@ -59,7 +59,7 @@ const DashboardAdmin = () => {
 
                 {/* Chart Section Placeholder */}
                 <Chart currentTheme={currentTheme} />
-        </div>
+            </div>
         </LayoutAdmin>
     );
 };

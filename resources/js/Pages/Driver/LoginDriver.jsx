@@ -1,46 +1,107 @@
 import React from "react";
+
 export default function LoginUser() {
-    return (
-        <>
-         <div className="flex h-screen w-screen items-center overflow-hidden px-2">
-  <div className="relative flex w-96 flex-col space-y-5 rounded-lg border bg-white px-5 py-10 shadow-xl sm:mx-auto">
-    <div className="-z-10 absolute top-4 left-1/2 h-full w-5/6 -translate-x-1/2 rounded-lg bg-blue-600 sm:-right-10 sm:top-auto sm:left-auto sm:w-full sm:translate-x-0"></div>
-    <div className="mx-auto mb-2 space-y-3">
-
-      <h1 class="text-center text-3xl font-bold text-gray-700">Sign in</h1>
-      <img src="" alt="" />
-
-      <p className="text-gray-500">Sign in to access your account</p>
-
-
-
-    </div>
-
-    <div>
-      <div className="relative mt-2 w-full">
-        <input type="text" id="email"  className="border-1 peer block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pt-4 pb-2.5 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0" placeholder=" " />
-        <label for="email" className="origin-[0] peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-blue-600 absolute left-1 top-2 z-10 -translate-y-4 scale-75 transform cursor-text select-none bg-white px-2 text-sm text-gray-500 duration-300"> Enter Username </label>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 flex items-center justify-center px-4 relative overflow-hidden">
+      {/* Animated Background Elements */}
+      <div className="absolute inset-0 overflow-hidden pointer-events-none">
+        <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
+        <div className="absolute bottom-20 right-10 w-96 h-96 bg-cyan-500/10 rounded-full blur-3xl animate-pulse delay-700"></div>
+        <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-indigo-500/5 rounded-full blur-3xl"></div>
       </div>
-    </div>
 
-    <div>
-      <div className="relative mt-2 w-full">
-        <input type="password" id="password" className="border-1 peer block w-full appearance-none rounded-lg border border-gray-300 bg-transparent px-2.5 pt-4 pb-2.5 text-sm text-gray-900 focus:border-blue-600 focus:outline-none focus:ring-0" placeholder=" " />
-        <label for="password" className="origin-[0] peer-placeholder-shown:top-1/2 peer-placeholder-shown:-translate-y-1/2 peer-placeholder-shown:scale-100 peer-focus:top-2 peer-focus:-translate-y-4 peer-focus:scale-75 peer-focus:px-2 peer-focus:text-blue-600 absolute left-1 top-2 z-10 -translate-y-4 scale-75 transform cursor-text select-none bg-white px-2 text-sm text-gray-500 duration-300"> Enter Your Key</label>
+      {/* Login Card */}
+      <div className="relative z-10 w-full max-w-md">
+        <div className="bg-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl border border-white/20 animate-fade-in">
+          {/* Header */}
+          <div className="mb-8 text-center">
+            <h1 className="text-4xl font-bold text-white mb-2 drop-shadow-lg">
+              Sign in
+            </h1>
+            <p className="text-blue-200">Sign in to access your account</p>
+          </div>
+
+          {/* Username Input */}
+          <div className="mb-6">
+            <div className="relative">
+              <input
+                type="text"
+                id="email"
+                className="peer block w-full appearance-none rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm px-4 pt-6 pb-3 text-sm text-white placeholder-transparent focus:border-blue-400/50 focus:outline-none focus:ring-2 focus:ring-blue-400/30 transition-all"
+                placeholder="Enter Username"
+              />
+              <label
+                htmlFor="email"
+                className="absolute left-4 top-2 text-xs text-blue-200 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-blue-300/50 peer-focus:top-2 peer-focus:text-xs peer-focus:text-blue-300"
+              >
+                Enter Username
+              </label>
+            </div>
+          </div>
+
+          {/* Password Input */}
+          <div className="mb-6">
+            <div className="relative">
+              <input
+                type="password"
+                id="password"
+                className="peer block w-full appearance-none rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm px-4 pt-6 pb-3 text-sm text-white placeholder-transparent focus:border-blue-400/50 focus:outline-none focus:ring-2 focus:ring-blue-400/30 transition-all"
+                placeholder="Enter Your Key"
+              />
+              <label
+                htmlFor="password"
+                className="absolute left-4 top-2 text-xs text-blue-200 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-blue-300/50 peer-focus:top-2 peer-focus:text-xs peer-focus:text-blue-300"
+              >
+                Enter Your Key
+              </label>
+            </div>
+          </div>
+
+          {/* Buttons */}
+          <div className="flex gap-4 mb-6">
+            <button className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-gray-900 font-bold py-3 rounded-xl shadow-lg hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 active:scale-95">
+              Login
+            </button>
+            <button className="flex-1 bg-white/10 backdrop-blur-sm border border-white/20 text-blue-300 font-bold py-3 rounded-xl hover:bg-white/15 transition-all duration-300 hover:scale-105 active:scale-95">
+              <a href="#" className="block">
+                Contact Admin?
+              </a>
+            </button>
+          </div>
+
+          {/* Forget Password Link */}
+          <p className="text-center text-blue-200 text-sm">
+            Forget Your Key?{" "}
+            <a
+              href="#"
+              className="font-semibold text-blue-400 hover:text-blue-300 hover:underline transition-colors"
+            >
+              Click Here?
+            </a>
+          </p>
+        </div>
       </div>
+
+      <style jsx>{`
+        @keyframes fade-in {
+          from {
+            opacity: 0;
+            transform: translateY(-10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-fade-in {
+          animation: fade-in 0.6s ease-out;
+        }
+
+        .delay-700 {
+          animation-delay: 700ms;
+        }
+      `}</style>
     </div>
-    <div className="flex w-full items-center">
-      <button className="shrink-0 inline-block w-36 rounded-lg bg-blue-600 py-3 font-bold text-white">Login</button>
-       <button className="shrink-0 inline-block w-36 rounded-lg bg-white py-3 font-bold text-white ms-11 border border-blue-600">
-      <a className="w-full text-center text-sm font-medium text-blue-500 hover:underline " href="#">Contact Admin?</a>
-      </button>
-    </div>
-    <p class="text-center text-gray-600">
-      Forget Your Key?
-      <a href="#" className="whitespace-nowrap font-semibold text-blue-500 hover:underline">Click Here?</a>
-    </p>
-  </div>
-</div>
-        </>
-    );
+  );
 }
