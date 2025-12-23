@@ -29,4 +29,9 @@ class Keruskaanacc extends Model
     {
         return $this->belongsTo(Kendaraan::class, 'kendaraan_id');
     }
+
+    public function bill()
+    {
+        return $this->hasOne(Bill::class, 'keruskaanacc_id');
+    }
 }

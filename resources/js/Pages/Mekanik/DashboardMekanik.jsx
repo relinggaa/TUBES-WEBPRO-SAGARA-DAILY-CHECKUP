@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from "react";
 import { Link, usePage, router } from "@inertiajs/react";
-import { toast } from "react-toastify";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function DashboardMekanik() {
-    const { auth, flash } = usePage().props;
+    const { auth, flash, keruskaanAcc: kerusakanAcc = [], bills = [] } = usePage().props;
     const user = auth?.user;
     const [showModal, setShowModal] = useState(false);
+    const [showBillModal, setShowBillModal] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
 
@@ -106,30 +108,73 @@ export default function DashboardMekanik() {
         }
     };
 
-    const profileImageUrl = user?.gambar && !user.gambar.startsWith('http') ? `/storage/${user.gambar}` : user?.gambar || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_qydwbyfzBseOkXvF2to4jax9f5yN6unb5g&s';
-    const cars = [
-        {
-            id: 1,
-            name: "Nissan Terrano 2014",
-            jadwal: "17/March/2025",
-            status: "FATAL",
-            plate: "B 4121 QQ",
-            kerusakan: "Kayanya kurang oli deh",
-            image: "https://blog.gaadikey.com/wp-content/uploads/2017/01/Nissan-Terrano-2017-Edition.jpg"
-        },
-        {
-            id: 2,
-            name: "Nissan Terrano 2014",
-            jadwal: "18/March/2025",
-            status: "FATAL",
-            plate: "B 4121 QQ",
-            kerusakan: "Kruk as nya kena kayanya",
-            image: "https://blog.gaadikey.com/wp-content/uploads/2017/01/Nissan-Terrano-2017-Edition.jpg"
+    const handleMarkAsFull = () => {
+        if (confirm('Apakah Anda yakin ingin menandai status sebagai Full? Anda tidak akan muncul di daftar mekanik yang tersedia.')) {
+            router.post('/mekanik/mark-as-full', {}, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    // Success message akan ditangani oleh flash message
+                },
+                onError: (errors) => {
+                    toast.error('Terjadi kesalahan saat mengubah status. Silakan coba lagi.', {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        style: {
+                            backgroundColor: '#1e293b',
+                            color: '#ffffff',
+                            border: '1px solid #ef444440',
+                            borderRadius: '12px',
+                            boxShadow: '0 4px 12px #ef444430'
+                        },
+                        progressStyle: {
+                            background: 'linear-gradient(to right, #ef4444, #dc2626)'
+                        }
+                    });
+                }
+            });
         }
-    ];
+    };
+
+    const handleMarkAsAvailable = () => {
+        if (confirm('Apakah Anda yakin ingin menandai status sebagai Available? Anda akan muncul di daftar mekanik yang tersedia.')) {
+            router.post('/mekanik/mark-as-available', {}, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    // Success message akan ditangani oleh flash message
+                },
+                onError: (errors) => {
+                    toast.error('Terjadi kesalahan saat mengubah status. Silakan coba lagi.', {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        style: {
+                            backgroundColor: '#1e293b',
+                            color: '#ffffff',
+                            border: '1px solid #ef444440',
+                            borderRadius: '12px',
+                            boxShadow: '0 4px 12px #ef444430'
+                        },
+                        progressStyle: {
+                            background: 'linear-gradient(to right, #ef4444, #dc2626)'
+                        }
+                    });
+                }
+            });
+        }
+    };
+
+    const profileImageUrl = user?.gambar && !user.gambar.startsWith('http') ? `/storage/${user.gambar}` : user?.gambar || 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_qydwbyfzBseOkXvF2to4jax9f5yN6unb5g&s';
 
     return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-4 md:p-6 relative overflow-hidden pb-20">
+            <ToastContainer />
 
             <div className="absolute inset-0 overflow-hidden pointer-events-none">
                 <div className="absolute top-20 left-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse"></div>
@@ -144,6 +189,15 @@ export default function DashboardMekanik() {
                         Dashboard
                     </h1>
                     <button
+                        onClick={() => setShowBillModal(true)}
+                        className="ms-5 group/btn relative bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold px-4 py-2 rounded-full hover:bg-white/15 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2"
+                    >
+                        <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <span>Bill</span>
+                    </button>
+                    <button
                         onClick={handleLogout}
                         className="group/btn relative bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold px-4 py-2 rounded-full hover:bg-white/15 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2"
                     >
@@ -152,6 +206,7 @@ export default function DashboardMekanik() {
                         </svg>
                         <span>Logout</span>
                     </button>
+
                 </div>
 
                 {/* Profile Card */}
@@ -174,7 +229,7 @@ export default function DashboardMekanik() {
                         <div className="flex-1 min-w-0">
                             {/* Name */}
                             <h2 className="text-white text-lg font-bold truncate">
-                             {user?.username || 'Mekanik'}
+                                {user?.username || 'Mekanik'}
                             </h2>
                             {/* Role */}
                             <p className="text-blue-200 text-xs flex items-center gap-1.5">
@@ -197,9 +252,21 @@ export default function DashboardMekanik() {
                         Edit Profile
                     </button>
 
-                    <button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
-                        Mark As Full
-                    </button>
+                    {user?.status === 'full' ? (
+                        <button 
+                            onClick={handleMarkAsAvailable}
+                            className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                        >
+                            Mark As Available
+                        </button>
+                    ) : (
+                        <button 
+                            onClick={handleMarkAsFull}
+                            className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
+                        >
+                            Mark As Full
+                        </button>
+                    )}
                 </div>
 
                 <div className="flex items-center gap-3 mb-5">
@@ -211,75 +278,91 @@ export default function DashboardMekanik() {
 
                 {/* Vehicle Card*/}
                 <div className="space-y-4">
-                    {cars.map((car, index) => (
-                        <div
-                            key={car.id}
-                            className="bg-white/10 backdrop-blur-xl rounded-[24px] overflow-hidden shadow-2xl border border-white/10 hover:bg-white/15 transition-all duration-300 animate-slide-up"
-                            style={{ animationDelay: `${index * 100}ms` }}
-                        >
-                            {/* Vehicle Image */}
-                            <div className="relative h-44 bg-gradient-to-br from-slate-800 to-slate-900">
-                                <img
-                                    src={car.image}
-                                    alt={car.name}
-                                    className="w-full h-full object-cover"
-                                />
+                    {kerusakanAcc.length > 0 ? (
+                        kerusakanAcc.map((keruskaan, index) => {
+                            const carImage = keruskaan.kendaraan.gambar && !keruskaan.kendaraan.gambar.startsWith('http')
+                                ? `/storage/${keruskaan.kendaraan.gambar}`
+                                : keruskaan.kendaraan.gambar || "https://blog.gaadikey.com/wp-content/uploads/2017/01/Nissan-Terrano-2017-Edition.jpg";
 
-                                <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 transition-all">
-                                    <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                    </svg>
-                                </button>
-                            </div>
-
-                            {/* Vehicle Info */}
-                            <div className="p-5">
-                                <div className="flex items-start justify-between mb-3">
-                                    <div className="flex-1">
-                                        <h3 className="text-white font-bold text-lg mb-1">
-                                            {car.name}
-                                        </h3>
-                                        <p className="text-white/60 text-sm font-medium mb-2">
-                                            {car.plate}
-                                        </p>
-                                        <p className="text-blue-200 text-xs flex items-center gap-1.5">
-                                            <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                                            </svg>
-                                            Jadwal: {car.jadwal}
-                                        </p>
-                                    </div>
-
-                                    {/* Status Badge */}
-                                    <div className="flex items-center gap-1.5 bg-red-500/20 border border-red-400/30 text-red-300 text-xs font-semibold px-3 py-1.5 rounded-full">
-                                        <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse"></span>
-                                        {car.status}
-                                    </div>
-                                </div>
-
-                                {/* Kerusakan Section */}
-                                <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-3 mb-4 border border-white/10">
-                                    <p className="text-blue-100 text-xs flex items-start gap-2">
-                                        <svg className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                                        </svg>
-                                        {car.kerusakan}
-                                    </p>
-                                </div>
-
-                                {/* Action Button */}
-                                <a
-                                    href="/mekanik/detailkerusakan"
-                                    className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold py-2.5 rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300 text-sm"
+                            return (
+                                <div
+                                    key={keruskaan.id}
+                                    className="bg-white/10 backdrop-blur-xl rounded-[24px] overflow-hidden shadow-2xl border border-white/10 hover:bg-white/15 transition-all duration-300 animate-slide-up"
+                                    style={{ animationDelay: `${index * 100}ms` }}
                                 >
-                                    See Detail
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
-                                    </svg>
-                                </a>
-                            </div>
+                                    {/* Vehicle Image */}
+                                    <div className="relative h-44 bg-gradient-to-br from-slate-800 to-slate-900">
+                                        <img
+                                            src={carImage}
+                                            alt={keruskaan.kendaraan.merek}
+                                            className="w-full h-full object-cover"
+                                        />
+
+                                        <button className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center hover:bg-white/30 transition-all">
+                                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+
+                                    {/* Vehicle Info */}
+                                    <div className="p-5">
+                                        <div className="flex items-start justify-between mb-3">
+                                            <div className="flex-1">
+                                                <h3 className="text-white font-bold text-lg mb-1">
+                                                    {keruskaan.kendaraan.merek}
+                                                </h3>
+                                                <p className="text-white/60 text-sm font-medium mb-2">
+                                                    {keruskaan.kendaraan.plat_nomor}
+                                                </p>
+                                                <p className="text-blue-200 text-xs flex items-center gap-1.5">
+                                                    <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                    Jadwal: {new Date(keruskaan.created_at).toLocaleDateString('id-ID', {
+                                                        day: 'numeric',
+                                                        month: 'long',
+                                                        year: 'numeric'
+                                                    })}
+                                                </p>
+                                            </div>
+
+                                            {/* Status Badge */}
+                                            <div className="flex items-center gap-1.5 bg-red-500/20 border border-red-400/30 text-red-300 text-xs font-semibold px-3 py-1.5 rounded-full">
+                                                <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse"></span>
+                                                {keruskaan.kendaraan.status}
+                                            </div>
+                                        </div>
+
+                                        {/* Kerusakan Section */}
+                                        <div className="bg-white/5 backdrop-blur-sm rounded-2xl p-3 mb-4 border border-white/10">
+                                            <p className="text-blue-100 text-xs flex items-start gap-2">
+                                                <svg className="w-4 h-4 text-yellow-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                                                </svg>
+                                                {keruskaan.kerusakan.catatan || "Tidak ada catatan"}
+                                            </p>
+                                        </div>
+
+                                        {/* Action Button */}
+                                        <Link
+                                            href={`/mekanik/detailkerusakan/${keruskaan.id}`}
+                                            className="flex items-center justify-center gap-2 w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold py-2.5 rounded-full hover:shadow-lg hover:scale-105 transition-all duration-300 text-sm"
+                                        >
+                                            See Detail
+                                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M9 5l7 7-7 7" />
+                                            </svg>
+                                        </Link>
+                                    </div>
+                                </div>
+                            );
+                        })
+                    ) : (
+                        <div className="text-center py-10">
+                            <p className="text-white/60">Tidak ada kendaraan yang sedang dalam perbaikan.</p>
                         </div>
-                    ))}
+                    )}
                 </div>
             </div>
 
@@ -350,6 +433,78 @@ export default function DashboardMekanik() {
                             >
                                 Upload
                             </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Modal for Bill History */}
+            {showBillModal && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+                    <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 rounded-[28px] p-8 max-w-2xl w-full border border-white/20 shadow-2xl animate-slide-up max-h-[80vh] overflow-y-auto">
+                        <button
+                            onClick={() => setShowBillModal(false)}
+                            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all"
+                        >
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        <h3 className="text-white text-2xl font-bold mb-6">Riwayat Bill</h3>
+
+                        <div className="space-y-4">
+                            {bills.length > 0 ? (
+                                bills.map((bill) => (
+                                    <div key={bill.id} className="bg-white/5 p-4 rounded-xl border border-white/10">
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div>
+                                                <h4 className="text-white font-bold text-lg">
+                                                    {bill.keruskaan_acc?.kendaraan?.merek || 'Kendaraan'}
+                                                </h4>
+                                                <p className="text-blue-200 text-xs font-medium">
+                                                    {bill.keruskaan_acc?.kendaraan?.plat_nomor}
+                                                </p>
+                                            </div>
+                                            <span className="text-green-400 font-bold bg-green-500/10 px-3 py-1 rounded-full border border-green-500/20">
+                                                Rp {Number(bill.total_biaya).toLocaleString('id-ID')}
+                                            </span>
+                                        </div>
+
+                                        <div className="space-y-2 mb-3">
+                                            {bill.detail_biaya && Array.isArray(bill.detail_biaya) && bill.detail_biaya.map((detail, idx) => (
+                                                <div key={idx} className="flex justify-between items-center text-sm border-b border-white/5 pb-2 last:border-0 last:pb-0">
+                                                    <div className="flex flex-col">
+                                                        <span className="text-white/80">{detail.text}</span>
+                                                        <span className="text-white/40 text-xs">Sparepart: {detail.sparepart}</span>
+                                                    </div>
+                                                    <span className="text-white/90 font-medium">
+                                                        Rp {Number(detail.nominal).toLocaleString('id-ID')}
+                                                    </span>
+                                                </div>
+                                            ))}
+                                        </div>
+
+                                        <div className="flex justify-end pt-2">
+                                            <span className="text-xs text-white/40">
+                                                {new Date(bill.created_at).toLocaleDateString('id-ID', {
+                                                    weekday: 'long',
+                                                    year: 'numeric',
+                                                    month: 'long',
+                                                    day: 'numeric'
+                                                })}
+                                            </span>
+                                        </div>
+                                    </div>
+                                ))
+                            ) : (
+                                <div className="text-center py-10 bg-white/5 rounded-xl border border-white/10">
+                                    <svg className="w-12 h-12 text-white/20 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                    </svg>
+                                    <p className="text-white/60">Belum ada riwayat bils.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </div>

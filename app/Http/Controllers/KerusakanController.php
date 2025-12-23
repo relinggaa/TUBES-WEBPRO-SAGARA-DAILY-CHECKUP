@@ -9,6 +9,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use App\Models\Bill;
 
 class KerusakanController extends Controller
 {
@@ -39,9 +40,13 @@ class KerusakanController extends Controller
             ]);
         }
 
-
+        // Driver bisa membuat laporan kerusakan baru kapan saja
+        // Setiap laporan baru akan membuat Kerusakan baru
+        // yang kemudian bisa dibuat Keruskaanacc baru dan bill baru
         Kerusakan::create($validated);
 
+        // Update status kendaraan menjadi 'Pengajuan Perbaikan'
+        // untuk servis baru ini
         $kendaraan->status = 'Pengajuan Perbaikan';
         $kendaraan->save();
 
@@ -135,6 +140,11 @@ class KerusakanController extends Controller
 
         $kerusakan = Kerusakan::findOrFail($validated['kerusakan_id']);
 
+        // Cek apakah Kerusakan sudah punya Keruskaanacc
+        if ($kerusakan->keruskaanAcc) {
+            return redirect()->route('admin.pengajuan-perbaikan')
+                ->with('error', 'Kerusakan ini sudah ditugaskan ke mekanik sebelumnya.');
+        }
 
         $kendaraan = Kendaraan::findOrFail($kerusakan->kendaraan_id);
 
@@ -143,9 +153,12 @@ class KerusakanController extends Controller
             ->where('role', 'Mekanik')
             ->first();
 
+        if (!$mekanik) {
+            return redirect()->route('admin.pengajuan-perbaikan')
+                ->with('error', 'Mekanik tidak ditemukan.');
+        }
 
-
-
+        // Buat Keruskaanacc baru untuk Kerusakan ini
         Keruskaanacc::create([
             'kerusakan_id' => $kerusakan->id,
             'mekanik_id' => $mekanik->id,
@@ -166,11 +179,16 @@ class KerusakanController extends Controller
             ->whereHas('kendaraan', function ($query) {
                 $query->where('status', 'Pengajuan Perbaikan');
             })
+            ->doesntHave('keruskaanAcc')
             ->latest()
             ->get();
 
 
         $mekaniks = User::where('role', 'Mekanik')
+            ->where(function($query) {
+                $query->where('status', 'available')
+                      ->orWhereNull('status');
+            })
             ->select('id', 'username')
             ->get();
 
@@ -184,5 +202,73 @@ class KerusakanController extends Controller
             'mekaniks' => $mekaniks,
             'perbaikans' => $perbaikans,
         ]);
+    }
+    public function mekanikDashboard()
+    {
+        $user = Auth::user();
+
+        $kerusakanAcc = Keruskaanacc::with(['kendaraan', 'kerusakan', 'kendaraan.driver'])
+            ->where('mekanik_id', $user->id)
+            ->whereHas('kendaraan', function ($query) {
+                $query->whereIn('status', ['Perbaikan', 'Pending']);
+            })
+            ->doesntHave('bill')
+            ->latest()
+            ->get();
+
+        $bills = Bill::with(['keruskaanAcc.kendaraan', 'keruskaanAcc.kerusakan'])
+            ->whereHas('keruskaanAcc', function ($query) use ($user) {
+                $query->where('mekanik_id', $user->id);
+            })
+            ->latest()
+            ->get();
+
+        return Inertia::render('Mekanik/DashboardMekanik', [
+            'keruskaanAcc' => $kerusakanAcc,
+            'bills' => $bills,
+        ]);
+    }
+    public function mekanikDetail($id)
+    {
+        $user = Auth::user();
+
+        $assignment = Keruskaanacc::with(['kendaraan', 'kerusakan', 'kendaraan.driver', 'bill'])
+            ->where('id', $id)
+            ->where('mekanik_id', $user->id)
+            ->firstOrFail();
+
+        // Cek apakah assignment sudah punya bill
+        if ($assignment->bill) {
+            return redirect()->route('mekanik.dashboard')
+                ->with('error', 'Bill untuk perbaikan ini sudah dibuat. Tidak dapat mengakses detail lagi.');
+        }
+
+        return Inertia::render('Mekanik/DetailKerusakan', [
+            'assignment' => $assignment,
+        ]);
+    }
+
+    public function markAsPending(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'keruskaanacc_id' => 'required|exists:keruskaanaccs,id',
+        ]);
+
+        $keruskaanAcc = Keruskaanacc::with('kendaraan')->findOrFail($validated['keruskaanacc_id']);
+
+        // Cek apakah mekanik memiliki akses ke assignment ini
+        if ($keruskaanAcc->mekanik_id !== $user->id) {
+            return back()->with('error', 'Unauthorized access.');
+        }
+
+        // Update status kendaraan menjadi Pending
+        $kendaraan = $keruskaanAcc->kendaraan;
+        $kendaraan->status = 'Pending';
+        $kendaraan->save();
+
+        return redirect()->route('mekanik.dashboard')
+            ->with('success', 'Status kendaraan berhasil diubah menjadi Pending.');
     }
 }

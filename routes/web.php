@@ -81,17 +81,20 @@ Route::prefix('mekanik')->group(function () {
 
 // Mekanik Protected Routes
 Route::middleware(['mekanik'])->prefix('mekanik')->group(function () {
-    Route::get('/dashboard', function () {
-        return inertia('Mekanik/DashboardMekanik');
-    })->name('mekanik.dashboard');
+    Route::get('/dashboard', [KerusakanController::class, 'mekanikDashboard'])->name('mekanik.dashboard');
 
     Route::post('/update-gambar', [MekanikAuthController::class, 'updateGambar'])->name('mekanik.update-gambar');
 
-    Route::get('/detailkerusakan', function () {
-        return inertia('Mekanik/DetailKerusakan');
-    })->name('mekanik.detailkerusakan');
+    Route::post('/mark-as-full', [MekanikAuthController::class, 'markAsFull'])->name('mekanik.mark-as-full');
+    Route::post('/mark-as-available', [MekanikAuthController::class, 'markAsAvailable'])->name('mekanik.mark-as-available');
+
+    Route::get('/detailkerusakan/{id}', [KerusakanController::class, 'mekanikDetail'])->name('mekanik.detailkerusakan');
+
+    Route::post('/mark-as-pending', [KerusakanController::class, 'markAsPending'])->name('mekanik.mark-as-pending');
 
     Route::get('/bill', function () {
         return inertia('Mekanik/BillMekanik');
     })->name('mekanik.bill');
+
+    Route::post('/bill', [App\Http\Controllers\BillController::class, 'store'])->name('mekanik.bill.store');
 });

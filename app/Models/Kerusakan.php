@@ -21,4 +21,9 @@ class Kerusakan extends Model
     {
         return $this->belongsTo(Kendaraan::class, 'kendaraan_id');
     }
+
+    public function keruskaanAcc()
+    {
+        return $this->hasOne(Keruskaanacc::class, 'kerusakan_id');
+    }
 }

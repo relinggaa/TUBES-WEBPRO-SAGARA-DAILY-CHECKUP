@@ -60,8 +60,8 @@ class MekanikAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('mekanik.login')
-            ->with('success', 'Anda telah logout.');
+        return redirect()->route('mekanik.login');
+         
     }
 
     public function updateGambar(Request $request)
@@ -77,16 +77,47 @@ class MekanikAuthController extends Controller
 
         $user = Auth::user();
 
-        // Hapus gambar lama jika ada
+        
         if ($user->gambar && !filter_var($user->gambar, FILTER_VALIDATE_URL)) {
             Storage::disk('public')->delete($user->gambar);
         }
 
-        // Simpan gambar baru
+    
         $gambarPath = $request->file('gambar')->store('profile-pictures', 'public');
         $user->gambar = $gambarPath;
         $user->save();
 
         return back()->with('success', 'Gambar profil berhasil diupdate!');
+    }
+
+    public function markAsFull(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user->role !== 'Mekanik') {
+            return back()->with('error', 'Unauthorized access.');
+        }
+
+   
+        $user->status = 'full';
+        $user->save();
+
+        return redirect()->route('mekanik.dashboard')
+            ->with('success', 'Status berhasil diubah menjadi Full. Anda tidak akan muncul di daftar mekanik yang tersedia.');
+    }
+
+    public function markAsAvailable(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user->role !== 'Mekanik') {
+            return back()->with('error', 'Unauthorized access.');
+        }
+
+        $user->status = 'available';
+        $user->save();
+
+        return redirect()->route('mekanik.dashboard')
+            ->with('success', 'Status berhasil diubah menjadi Available. Anda akan muncul di daftar mekanik yang tersedia.');
     }
 }
