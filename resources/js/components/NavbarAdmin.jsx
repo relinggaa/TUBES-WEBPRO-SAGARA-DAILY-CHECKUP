@@ -92,10 +92,10 @@ const NavbarAdmin = () => {
 
     const menuItems = [
         { name: 'Dashboard', href: '/admin/dashboard' },
+        { name: 'Generate Key', href: '/admin/generate-key' },
+        { name: 'Kendaraan', href: '/admin/kendaraan' },
         { name: 'Pengajuan Perbaikan', href: '/admin/pengajuan-perbaikan' },
         { name: 'Laporan Biaya', href: '/admin/laporan-biaya' },
-        { name: 'Kendaraan', href: '/admin/kendaraan' },
-        { name: 'Generate Key', href: '/admin/generate-key' },
     ];
 
     const isActive = (path) => {

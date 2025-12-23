@@ -30,9 +30,7 @@ Route::middleware(['admin'])->prefix('admin')->group(function () {
     Route::get('/pengajuan-perbaikan', [KerusakanController::class, 'index'])->name('admin.pengajuan-perbaikan');
     Route::post('/kerusakan/approve', [KerusakanController::class, 'approve'])->name('admin.kerusakan.approve');
 
-    Route::get('/laporan-biaya', function () {
-        return inertia('Admin/LaporanBiaya');
-    })->name('admin.laporan-biaya');
+    Route::get('/laporan-biaya', [App\Http\Controllers\BillController::class, 'index'])->name('admin.laporan-biaya');
 
     Route::prefix('kendaraan')->name('kendaraan.')->group(function () {
         Route::get('/', [KendaraanController::class, 'index'])->name('index');

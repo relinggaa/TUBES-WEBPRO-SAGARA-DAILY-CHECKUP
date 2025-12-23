@@ -40,13 +40,10 @@ class KerusakanController extends Controller
             ]);
         }
 
-        // Driver bisa membuat laporan kerusakan baru kapan saja
-        // Setiap laporan baru akan membuat Kerusakan baru
-        // yang kemudian bisa dibuat Keruskaanacc baru dan bill baru
+   
         Kerusakan::create($validated);
 
-        // Update status kendaraan menjadi 'Pengajuan Perbaikan'
-        // untuk servis baru ini
+     
         $kendaraan->status = 'Pengajuan Perbaikan';
         $kendaraan->save();
 
@@ -140,7 +137,7 @@ class KerusakanController extends Controller
 
         $kerusakan = Kerusakan::findOrFail($validated['kerusakan_id']);
 
-        // Cek apakah Kerusakan sudah punya Keruskaanacc
+     
         if ($kerusakan->keruskaanAcc) {
             return redirect()->route('admin.pengajuan-perbaikan')
                 ->with('error', 'Kerusakan ini sudah ditugaskan ke mekanik sebelumnya.');
@@ -158,7 +155,7 @@ class KerusakanController extends Controller
                 ->with('error', 'Mekanik tidak ditemukan.');
         }
 
-        // Buat Keruskaanacc baru untuk Kerusakan ini
+
         Keruskaanacc::create([
             'kerusakan_id' => $kerusakan->id,
             'mekanik_id' => $mekanik->id,
@@ -237,7 +234,6 @@ class KerusakanController extends Controller
             ->where('mekanik_id', $user->id)
             ->firstOrFail();
 
-        // Cek apakah assignment sudah punya bill
         if ($assignment->bill) {
             return redirect()->route('mekanik.dashboard')
                 ->with('error', 'Bill untuk perbaikan ini sudah dibuat. Tidak dapat mengakses detail lagi.');
@@ -258,12 +254,11 @@ class KerusakanController extends Controller
 
         $keruskaanAcc = Keruskaanacc::with('kendaraan')->findOrFail($validated['keruskaanacc_id']);
 
-        // Cek apakah mekanik memiliki akses ke assignment ini
+
         if ($keruskaanAcc->mekanik_id !== $user->id) {
             return back()->with('error', 'Unauthorized access.');
         }
 
-        // Update status kendaraan menjadi Pending
         $kendaraan = $keruskaanAcc->kendaraan;
         $kendaraan->status = 'Pending';
         $kendaraan->save();

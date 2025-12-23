@@ -272,7 +272,7 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
         }
     }, [filters]);
 
-    // pagination
+
     const applyFilters = (search, page = 1) => {
         const params = {};
         if (search && search.trim() !== '') {
@@ -300,7 +300,7 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
         }, 500);
     };
 
-    // Handle pagination click
+
     const handlePaginationClick = (url, e) => {
         if (!url) return;
 

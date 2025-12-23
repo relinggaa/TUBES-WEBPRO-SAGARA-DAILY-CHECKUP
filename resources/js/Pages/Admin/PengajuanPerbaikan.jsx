@@ -13,6 +13,9 @@ export default function PengajuanPerbaikan({ kerusakans = [], mekaniks = [], per
     const [selectedKerusakan, setSelectedKerusakan] = useState(null);
     const [selectedMekanik, setSelectedMekanik] = useState('');
     const [expandedItems, setExpandedItems] = useState({});
+    const [searchQuery, setSearchQuery] = useState('');
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 3;
 
 
     useEffect(() => {
@@ -87,10 +90,6 @@ export default function PengajuanPerbaikan({ kerusakans = [], mekaniks = [], per
                         currentTheme={currentTheme}
                         title="Pengajuan Perbaikan"
                         subtitle="Kelola semua pengajuan perbaikan yang masuk"
-                        buttonText="Tambah Kendaraan"
-                        onButtonClick={() => setIsModalOpen(true)}
-                        badgeText="Active"
-                        showBadge={true}
                     />
                     {kerusakans.length === 0 ? (
                         <div
@@ -231,20 +230,84 @@ export default function PengajuanPerbaikan({ kerusakans = [], mekaniks = [], per
                 </div>
 
                 <div className="space-y-6 pt-6 border-t border-white/10">
-                    <div>
-                        <h2 className="text-3xl font-bold text-white mb-2">Sedang Diperbaiki</h2>
-                        <p className="text-gray-400">Daftar kendaraan yang sedang dalam proses perbaikan</p>
+                    <div className="flex justify-between items-center">
+                        <div>
+                            <h2 className="text-3xl font-bold text-white mb-2">Sedang Diperbaiki</h2>
+                            <p className="text-gray-400">Daftar kendaraan yang sedang dalam proses perbaikan</p>
+                        </div>
                     </div>
 
-                    {perbaikans.length === 0 ? (
-                        <div className="text-center py-12 text-gray-500 bg-white/5 rounded-xl border border-white/10">
-                            <p>Tidak ada kendaraan yang sedang diperbaiki</p>
-                        </div>
-                    ) : (
-                        <div className="grid gap-4">
-                            {perbaikans.map((perbaikan, index) => (
-                                <div
-                                    key={perbaikan.id}
+                    {/* Search Input */}
+                    <div className="relative">
+                        <input
+                            type="text"
+                            placeholder="Cari kendaraan (merek, plat nomor, driver, mekanik)..."
+                            value={searchQuery}
+                            onChange={(e) => {
+                                setSearchQuery(e.target.value);
+                                setCurrentPage(1); // Reset to first page on search
+                            }}
+                            className="w-full rounded-xl border bg-white/10 backdrop-blur-sm py-3 px-4 pl-12 text-white placeholder-gray-400 outline-none focus:ring-2 transition-all"
+                            style={{
+                                borderColor: `${currentTheme.hex.primary}40`,
+                                '--tw-ring-color': currentTheme.hex.primary,
+                            }}
+                        />
+                        <svg 
+                            className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" 
+                            fill="none" 
+                            stroke="currentColor" 
+                            viewBox="0 0 24 24"
+                        >
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                        {searchQuery && (
+                            <button
+                                onClick={() => {
+                                    setSearchQuery('');
+                                    setCurrentPage(1);
+                                }}
+                                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white transition-colors"
+                            >
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                </svg>
+                            </button>
+                        )}
+                    </div>
+
+                    {/* Filtered and Paginated Results */}
+                    {(() => {
+                        // Filter perbaikans based on search query
+                        const filteredPerbaikans = perbaikans.filter((perbaikan) => {
+                            if (!searchQuery) return true;
+                            const query = searchQuery.toLowerCase();
+                            return (
+                                perbaikan.kendaraan?.merek?.toLowerCase().includes(query) ||
+                                perbaikan.kendaraan?.plat_nomor?.toLowerCase().includes(query) ||
+                                perbaikan.kendaraan?.driver?.username?.toLowerCase().includes(query) ||
+                                perbaikan.mekanik?.username?.toLowerCase().includes(query)
+                            );
+                        });
+
+                        // Calculate pagination
+                        const totalPages = Math.ceil(filteredPerbaikans.length / itemsPerPage);
+                        const startIndex = (currentPage - 1) * itemsPerPage;
+                        const endIndex = startIndex + itemsPerPage;
+                        const paginatedPerbaikans = filteredPerbaikans.slice(startIndex, endIndex);
+
+                        return (
+                            <>
+                                {filteredPerbaikans.length === 0 ? (
+                                    <div className="text-center py-12 text-gray-500 bg-white/5 rounded-xl border border-white/10">
+                                        <p>{searchQuery ? 'Tidak ada kendaraan yang sesuai dengan pencarian' : 'Tidak ada kendaraan yang sedang diperbaiki'}</p>
+                                    </div>
+                                ) : (
+                                    <>
+                                        <div className="grid gap-4">
+                                            {paginatedPerbaikans.map((perbaikan, index) => (
+                                                <div
+                                                    key={perbaikan.id}
                                     className="backdrop-blur-sm rounded-xl p-6 border shadow-xl transition-all duration-300 hover:scale-[1.01]"
                                     style={{
                                         background: `linear-gradient(to bottom right, ${currentTheme.hex.primary}05, ${currentTheme.hex.secondary}05)`,
@@ -276,9 +339,19 @@ export default function PengajuanPerbaikan({ kerusakans = [], mekaniks = [], per
 
                                         <div className="flex flex-col items-end gap-3">
                                             <span
-                                                className="px-4 py-1.5 rounded-full text-xs font-semibold bg-yellow-500/20 text-yellow-400"
+                                                className={`px-4 py-1.5 rounded-full text-xs font-semibold ${
+                                                    perbaikan.kendaraan?.status === 'Perbaikan' 
+                                                        ? 'bg-yellow-500/20 text-yellow-400'
+                                                        : perbaikan.kendaraan?.status === 'Pending'
+                                                        ? 'bg-orange-500/20 text-orange-400'
+                                                        : perbaikan.kendaraan?.status === 'Normal'
+                                                        ? 'bg-green-500/20 text-green-400'
+                                                        : perbaikan.kendaraan?.status === 'Pengajuan Perbaikan'
+                                                        ? 'bg-blue-500/20 text-blue-400'
+                                                        : 'bg-gray-500/20 text-gray-400'
+                                                }`}
                                             >
-                                                Sedang Diperbaiki
+                                                {perbaikan.kendaraan?.status || 'N/A'}
                                             </span>
 
                                             <button
@@ -333,9 +406,69 @@ export default function PengajuanPerbaikan({ kerusakans = [], mekaniks = [], per
                                         </div>
                                     )}
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                                            ))}
+
+                                        {/* Pagination Controls */}
+                                        {totalPages > 1 && (
+                                                <div className="flex items-center justify-between mt-6 pt-6 border-t border-white/10">
+                                                    <div className="text-sm text-gray-400">
+                                                        Menampilkan {startIndex + 1}-{Math.min(endIndex, filteredPerbaikans.length)} dari {filteredPerbaikans.length} kendaraan
+                                                    </div>
+                                                    <div className="flex items-center gap-2">
+                                                        <button
+                                                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                                                            disabled={currentPage === 1}
+                                                            className="px-4 py-2 rounded-lg border text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/10"
+                                                            style={{
+                                                                borderColor: `${currentTheme.hex.primary}40`,
+                                                            }}
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                                                            </svg>
+                                                        </button>
+                                                        
+                                                        <div className="flex items-center gap-1">
+                                                            {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => (
+                                                                <button
+                                                                    key={page}
+                                                                    onClick={() => setCurrentPage(page)}
+                                                                    className={`px-4 py-2 rounded-lg font-medium transition-all ${
+                                                                        currentPage === page
+                                                                            ? 'text-white'
+                                                                            : 'text-gray-400 hover:text-white'
+                                                                    }`}
+                                                                    style={{
+                                                                        backgroundColor: currentPage === page ? `${currentTheme.hex.primary}30` : 'transparent',
+                                                                        border: currentPage === page ? `1px solid ${currentTheme.hex.primary}40` : '1px solid transparent',
+                                                                    }}
+                                                                >
+                                                                    {page}
+                                                                </button>
+                                                            ))}
+                                                        </div>
+
+                                                        <button
+                                                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                                                            disabled={currentPage === totalPages}
+                                                            className="px-4 py-2 rounded-lg border text-white font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed hover:bg-white/10"
+                                                            style={{
+                                                                borderColor: `${currentTheme.hex.primary}40`,
+                                                            }}
+                                                        >
+                                                            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                                            </svg>
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                        )}
+                                        </div>
+                                    </>
+                                )}
+                            </>
+                        );
+                    })()}
                 </div>
             </div>
 

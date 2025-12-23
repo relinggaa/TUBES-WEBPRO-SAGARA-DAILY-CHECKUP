@@ -8,6 +8,7 @@ use App\Models\Kendaraan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Inertia\Inertia;
 
 class BillController extends Controller
 {
@@ -58,5 +59,50 @@ class BillController extends Controller
         $kendaraan->save();
 
         return redirect()->route('mekanik.dashboard')->with('success', 'Bill berhasil di buat');
+    }
+
+    public function index(Request $request)
+    {
+        $search = $request->get('search', '');
+        $perPage = 5;
+
+        $query = Bill::with([
+            'keruskaanAcc.kendaraan.driver',
+            'keruskaanAcc.kerusakan',
+            'keruskaanAcc.mekanik'
+        ]);
+
+     
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+            
+                $q->whereHas('keruskaanAcc.kendaraan', function ($subQuery) use ($search) {
+                    $subQuery->where('merek', 'like', "%{$search}%");
+                })
+        
+                ->orWhereHas('keruskaanAcc.kendaraan', function ($subQuery) use ($search) {
+                    $subQuery->where('plat_nomor', 'like', "%{$search}%");
+                })
+               
+                ->orWhereHas('keruskaanAcc.kendaraan.driver', function ($subQuery) use ($search) {
+                    $subQuery->where('username', 'like', "%{$search}%");
+                })
+              
+                ->orWhereHas('keruskaanAcc.mekanik', function ($subQuery) use ($search) {
+                    $subQuery->where('username', 'like', "%{$search}%");
+                })
+       
+                ->orWhere('total_biaya', 'like', "%{$search}%");
+            });
+        }
+
+        $bills = $query->latest()->paginate($perPage)->withQueryString();
+
+        return Inertia::render('Admin/LaporanBiaya', [
+            'bills' => $bills,
+            'filters' => [
+                'search' => $search,
+            ],
+        ]);
     }
 }
