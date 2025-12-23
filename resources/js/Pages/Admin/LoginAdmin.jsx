@@ -1,16 +1,63 @@
-import React, { useState } from 'react';
-import { router } from '@inertiajs/react';
+import React, { useState, useEffect } from 'react';
+import { router, usePage } from '@inertiajs/react';
 import { useTheme } from '../../contexts/ThemeContext';
 import ModelViewer from '../../components/ModelViewer';
+import { toast } from 'react-toastify';
 
 export default function LoginAdmin() {
     const { currentTheme } = useTheme();
+    const { flash, auth } = usePage().props;
     const [formData, setFormData] = useState({
         username: '',
         key: ''
     });
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
+
+
+    useEffect(() => {
+        if (flash?.success) {
+            toast.success(flash.success, {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                style: {
+                    backgroundColor: '#000000',
+                    color: '#ffffff',
+                    border: `1px solid ${currentTheme.hex.primary}40`,
+                    borderRadius: '12px',
+                    boxShadow: `0 4px 12px ${currentTheme.hex.primary}30`
+                },
+                progressStyle: {
+                    background: `linear-gradient(to right, ${currentTheme.hex.primary}, ${currentTheme.hex.secondary})`
+                }
+            });
+        }
+
+        if (flash?.error) {
+            toast.error(flash.error, {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: true,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                style: {
+                    backgroundColor: '#000000',
+                    color: '#ffffff',
+                    border: '1px solid #ef444440',
+                    borderRadius: '12px',
+                    boxShadow: '0 4px 12px #ef444430'
+                },
+                progressStyle: {
+                    background: 'linear-gradient(to right, #ef4444, #dc2626)'
+                }
+            });
+        }
+    }, [flash?.success, flash?.error, currentTheme]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -19,8 +66,9 @@ export default function LoginAdmin() {
 
         router.post('/admin/login', formData, {
             preserveScroll: true,
-            onSuccess: () => {
+            onSuccess: (page) => {
                 setIsLoading(false);
+              
             },
             onError: (errors) => {
                 setErrors(errors);
@@ -31,7 +79,7 @@ export default function LoginAdmin() {
 
     return (
         <div className="min-h-screen bg-[#0D0219] relative overflow-hidden">
-            {/* Background Gradient Effects */}
+   
             <div className="absolute inset-0 overflow-hidden">
                 <div
                     className="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full bg-gradient-to-b from-transparent via-purple-900/20 to-transparent blur-3xl animate-pulse"
@@ -44,11 +92,10 @@ export default function LoginAdmin() {
 
 
 
-            {/* 2 Column Layout */}
             <div className="relative z-10 min-h-screen grid grid-cols-1 lg:grid-cols-2">
-                {/* Left Column - ModelViewer */}
+              
                 <div className="relative flex items-center justify-center p-8 lg:p-12 overflow-hidden">
-                    {/* Background Glow for Left Column */}
+                 
                     <div
                         className="absolute inset-0 opacity-30"
                         style={{

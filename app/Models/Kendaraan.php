@@ -11,6 +11,7 @@ class Kendaraan extends Model
         'plat_nomor',
         'driver_id',
         'gambar',
+        'status',
     ];
 
     /**

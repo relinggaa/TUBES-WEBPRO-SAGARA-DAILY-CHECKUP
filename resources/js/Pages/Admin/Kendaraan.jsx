@@ -412,8 +412,37 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
                                         {/* Content Section */}
                                         <div className="p-6">
                                             <div className="flex items-start justify-between mb-4">
-                                                <div>
-                                                    <h3 className="text-xl font-bold text-white mb-1">{kendaraan.merek}</h3>
+                                                <div className="flex-1">
+                                                    <div className="flex items-center space-x-2 mb-1">
+                                                        <h3 className="text-xl font-bold text-white">{kendaraan.merek}</h3>
+                                                        {/* Status Badge */}
+                                                        <span
+                                                            className="px-3 py-1 rounded-full text-xs font-semibold"
+                                                            style={{
+                                                                backgroundColor: 
+                                                                    kendaraan.status === 'Normal' 
+                                                                        ? `${currentTheme.hex.primary}20`
+                                                                        : kendaraan.status === 'Pengajuan Perbaikan'
+                                                                        ? '#f59e0b20'
+                                                                        : '#ef444420',
+                                                                color: 
+                                                                    kendaraan.status === 'Normal'
+                                                                        ? currentTheme.hex.primary
+                                                                        : kendaraan.status === 'Pengajuan Perbaikan'
+                                                                        ? '#f59e0b'
+                                                                        : '#ef4444',
+                                                                border: `1px solid ${
+                                                                    kendaraan.status === 'Normal'
+                                                                        ? `${currentTheme.hex.primary}40`
+                                                                        : kendaraan.status === 'Pengajuan Perbaikan'
+                                                                        ? '#f59e0b40'
+                                                                        : '#ef444440'
+                                                                }`
+                                                            }}
+                                                        >
+                                                            {kendaraan.status || 'Normal'}
+                                                        </span>
+                                                    </div>
                                                     <p className="text-gray-400 text-sm">Plat: {kendaraan.plat_nomor}</p>
                                                 </div>
                                                 <div className="flex items-center space-x-2">

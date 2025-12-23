@@ -11,23 +11,23 @@ const NavbarAdmin = () => {
     const dropdownRef = useRef(null);
     const userMenuButtonRef = useRef(null);
 
-    // Handle click outside to close dropdown
+
     useEffect(() => {
         if (!isUserMenuOpen) return;
 
         const handleClickOutside = (event) => {
-            // Check if click is outside dropdown and user menu button
+
             const isClickInsideDropdown = dropdownRef.current?.contains(event.target);
             const isClickOnUserButton = userMenuButtonRef.current?.contains(event.target);
             
-            // Only close if clicking outside both dropdown and button
+
             if (!isClickInsideDropdown && !isClickOnUserButton) {
                 setIsUserMenuOpen(false);
                 setIsSettingsOpen(false);
             }
         };
 
-        // Add event listener after a short delay to ensure button onClick handlers fire first
+    
         const timeoutId = setTimeout(() => {
             document.addEventListener('click', handleClickOutside);
         }, 0);
@@ -37,11 +37,10 @@ const NavbarAdmin = () => {
             document.removeEventListener('click', handleClickOutside);
         };
     }, [isUserMenuOpen]);
-    
-    // Try multiple ways to get user data
+   
     const user = props?.auth?.user || props?.user || (props && Object.keys(props).length > 0 ? props : null);
     
-    // Fallback user data for display
+
     const displayUser = user || {
         name: 'Admin',
         username: 'admin',
@@ -50,12 +49,12 @@ const NavbarAdmin = () => {
 
     const handleLogout = () => {
         if (confirm('Apakah Anda yakin ingin logout?')) {
-            router.post('/logout');
+            router.post('/admin/logout');
         }
     };
 
     const menuItems = [
-        { name: 'Dashboard', href: '/' },
+        { name: 'Dashboard', href: '/admin/dashboard' },
         { name: 'Pengajuan Perbaikan', href: '/admin/pengajuan-perbaikan' },
         { name: 'Laporan Biaya', href: '/admin/laporan-biaya' },
         { name: 'Kendaraan', href: '/admin/kendaraan' },
@@ -69,7 +68,7 @@ const NavbarAdmin = () => {
         return url.startsWith(path);
     };
 
-    // Get theme-based color classes
+  
     const getThemeColor = (type) => {
         const colorMap = {
             purple: { bg: 'purple-500', border: 'purple-500', text: 'purple-300', glow: 'purple-500', gradient: 'from-purple-500 to-purple-600' },
@@ -86,17 +85,17 @@ const NavbarAdmin = () => {
 
     return (
         <nav className="fixed top-0 left-0 right-0 z-50 py-4">
-            {/* Background with theme glow effect */}
+  
             <div className="absolute inset-0 -z-10">
                 <div className={`absolute bottom-0 left-1/2 -translate-x-1/2 w-full h-32 bg-${themeColors.bg}/20 blur-3xl animate-pulse`}></div>
             </div>
             
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-                {/* Navbar Container - Pill Shaped with Glassmorphism */}
+    
                 <div className={`bg-[#1E1730]/90 backdrop-blur-xl rounded-full px-6 py-3 flex justify-between items-center border border-${themeColors.border}/20 shadow-2xl shadow-${themeColors.glow}/10 hover:shadow-${themeColors.glow}/20 transition-all duration-300 relative`} style={{ overflow: 'visible' }}>
-                    {/* Logo - Left */}
-                    <Link href="/" className="flex items-center space-x-3 group">
-                        {/* Icon Atom/Star Style with Glow */}
+        
+                    <Link href="/admin/dashboard" className="flex items-center space-x-3 group">
+                 
                         <div className={`w-10 h-10 flex items-center justify-center rounded-lg bg-gradient-to-br from-${themeColors.bg}/20 to-${themeColors.bg}/30 group-hover:from-${themeColors.bg}/30 group-hover:to-${themeColors.bg}/40 transition-all duration-300 group-hover:scale-110`}>
                             <svg 
                                 className="w-6 h-6 text-white drop-shadow-lg transition-all duration-300" 
@@ -114,7 +113,7 @@ const NavbarAdmin = () => {
                         </span>
                     </Link>
 
-                    {/* Desktop Menu - Right */}
+            
                     <div className="hidden md:flex md:items-center md:space-x-2">
                         {menuItems.map((item) => (
                             <Link
@@ -133,7 +132,7 @@ const NavbarAdmin = () => {
                             </Link>
                         ))}
                         
-                        {/* User Menu Dropdown */}
+           
                         <div className={`relative ml-4 pl-4 border-l border-${themeColors.border}/20`} style={{ position: 'relative', zIndex: 100 }}>
                             <button
                                 ref={userMenuButtonRef}
@@ -166,7 +165,7 @@ const NavbarAdmin = () => {
                                 </svg>
                             </button>
                             
-                            {/* Dropdown Menu */}
+                   
                             {isUserMenuOpen && (
                                 <div 
                                     ref={dropdownRef}
@@ -252,7 +251,7 @@ const NavbarAdmin = () => {
                                                 </svg>
                                             </button>
                                             
-                                            {/* Color Picker Dropdown */}
+                                       
                                             {isSettingsOpen && (
                                                 <div 
                                                     className="bg-[#1E1730]/95 backdrop-blur-xl rounded-xl shadow-xl overflow-hidden"
