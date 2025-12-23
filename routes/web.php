@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GenerateKeyController;
 use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\AdminAuthController;
+use App\Http\Controllers\DriverAuthController;
 
 Route::get('/', function () {
     return inertia('Landing');
@@ -21,6 +22,8 @@ Route::middleware(['admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', function () {
         return inertia('Admin/DashboardAdmin');
     })->name('admin.dashboard');
+
+    Route::post('/update-gambar', [AdminAuthController::class, 'updateGambar'])->name('admin.update-gambar');
 
     Route::get('/pengajuan-perbaikan', function () {
         return inertia('Admin/PengajuanPerbaikan');
@@ -45,20 +48,24 @@ Route::middleware(['admin'])->prefix('admin')->group(function () {
     });
 });
 
-Route::get('/driver/login', function () {
-    return inertia('Driver/LoginDriver');
+// Driver Auth Routes (Public)
+Route::prefix('driver')->group(function () {
+    Route::get('/login', [DriverAuthController::class, 'showLoginForm'])->name('driver.login');
+    Route::post('/login', [DriverAuthController::class, 'login'])->name('driver.login.post');
+    Route::post('/logout', [DriverAuthController::class, 'logout'])->name('driver.logout');
 });
 
-Route::get('/driver/dashboard', function () {
-    return inertia('Driver/DashboardDriver');
-});
+// Driver Protected Routes
+Route::middleware(['driver'])->prefix('driver')->group(function () {
+    Route::get('/dashboard', function () {
+        return inertia('Driver/DashboardDriver');
+    })->name('driver.dashboard');
 
-Route::get('/driver/listcar', function () {
-    return inertia('Driver/ListCarDriver');
-});
+    Route::post('/update-gambar', [DriverAuthController::class, 'updateGambar'])->name('driver.update-gambar');
 
-Route::get('/driver/report', function () {
-    return inertia('Driver/ReportDriver');
+    Route::get('/report', function () {
+        return inertia('Driver/ReportDriver');
+    })->name('driver.report');
 });
 
 Route::get('/mekanik/dashboard', function () {

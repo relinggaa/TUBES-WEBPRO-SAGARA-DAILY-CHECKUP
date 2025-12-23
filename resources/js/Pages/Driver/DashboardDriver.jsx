@@ -1,10 +1,64 @@
-import React, { useState } from "react";
-import { Link } from "@inertiajs/react";
+import React, { useState, useEffect } from "react";
+import { Link, usePage, router } from "@inertiajs/react";
+import { toast } from "react-toastify";
 
 export default function DashboardDriver() {
+  const { auth, flash } = usePage().props;
+  const user = auth?.user;
+
+  // Handle flash messages
+  useEffect(() => {
+    if (flash?.success) {
+      toast.success(flash.success, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        style: {
+          backgroundColor: '#1e293b',
+          color: '#ffffff',
+          border: '1px solid #3b82f640',
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px #3b82f630'
+        },
+        progressStyle: {
+          background: 'linear-gradient(to right, #3b82f6, #06b6d4)'
+        }
+      });
+    }
+
+    if (flash?.error) {
+      toast.error(flash.error, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        style: {
+          backgroundColor: '#1e293b',
+          color: '#ffffff',
+          border: '1px solid #ef444440',
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px #ef444430'
+        },
+        progressStyle: {
+          background: 'linear-gradient(to right, #ef4444, #dc2626)'
+        }
+      });
+    }
+  }, [flash?.success, flash?.error]);
   const [showModal, setShowModal] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [previewUrl, setPreviewUrl] = useState(null);
+
+  const handleLogout = () => {
+    if (confirm('Apakah Anda yakin ingin logout?')) {
+      router.post('/driver/logout');
+    }
+  };
 
   const handleFileChange = (e) => {
     const file = e.target.files[0];
@@ -15,11 +69,24 @@ export default function DashboardDriver() {
   };
 
   const handleUpload = () => {
-    // Handle upload logic here
-    console.log("Uploading file:", selectedFile);
-    setShowModal(false);
-    setSelectedFile(null);
-    setPreviewUrl(null);
+    if (!selectedFile) return;
+
+    const formData = new FormData();
+    formData.append('gambar', selectedFile);
+
+    router.post('/driver/update-gambar', formData, {
+      preserveScroll: true,
+      preserveState: false,
+      onSuccess: () => {
+        setShowModal(false);
+        setSelectedFile(null);
+        setPreviewUrl(null);
+      },
+      onError: (errors) => {
+        console.error('Error uploading image:', errors);
+        alert('Gagal mengupload gambar. Pastikan file adalah gambar dan ukurannya tidak lebih dari 2MB.');
+      }
+    });
   };
   const vehicles = [
     {
@@ -29,20 +96,7 @@ export default function DashboardDriver() {
       plate: "B 4121 QQ",
       image: "https://blog.gaadikey.com/wp-content/uploads/2017/01/Nissan-Terrano-2017-Edition.jpg",
     },
-    {
-      id: 2,
-      name: "Toyota Fortuner 2012",
-      status: "Perbaikan",
-      plate: "B 4317 SLK",
-      image: "https://auto2000.co.id/mobil-baru-toyota/_next/image?url=https%3A%2F%2Ftsoimageprod.azureedge.net%2Fstatic-content%2Fprod%2F360degview%2FFORTUNER_IMPROVEMENT%2FExterior_360%2Fwhite.png&w=1920&q=75",
-    },
-    {
-      id: 3,
-      name: "Toyota Fortuner 2012",
-      status: "Pengajuan Perbaikan",
-      plate: "B 4317 SLK",
-      image: "https://auto2000.co.id/mobil-baru-toyota/_next/image?url=https%3A%2F%2Ftsoimageprod.azureedge.net%2Fstatic-content%2Fprod%2F360degview%2FFORTUNER_IMPROVEMENT%2FExterior_360%2Fwhite.png&w=1920&q=75",
-    },
+
   ];
 
   return (
@@ -54,6 +108,18 @@ export default function DashboardDriver() {
       </div>
 
       <div className="max-w-md mx-auto relative z-10">
+        {/* Logout Button */}
+        <div className="flex justify-end mb-4">
+          <button
+            onClick={handleLogout}
+            className="group/btn relative bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold px-4 py-2 rounded-full hover:bg-white/15 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            <span>Logout</span>
+          </button>
+        </div>
 
         <div className="relative bg-gradient-to-br from-blue-500/20 via-blue-600/10 to-purple-500/20 backdrop-blur-2xl rounded-[32px] p-8 mb-8 shadow-2xl border border-white/30 overflow-hidden animate-fade-in hover:scale-[1.02] hover:border-white/40 hover:shadow-cyan-500/30 transition-all duration-300 cursor-pointer group">
 
@@ -74,7 +140,7 @@ export default function DashboardDriver() {
                 className="relative w-36 h-36 rounded-full overflow-hidden border-4 border-white/40 shadow-2xl backdrop-blur-sm cursor-pointer hover:border-white/50 transition-all"
               >
                 <img
-                  src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_qydwbyfzBseOkXvF2to4jax9f5yN6unb5g&s"
+                  src={user?.gambar ? `/storage/${user.gambar}` : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_qydwbyfzBseOkXvF2to4jax9f5yN6unb5g&s"}
                   alt="Profile picture"
                   className="w-full h-full object-cover"
                 />
@@ -93,16 +159,14 @@ export default function DashboardDriver() {
 
             {/* Name */}
             <h4 className="text-white text-3xl font-bold mb-2 drop-shadow-2xl tracking-tight">
-              Marc Silvester
+              {user?.username || 'Driver'}
             </h4>
 
             {/* Date*/}
             <div className="flex items-center gap-2 mb-8 bg-white/10 backdrop-blur-md px-4 py-2 rounded-full border border-white/20">
-              <svg className="w-4 h-4 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
-              </svg>
+            
               <p className="text-blue-200 text-sm font-medium">
-                17/Maret/2025
+                Driver
               </p>
             </div>
           </div>
@@ -182,7 +246,7 @@ export default function DashboardDriver() {
             <div className="flex justify-center mb-6">
               <div className="relative w-32 h-32 rounded-full overflow-hidden border-4 border-white/40 shadow-xl">
                 <img
-                  src={previewUrl || "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_qydwbyfzBseOkXvF2to4jax9f5yN6unb5g&s"}
+                  src={previewUrl || (user?.gambar ? `/storage/${user.gambar}` : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcR_qydwbyfzBseOkXvF2to4jax9f5yN6unb5g&s")}
                   alt="Preview"
                   className="w-full h-full object-cover"
                 />

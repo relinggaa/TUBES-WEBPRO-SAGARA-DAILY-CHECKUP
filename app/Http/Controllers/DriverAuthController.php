@@ -8,16 +8,15 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 
-class AdminAuthController extends Controller
+class DriverAuthController extends Controller
 {
     public function showLoginForm()
     {
-       
-        if (Auth::check() && Auth::user()->role === 'Admin') {
-            return redirect()->route('admin.dashboard');
+        if (Auth::check() && Auth::user()->role === 'Driver') {
+            return redirect()->route('driver.dashboard');
         }
 
-        return Inertia::render('Admin/LoginAdmin');
+        return Inertia::render('Driver/LoginDriver');
     }
 
     public function login(Request $request)
@@ -31,29 +30,26 @@ class AdminAuthController extends Controller
             'key.size' => 'Key harus terdiri dari 8 karakter',
         ]);
 
-    
         $user = User::where('username', $validated['username'])
             ->where('key', strtoupper($validated['key']))
             ->first();
 
-       
         if (!$user) {
             return back()->withErrors([
                 'key' => 'Username atau key tidak valid.',
             ])->withInput($request->only('username'));
         }
 
-  
-        if ($user->role !== 'Admin') {
+        if ($user->role !== 'Driver') {
             return back()->withErrors([
-                'key' => 'Anda tidak memiliki akses sebagai admin.',
+                'key' => 'Anda tidak memiliki akses sebagai driver.',
             ])->withInput($request->only('username'));
         }
 
-
         Auth::login($user, $request->has('remember'));
         $request->session()->regenerate();
-        return redirect()->intended(route('admin.dashboard'))
+        
+        return redirect()->intended(route('driver.dashboard'))
             ->with('success', 'Login berhasil! Selamat datang, ' . $user->username);
     }
 
@@ -64,7 +60,7 @@ class AdminAuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
-        return redirect()->route('admin.login')
+        return redirect()->route('driver.login')
             ->with('success', 'Anda telah logout.');
     }
 
@@ -82,7 +78,7 @@ class AdminAuthController extends Controller
         $user = Auth::user();
 
         // Hapus gambar lama jika ada
-        if ($user->gambar && strpos($user->gambar, 'http') !== 0) {
+        if ($user->gambar) {
             Storage::disk('public')->delete($user->gambar);
         }
 
@@ -94,7 +90,7 @@ class AdminAuthController extends Controller
             $user->save();
         }
 
-        return redirect()->back()
+        return redirect()->route('driver.dashboard')
             ->with('success', 'Foto profil berhasil diupdate!');
     }
 }

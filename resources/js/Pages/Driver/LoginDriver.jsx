@@ -1,6 +1,78 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
+import { router, usePage } from "@inertiajs/react";
+import { toast } from "react-toastify";
 
-export default function LoginUser() {
+export default function LoginDriver() {
+  const { flash } = usePage().props;
+  const [formData, setFormData] = useState({
+    username: '',
+    key: ''
+  });
+  const [errors, setErrors] = useState({});
+  const [isLoading, setIsLoading] = useState(false);
+
+  // Handle flash messages
+  useEffect(() => {
+    if (flash?.success) {
+      toast.success(flash.success, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        style: {
+          backgroundColor: '#1e293b',
+          color: '#ffffff',
+          border: '1px solid #3b82f640',
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px #3b82f630'
+        },
+        progressStyle: {
+          background: 'linear-gradient(to right, #3b82f6, #06b6d4)'
+        }
+      });
+    }
+
+    if (flash?.error) {
+      toast.error(flash.error, {
+        position: "top-right",
+        autoClose: 5000,
+        hideProgressBar: true,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        style: {
+          backgroundColor: '#1e293b',
+          color: '#ffffff',
+          border: '1px solid #ef444440',
+          borderRadius: '12px',
+          boxShadow: '0 4px 12px #ef444430'
+        },
+        progressStyle: {
+          background: 'linear-gradient(to right, #ef4444, #dc2626)'
+        }
+      });
+    }
+  }, [flash?.success, flash?.error]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setErrors({});
+    setIsLoading(true);
+
+    router.post('/driver/login', formData, {
+      preserveScroll: true,
+      onSuccess: () => {
+        setIsLoading(false);
+      },
+      onError: (errors) => {
+        setErrors(errors);
+        setIsLoading(false);
+      }
+    });
+  };
+
   return (
     <div className="min-h-screen relative flex items-center justify-center px-4 overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900">
       {/* Video Background */}
@@ -40,69 +112,117 @@ export default function LoginUser() {
               <p className="text-blue-200">Sign in to access your account</p>
             </div>
 
-            {/* Username Input */}
-            <div className="mb-6">
-              <div className="relative group/input">
-                <input
-                  type="text"
-                  id="email"
-                  className="peer block w-full appearance-none rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm px-4 pt-6 pb-3 text-sm text-white placeholder-transparent focus:border-blue-400/50 focus:outline-none focus:ring-2 focus:ring-blue-400/30 transition-all hover:bg-white/15 hover:border-white/30"
-                  placeholder="Enter Username"
-                />
-                <label
-                  htmlFor="email"
-                  className="absolute left-4 top-2 text-xs text-blue-200 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-blue-300/50 peer-focus:top-2 peer-focus:text-xs peer-focus:text-blue-300"
-                >
-                  Enter Username
-                </label>
-                {/* Input icon */}
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover/input:opacity-100 transition-opacity">
-                  <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
-                  </svg>
+            <form onSubmit={handleSubmit}>
+              {/* Username Input */}
+              <div className="mb-6">
+                <div className="relative group/input">
+                  <input
+                    type="text"
+                    id="username"
+                    value={formData.username}
+                    onChange={(e) => setFormData({ ...formData, username: e.target.value })}
+                    className={`peer block w-full appearance-none rounded-xl border backdrop-blur-sm px-4 pt-6 pb-3 text-sm text-white placeholder-transparent focus:outline-none focus:ring-2 transition-all hover:bg-white/15 ${
+                      errors.username || errors.key
+                        ? 'border-red-400/50 focus:border-red-400/50 focus:ring-red-400/30 bg-white/10'
+                        : 'border-white/20 bg-white/10 focus:border-blue-400/50 focus:ring-blue-400/30 hover:border-white/30'
+                    }`}
+                    placeholder="Enter Username"
+                    disabled={isLoading}
+                  />
+                  <label
+                    htmlFor="username"
+                    className={`absolute left-4 top-2 text-xs transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-xs ${
+                      errors.username || errors.key
+                        ? 'text-red-300 peer-placeholder-shown:text-red-300/50 peer-focus:text-red-300'
+                        : 'text-blue-200 peer-placeholder-shown:text-blue-300/50 peer-focus:text-blue-300'
+                    }`}
+                  >
+                    Enter Username
+                  </label>
+                  {/* Input icon */}
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover/input:opacity-100 transition-opacity">
+                    <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                    </svg>
+                  </div>
                 </div>
+                {errors.username && (
+                  <p className="mt-1 text-xs text-red-400">{errors.username}</p>
+                )}
               </div>
-            </div>
 
-            {/* Password Input */}
-            <div className="mb-6">
-              <div className="relative group/input">
-                <input
-                  type="password"
-                  id="password"
-                  className="peer block w-full appearance-none rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm px-4 pt-6 pb-3 text-sm text-white placeholder-transparent focus:border-blue-400/50 focus:outline-none focus:ring-2 focus:ring-blue-400/30 transition-all hover:bg-white/15 hover:border-white/30"
-                  placeholder="Enter Your Key"
-                />
-                <label
-                  htmlFor="password"
-                  className="absolute left-4 top-2 text-xs text-blue-200 transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-placeholder-shown:text-blue-300/50 peer-focus:top-2 peer-focus:text-xs peer-focus:text-blue-300"
-                >
-                  Enter Your Key
-                </label>
-                {/* Input icon */}
-                <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover/input:opacity-100 transition-opacity">
-                  <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
-                  </svg>
+              {/* Key Input */}
+              <div className="mb-6">
+                <div className="relative group/input">
+                  <input
+                    type="text"
+                    id="key"
+                    value={formData.key}
+                    onChange={(e) => setFormData({ ...formData, key: e.target.value.toUpperCase() })}
+                    className={`peer block w-full appearance-none rounded-xl border backdrop-blur-sm px-4 pt-6 pb-3 text-sm text-white placeholder-transparent focus:outline-none focus:ring-2 transition-all hover:bg-white/15 font-mono tracking-wider ${
+                      errors.key
+                        ? 'border-red-400/50 focus:border-red-400/50 focus:ring-red-400/30 bg-white/10'
+                        : 'border-white/20 bg-white/10 focus:border-blue-400/50 focus:ring-blue-400/30 hover:border-white/30'
+                    }`}
+                    placeholder="Enter Your Key"
+                    maxLength={8}
+                    disabled={isLoading}
+                  />
+                  <label
+                    htmlFor="key"
+                    className={`absolute left-4 top-2 text-xs transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-xs ${
+                      errors.key
+                        ? 'text-red-300 peer-placeholder-shown:text-red-300/50 peer-focus:text-red-300'
+                        : 'text-blue-200 peer-placeholder-shown:text-blue-300/50 peer-focus:text-blue-300'
+                    }`}
+                  >
+                    Enter Your Key
+                  </label>
+                  {/* Input icon */}
+                  <div className="absolute right-4 top-1/2 -translate-y-1/2 opacity-0 group-hover/input:opacity-100 transition-opacity">
+                    <svg className="w-5 h-5 text-blue-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 7a2 2 0 012 2m4 0a6 6 0 01-7.743 5.743L11 17H9v2H7v2H4a1 1 0 01-1-1v-2.586a1 1 0 01.293-.707l5.964-5.964A6 6 0 1121 9z" />
+                    </svg>
+                  </div>
                 </div>
+                {errors.key && (
+                  <p className="mt-1 text-xs text-red-400">{errors.key}</p>
+                )}
               </div>
-            </div>
 
-            {/* Buttons */}
-            <div className="flex gap-4 mb-6">
-              <a href="/driver/dashboard" className="flex-1">
-                <button className="group/btn relative w-full bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-600 text-white font-bold py-3 rounded-xl shadow-xl hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden">
+              {/* Buttons */}
+              <div className="flex gap-4 mb-6">
+                <button
+                  type="submit"
+                  disabled={isLoading}
+                  className="group/btn relative flex-1 bg-gradient-to-r from-blue-500 via-cyan-500 to-blue-600 text-white font-bold py-3 rounded-xl shadow-xl hover:shadow-2xl hover:shadow-cyan-500/50 transition-all duration-300 hover:scale-105 active:scale-95 overflow-hidden disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+                >
                   <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover/btn:translate-x-[200%] transition-transform duration-1000"></div>
-                  <span className="relative">Login</span>
+                  <span className="relative">
+                    {isLoading ? (
+                      <span className="flex items-center justify-center gap-2">
+                        <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                          <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                          <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        Memproses...
+                      </span>
+                    ) : (
+                      'Login'
+                    )}
+                  </span>
                 </button>
-              </a>
-              <button className="group/btn relative flex-1 bg-white/10 backdrop-blur-sm border border-white/20 text-blue-300 font-bold py-3 rounded-xl hover:bg-white/15 transition-all duration-300 hover:scale-105 active:scale-95 hover:border-white/30 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-r from-blue-400/0 to-cyan-400/0 group-hover/btn:from-blue-400/10 group-hover/btn:to-cyan-400/10 transition-all duration-300"></div>
-                <a href="#" className="relative block">
-                  Contact Admin
-                </a>
-              </button>
-            </div>
+                <button
+                  type="button"
+                  className="group/btn relative flex-1 bg-white/10 backdrop-blur-sm border border-white/20 text-blue-300 font-bold py-3 rounded-xl hover:bg-white/15 transition-all duration-300 hover:scale-105 active:scale-95 hover:border-white/30 overflow-hidden"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-400/0 to-cyan-400/0 group-hover/btn:from-blue-400/10 group-hover/btn:to-cyan-400/10 transition-all duration-300"></div>
+                  <a href="#" className="relative block">
+                    Contact Admin
+                  </a>
+                </button>
+              </div>
+            </form>
 
             {/* Forget Password Link */}
             <p className="text-center text-blue-200 text-sm">

@@ -12,7 +12,7 @@ class GenerateKeyController extends Controller
     public function index(Request $request)
     {
         $query = User::whereNotNull('key')
-            ->select('id', 'username', 'role', 'key', 'created_at');
+            ->select('id', 'username', 'role', 'key', 'gambar', 'created_at');
         
         // Search filter
         if ($request->has('search') && $request->search !== null && $request->search !== '') {

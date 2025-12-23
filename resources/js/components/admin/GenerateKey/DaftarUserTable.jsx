@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { router } from '@inertiajs/react';
 import { 
     getThemeBorder, 
@@ -266,7 +266,44 @@ export default function DaftarUserTable({
                                     </td>
                                 </tr>
                             ) : (
-                                users.data.map((user, index) => (
+                                users.data.map((user, index) => {
+                                    const UserAvatar = ({ user, theme }) => {
+                                        const [imageError, setImageError] = useState(false);
+                                        
+                                        if (user.gambar && user.gambar.startsWith('users/') && !imageError) {
+                                            return (
+                                                <div 
+                                                    className="w-10 h-10 rounded-xl overflow-hidden border-2 flex-shrink-0"
+                                                    style={{
+                                                        borderColor: `${theme.hex.primary}40`,
+                                                        boxShadow: `0 2px 8px ${theme.hex.primary}20`
+                                                    }}
+                                                >
+                                                    <img 
+                                                        src={`/storage/${user.gambar}`} 
+                                                        alt={user.username}
+                                                        className="w-full h-full object-cover"
+                                                        onError={() => setImageError(true)}
+                                                    />
+                                                </div>
+                                            );
+                                        }
+                                        
+                                        return (
+                                            <div 
+                                                className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm flex-shrink-0"
+                                                style={{
+                                                    background: `linear-gradient(to bottom right, ${theme.hex.primary}, ${theme.hex.secondary})`,
+                                                    color: 'white',
+                                                    boxShadow: `0 2px 8px ${theme.hex.primary}20`
+                                                }}
+                                            >
+                                                {user.username.charAt(0).toUpperCase()}
+                                            </div>
+                                        );
+                                    };
+                                    
+                                    return (
                                 <tr 
                                     key={user.id}
                                     className="group/row border-b transition-all duration-300"
@@ -283,15 +320,7 @@ export default function DaftarUserTable({
                                 >
                                     <td className="px-6 py-4">
                                         <div className="flex items-center space-x-3">
-                                            <div 
-                                                className="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-sm"
-                                                style={{
-                                                    background: `linear-gradient(to bottom right, ${currentTheme.hex.primary}, ${currentTheme.hex.secondary})`,
-                                                    color: 'white'
-                                                }}
-                                            >
-                                                {user.username.charAt(0).toUpperCase()}
-                                            </div>
+                                            <UserAvatar user={user} theme={currentTheme} />
                                             <span className="text-white font-medium">{user.username}</span>
                                         </div>
                                     </td>
@@ -386,7 +415,8 @@ export default function DaftarUserTable({
                                         </div>
                                     </td>
                                 </tr>
-                                ))
+                                    );
+                                })
                             )}
                         </tbody>
                     </table>
