@@ -11,7 +11,7 @@ export default function LoginDriver() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
 
-  // Handle flash messages
+
   useEffect(() => {
     if (flash?.success) {
       toast.success(flash.success, {
@@ -121,21 +121,19 @@ export default function LoginDriver() {
                     id="username"
                     value={formData.username}
                     onChange={(e) => setFormData({ ...formData, username: e.target.value })}
-                    className={`peer block w-full appearance-none rounded-xl border backdrop-blur-sm px-4 pt-6 pb-3 text-sm text-white placeholder-transparent focus:outline-none focus:ring-2 transition-all hover:bg-white/15 ${
-                      errors.username || errors.key
+                    className={`peer block w-full appearance-none rounded-xl border backdrop-blur-sm px-4 pt-6 pb-3 text-sm text-white placeholder-transparent focus:outline-none focus:ring-2 transition-all hover:bg-white/15 ${errors.username || errors.key
                         ? 'border-red-400/50 focus:border-red-400/50 focus:ring-red-400/30 bg-white/10'
                         : 'border-white/20 bg-white/10 focus:border-blue-400/50 focus:ring-blue-400/30 hover:border-white/30'
-                    }`}
+                      }`}
                     placeholder="Enter Username"
                     disabled={isLoading}
                   />
                   <label
                     htmlFor="username"
-                    className={`absolute left-4 top-2 text-xs transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-xs ${
-                      errors.username || errors.key
+                    className={`absolute left-4 top-2 text-xs transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-xs ${errors.username || errors.key
                         ? 'text-red-300 peer-placeholder-shown:text-red-300/50 peer-focus:text-red-300'
                         : 'text-blue-200 peer-placeholder-shown:text-blue-300/50 peer-focus:text-blue-300'
-                    }`}
+                      }`}
                   >
                     Enter Username
                   </label>
@@ -159,22 +157,20 @@ export default function LoginDriver() {
                     id="key"
                     value={formData.key}
                     onChange={(e) => setFormData({ ...formData, key: e.target.value.toUpperCase() })}
-                    className={`peer block w-full appearance-none rounded-xl border backdrop-blur-sm px-4 pt-6 pb-3 text-sm text-white placeholder-transparent focus:outline-none focus:ring-2 transition-all hover:bg-white/15 font-mono tracking-wider ${
-                      errors.key
+                    className={`peer block w-full appearance-none rounded-xl border backdrop-blur-sm px-4 pt-6 pb-3 text-sm text-white placeholder-transparent focus:outline-none focus:ring-2 transition-all hover:bg-white/15 font-mono tracking-wider ${errors.key
                         ? 'border-red-400/50 focus:border-red-400/50 focus:ring-red-400/30 bg-white/10'
                         : 'border-white/20 bg-white/10 focus:border-blue-400/50 focus:ring-blue-400/30 hover:border-white/30'
-                    }`}
+                      }`}
                     placeholder="Enter Your Key"
                     maxLength={8}
                     disabled={isLoading}
                   />
                   <label
                     htmlFor="key"
-                    className={`absolute left-4 top-2 text-xs transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-xs ${
-                      errors.key
+                    className={`absolute left-4 top-2 text-xs transition-all peer-placeholder-shown:top-4 peer-placeholder-shown:text-base peer-focus:top-2 peer-focus:text-xs ${errors.key
                         ? 'text-red-300 peer-placeholder-shown:text-red-300/50 peer-focus:text-red-300'
                         : 'text-blue-200 peer-placeholder-shown:text-blue-300/50 peer-focus:text-blue-300'
-                    }`}
+                      }`}
                   >
                     Enter Your Key
                   </label>

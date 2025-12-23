@@ -22,4 +22,13 @@ class Kendaraan extends Model
     {
         return $this->belongsTo(User::class, 'driver_id');
     }
+
+    /**
+     * Relasi hasMany dengan Kerusakan
+     * Satu kendaraan bisa memiliki banyak kerusakan
+     */
+    public function kerusakans()
+    {
+        return $this->hasMany(Kerusakan::class, 'kendaraan_id');
+    }
 }

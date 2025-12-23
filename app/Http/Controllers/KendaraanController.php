@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Kendaraan;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
@@ -15,19 +16,19 @@ class KendaraanController extends Controller
     public function index(Request $request)
     {
         $query = Kendaraan::with('driver')->orderBy('created_at', 'desc');
-        
-    
+
+
         if ($request->has('search') && $request->search !== null && $request->search !== '') {
             $search = $request->search;
-            $query->where(function($q) use ($search) {
+            $query->where(function ($q) use ($search) {
                 $q->where('merek', 'like', '%' . $search . '%')
-                  ->orWhere('plat_nomor', 'like', '%' . $search . '%')
-                  ->orWhereHas('driver', function($driverQuery) use ($search) {
-                      $driverQuery->where('username', 'like', '%' . $search . '%');
-                  });
+                    ->orWhere('plat_nomor', 'like', '%' . $search . '%')
+                    ->orWhereHas('driver', function ($driverQuery) use ($search) {
+                        $driverQuery->where('username', 'like', '%' . $search . '%');
+                    });
             });
         }
-        
+
         $kendaraans = $query->paginate(6)->appends($request->only(['search']));
         $drivers = User::where('role', 'Driver')->select('id', 'username')->get();
 
@@ -65,27 +66,27 @@ class KendaraanController extends Controller
 
             Kendaraan::create($validated);
 
-       
-        
+
+
 
             return redirect()->route('kendaraan.index')
                 ->with('success', 'Kendaraan berhasil ditambahkan!');
         } catch (UniqueConstraintViolationException $e) {
-           
+
             if (isset($validated['gambar']) && Storage::disk('public')->exists($validated['gambar'])) {
                 Storage::disk('public')->delete($validated['gambar']);
             }
-            
+
             if (str_contains($e->getMessage(), 'driver_id') || str_contains($e->getMessage(), 'kendaraans_driver_id_unique')) {
                 return redirect()->route('kendaraan.index')
                     ->with('error', 'User sudah memiliki kendaraan. Satu user hanya bisa memiliki satu kendaraan.');
             }
-            
+
             if (str_contains($e->getMessage(), 'plat_nomor') || str_contains($e->getMessage(), 'kendaraans_plat_nomor_unique')) {
                 return redirect()->route('kendaraan.index')
                     ->with('error', 'Kendaraan sudah terdaftar.');
             }
-            
+
             throw $e;
         }
     }
@@ -123,21 +124,21 @@ class KendaraanController extends Controller
             return redirect()->route('kendaraan.index')
                 ->with('success', 'Kendaraan berhasil diupdate!');
         } catch (UniqueConstraintViolationException $e) {
-       
+
             if (isset($validated['gambar']) && Storage::disk('public')->exists($validated['gambar'])) {
                 Storage::disk('public')->delete($validated['gambar']);
             }
-            
+
             if (str_contains($e->getMessage(), 'driver_id') || str_contains($e->getMessage(), 'kendaraans_driver_id_unique')) {
                 return redirect()->route('kendaraan.index')
                     ->with('error', 'User sudah memiliki kendaraan. Satu user hanya bisa memiliki satu kendaraan.');
             }
-            
+
             if (str_contains($e->getMessage(), 'plat_nomor') || str_contains($e->getMessage(), 'kendaraans_plat_nomor_unique')) {
                 return redirect()->route('kendaraan.index')
                     ->with('error', 'Kendaraan sudah terdaftar.');
             }
-            
+
             throw $e;
         }
     }
@@ -152,9 +153,49 @@ class KendaraanController extends Controller
 
         $kendaraan->delete();
 
-      
+
 
         return redirect()->route('kendaraan.index')
             ->with('success', 'Kendaraan berhasil dihapus!');
+    }
+
+    public function driverDashboard()
+    {
+        $user = Auth::user();
+
+        // Ambil kendaraan yang dimiliki driver dengan relasi kerusakans
+        $kendaraan = Kendaraan::where('driver_id', $user->id)
+            ->with([
+                'driver',
+                'kerusakans' => function ($query) {
+                    $query->latest()->first(); // Ambil kerusakan terbaru
+                }
+            ])
+            ->first();
+
+        // Ambil kerusakan terbaru jika ada
+        $latestKerusakan = null;
+        if ($kendaraan) {
+            $latestKerusakan = $kendaraan->kerusakans()->latest()->first();
+        }
+
+        return Inertia::render('Driver/DashboardDriver', [
+            'kendaraan' => $kendaraan,
+            'kerusakan' => $latestKerusakan
+        ]);
+    }
+
+    public function driverReport()
+    {
+        $user = Auth::user();
+
+        // Ambil kendaraan yang dimiliki driver
+        $kendaraan = Kendaraan::where('driver_id', $user->id)
+            ->with('driver')
+            ->first();
+
+        return Inertia::render('Driver/ReportDriver', [
+            'kendaraan' => $kendaraan
+        ]);
     }
 }

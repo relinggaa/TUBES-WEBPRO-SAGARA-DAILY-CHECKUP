@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GenerateKeyController;
 use App\Http\Controllers\KendaraanController;
+use App\Http\Controllers\KerusakanController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\DriverAuthController;
 use App\Http\Controllers\MekanikAuthController;
@@ -26,9 +27,8 @@ Route::middleware(['admin'])->prefix('admin')->group(function () {
 
     Route::post('/update-gambar', [AdminAuthController::class, 'updateGambar'])->name('admin.update-gambar');
 
-    Route::get('/pengajuan-perbaikan', function () {
-        return inertia('Admin/PengajuanPerbaikan');
-    })->name('admin.pengajuan-perbaikan');
+    Route::get('/pengajuan-perbaikan', [KerusakanController::class, 'index'])->name('admin.pengajuan-perbaikan');
+    Route::post('/kerusakan/approve', [KerusakanController::class, 'approve'])->name('admin.kerusakan.approve');
 
     Route::get('/laporan-biaya', function () {
         return inertia('Admin/LaporanBiaya');
@@ -58,15 +58,18 @@ Route::prefix('driver')->group(function () {
 
 // Driver Protected Routes
 Route::middleware(['driver'])->prefix('driver')->group(function () {
-    Route::get('/dashboard', function () {
-        return inertia('Driver/DashboardDriver');
-    })->name('driver.dashboard');
+    Route::get('/dashboard', [KendaraanController::class, 'driverDashboard'])->name('driver.dashboard');
 
     Route::post('/update-gambar', [DriverAuthController::class, 'updateGambar'])->name('driver.update-gambar');
 
-    Route::get('/report', function () {
-        return inertia('Driver/ReportDriver');
-    })->name('driver.report');
+    Route::get('/report', [KendaraanController::class, 'driverReport'])->name('driver.report');
+    Route::post('/report', [KerusakanController::class, 'store'])->name('driver.report.store');
+
+    // Route untuk batalkan pengajuan perbaikan
+    Route::post('/kerusakan/cancel', [KerusakanController::class, 'cancel'])->name('driver.kerusakan.cancel');
+
+    // Route untuk update kendala kerusakan
+    Route::put('/kerusakan/{id}', [KerusakanController::class, 'update'])->name('driver.kerusakan.update');
 });
 
 // Mekanik Auth Routes (Public)
