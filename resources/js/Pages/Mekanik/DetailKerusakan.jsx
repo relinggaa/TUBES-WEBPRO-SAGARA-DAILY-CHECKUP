@@ -46,7 +46,7 @@ export default function DetailKerusakan() {
                     </svg>
                 </Link>
 
-                {/* glassmorphism */}
+
                 <div className="bg-white/10 backdrop-blur-xl rounded-[28px] p-6 shadow-2xl border border-white/10 mb-6 animate-fade-in">
                     {/* Car Header */}
                     <div className="flex justify-between items-start mb-5">
@@ -129,21 +129,22 @@ export default function DetailKerusakan() {
 
 
                     <div className="space-y-2.5">
-                        <button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-gray-900 font-semibold py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                        <button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                             Mark As Pending
                         </button>
                         <a href="/mekanik/bill">
-                            <button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-gray-900 font-semibold py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
+                            <button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300">
                                 Upload Bill
                             </button>
                         </a>
                     </div>
                 </div>
 
-
-                <button className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-gray-900 font-bold py-4 rounded-full shadow-2xl hover:shadow-emerald-500/50 hover:scale-105 transition-all duration-300 animate-slide-up">
-                    Done
-                </button>
+                <a href="/mekanik/dashboard">
+                    <button className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-bold py-4 rounded-full shadow-2xl hover:shadow-emerald-500/50 hover:scale-105 transition-all duration-300 animate-slide-up">
+                        Done
+                    </button>
+                </a>
             </div>
 
             <style jsx>{`

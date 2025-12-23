@@ -7,8 +7,20 @@ export default function ReportDriver() {
     { id: 2, name: "Kendala 2", description: "Deskripsi kendala 2" },
   ]);
 
+  const [showModal, setShowModal] = useState(false);
+  const [newKendala, setNewKendala] = useState({ name: "", description: "" });
+
   const removeKendala = (id) => {
     setKendalaList(kendalaList.filter((item) => item.id !== id));
+  };
+
+  const handleAddKendala = () => {
+    if (newKendala.name.trim() && newKendala.description.trim()) {
+      const newId = kendalaList.length > 0 ? Math.max(...kendalaList.map(k => k.id)) + 1 : 1;
+      setKendalaList([...kendalaList, { id: newId, ...newKendala }]);
+      setNewKendala({ name: "", description: "" });
+      setShowModal(false);
+    }
   };
 
   return (
@@ -23,7 +35,7 @@ export default function ReportDriver() {
       <div className="max-w-2xl mx-auto relative z-10">
         {/* Back Button */}
         <Link
-          href="/driver/listcar"
+          href="/driver/dashboard"
           className="inline-flex items-center justify-center w-14 h-14 bg-white/10 backdrop-blur-xl rounded-full mb-8 border border-white/20 hover:bg-white/15 transition-all duration-300 hover:scale-110 shadow-2xl group"
         >
           <svg
@@ -73,7 +85,10 @@ export default function ReportDriver() {
 
           {/* Kendala Section */}
           <div className="bg-white/60 backdrop-blur-sm rounded-2xl p-6 border border-blue-300/40 mb-6">
-            <button className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-gray-900 font-semibold py-3 rounded-xl shadow-lg hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 active:scale-95 mb-6">
+            <button
+              onClick={() => setShowModal(true)}
+              className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold py-3 rounded-xl shadow-lg hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 active:scale-95 mb-6"
+            >
               Tambah Kendala
             </button>
 
@@ -118,7 +133,7 @@ export default function ReportDriver() {
         </div>
 
         <div className="flex justify-center">
-          <button className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-gray-900 font-bold px-10 py-4 rounded-xl shadow-xl hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 active:scale-95 animate-slide-up">
+          <button className="group inline-flex items-center justify-center gap-3 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold px-10 py-4 rounded-xl shadow-xl hover:shadow-2xl hover:shadow-blue-500/50 transition-all duration-300 hover:scale-105 active:scale-95 animate-slide-up">
             <span>Kirim Laporan</span>
             <svg
               className="w-6 h-6 group-hover:translate-x-1 transition-transform"
@@ -137,6 +152,79 @@ export default function ReportDriver() {
           </button>
         </div>
       </div>
+
+      {/* Modal for Adding Kendala */}
+      {showModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm animate-fade-in">
+          <div className="relative bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 rounded-[28px] p-8 max-w-md w-full border border-white/20 shadow-2xl animate-slide-up">
+            {/* Close Button */}
+            <button
+              onClick={() => {
+                setShowModal(false);
+                setNewKendala({ name: "", description: "" });
+              }}
+              className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all"
+            >
+              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            <h3 className="text-white text-2xl font-bold mb-6">Tambah Kendala Baru</h3>
+
+            {/* Form Inputs */}
+            <div className="space-y-4 mb-6">
+              {/* Nama Kendala */}
+              <div>
+                <label className="block text-blue-200 text-sm font-medium mb-2">
+                  Nama Kendala
+                </label>
+                <input
+                  type="text"
+                  value={newKendala.name}
+                  onChange={(e) => setNewKendala({ ...newKendala, name: e.target.value })}
+                  className="w-full rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm py-3 px-4 text-white placeholder-blue-200 shadow-lg outline-none focus:border-blue-400/50 focus:ring-2 focus:ring-blue-400/30 transition-all"
+                  placeholder="Contoh: Kendala 3"
+                />
+              </div>
+
+              {/* Deskripsi Kendala */}
+              <div>
+                <label className="block text-blue-200 text-sm font-medium mb-2">
+                  Deskripsi Kendala
+                </label>
+                <textarea
+                  value={newKendala.description}
+                  onChange={(e) => setNewKendala({ ...newKendala, description: e.target.value })}
+                  rows="3"
+                  className="w-full rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm py-3 px-4 text-white placeholder-blue-200 shadow-lg outline-none focus:border-blue-400/50 focus:ring-2 focus:ring-blue-400/30 transition-all resize-none"
+                  placeholder="Deskripsi kendala..."
+                />
+              </div>
+            </div>
+
+            {/* Action Buttons */}
+            <div className="flex gap-3">
+              <button
+                onClick={() => {
+                  setShowModal(false);
+                  setNewKendala({ name: "", description: "" });
+                }}
+                className="flex-1 bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold py-3 rounded-full hover:bg-white/15 transition-all"
+              >
+                Batal
+              </button>
+              <button
+                onClick={handleAddKendala}
+                disabled={!newKendala.name.trim() || !newKendala.description.trim()}
+                className="flex-1 bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-bold py-3 rounded-full hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100"
+              >
+                Tambah
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style jsx>{`
         @keyframes fade-in {
