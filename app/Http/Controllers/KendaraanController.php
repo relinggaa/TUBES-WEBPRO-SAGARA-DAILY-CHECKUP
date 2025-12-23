@@ -16,7 +16,7 @@ class KendaraanController extends Controller
     {
         $query = Kendaraan::with('driver')->orderBy('created_at', 'desc');
         
-        // Search filter
+    
         if ($request->has('search') && $request->search !== null && $request->search !== '') {
             $search = $request->search;
             $query->where(function($q) use ($search) {
@@ -52,6 +52,7 @@ class KendaraanController extends Controller
             ],
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
+            'plat_nomor.unique' => 'Kendaraan sudah terdaftar.',
             'driver_id.unique' => 'User sudah memiliki kendaraan. Satu user hanya bisa memiliki satu kendaraan.',
         ]);
 
@@ -70,20 +71,20 @@ class KendaraanController extends Controller
             return redirect()->route('kendaraan.index')
                 ->with('success', 'Kendaraan berhasil ditambahkan!');
         } catch (UniqueConstraintViolationException $e) {
-          
+           
+            if (isset($validated['gambar']) && Storage::disk('public')->exists($validated['gambar'])) {
+                Storage::disk('public')->delete($validated['gambar']);
+            }
+            
             if (str_contains($e->getMessage(), 'driver_id') || str_contains($e->getMessage(), 'kendaraans_driver_id_unique')) {
-        
-                if (isset($validated['gambar']) && Storage::disk('public')->exists($validated['gambar'])) {
-                    Storage::disk('public')->delete($validated['gambar']);
-                }
-                
-                
-              
-
                 return redirect()->route('kendaraan.index')
                     ->with('error', 'User sudah memiliki kendaraan. Satu user hanya bisa memiliki satu kendaraan.');
             }
             
+            if (str_contains($e->getMessage(), 'plat_nomor') || str_contains($e->getMessage(), 'kendaraans_plat_nomor_unique')) {
+                return redirect()->route('kendaraan.index')
+                    ->with('error', 'Kendaraan sudah terdaftar.');
+            }
             
             throw $e;
         }
@@ -103,6 +104,7 @@ class KendaraanController extends Controller
             ],
             'gambar' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:2048',
         ], [
+            'plat_nomor.unique' => 'Kendaraan sudah terdaftar.',
             'driver_id.unique' => 'User sudah memiliki kendaraan. Satu user hanya bisa memiliki satu kendaraan.',
         ]);
 
@@ -118,25 +120,24 @@ class KendaraanController extends Controller
 
             $kendaraan->update($validated);
 
- 
-
             return redirect()->route('kendaraan.index')
                 ->with('success', 'Kendaraan berhasil diupdate!');
         } catch (UniqueConstraintViolationException $e) {
-            if (str_contains($e->getMessage(), 'driver_id') || str_contains($e->getMessage(), 'kendaraans_driver_id_unique')) {
-              
-                if (isset($validated['gambar']) && Storage::disk('public')->exists($validated['gambar'])) {
-                    Storage::disk('public')->delete($validated['gambar']);
-                }
-                
-           
+       
+            if (isset($validated['gambar']) && Storage::disk('public')->exists($validated['gambar'])) {
+                Storage::disk('public')->delete($validated['gambar']);
+            }
             
-
+            if (str_contains($e->getMessage(), 'driver_id') || str_contains($e->getMessage(), 'kendaraans_driver_id_unique')) {
                 return redirect()->route('kendaraan.index')
                     ->with('error', 'User sudah memiliki kendaraan. Satu user hanya bisa memiliki satu kendaraan.');
             }
             
-    
+            if (str_contains($e->getMessage(), 'plat_nomor') || str_contains($e->getMessage(), 'kendaraans_plat_nomor_unique')) {
+                return redirect()->route('kendaraan.index')
+                    ->with('error', 'Kendaraan sudah terdaftar.');
+            }
+            
             throw $e;
         }
     }

@@ -5,6 +5,7 @@ use App\Http\Controllers\GenerateKeyController;
 use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\DriverAuthController;
+use App\Http\Controllers\MekanikAuthController;
 
 Route::get('/', function () {
     return inertia('Landing');
@@ -68,14 +69,26 @@ Route::middleware(['driver'])->prefix('driver')->group(function () {
     })->name('driver.report');
 });
 
-Route::get('/mekanik/dashboard', function () {
-    return inertia('Mekanik/DashboardMekanik');
+// Mekanik Auth Routes (Public)
+Route::prefix('mekanik')->group(function () {
+    Route::get('/login', [MekanikAuthController::class, 'showLoginForm'])->name('mekanik.login');
+    Route::post('/login', [MekanikAuthController::class, 'login'])->name('mekanik.login.post');
+    Route::post('/logout', [MekanikAuthController::class, 'logout'])->name('mekanik.logout');
 });
 
-Route::get('/mekanik/detailkerusakan', function () {
-    return inertia('Mekanik/DetailKerusakan');
-});
+// Mekanik Protected Routes
+Route::middleware(['mekanik'])->prefix('mekanik')->group(function () {
+    Route::get('/dashboard', function () {
+        return inertia('Mekanik/DashboardMekanik');
+    })->name('mekanik.dashboard');
 
-Route::get('/mekanik/bill', function () {
-    return inertia('Mekanik/BillMekanik');
+    Route::post('/update-gambar', [MekanikAuthController::class, 'updateGambar'])->name('mekanik.update-gambar');
+
+    Route::get('/detailkerusakan', function () {
+        return inertia('Mekanik/DetailKerusakan');
+    })->name('mekanik.detailkerusakan');
+
+    Route::get('/bill', function () {
+        return inertia('Mekanik/BillMekanik');
+    })->name('mekanik.bill');
 });

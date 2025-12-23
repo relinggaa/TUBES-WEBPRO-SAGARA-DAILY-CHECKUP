@@ -112,6 +112,27 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
             onError: (errors) => {
                 setErrors(errors);
 
+                if (errors.plat_nomor) {
+                    toast.error(errors.plat_nomor, {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        style: {
+                            backgroundColor: '#000000',
+                            color: '#ffffff',
+                            border: '1px solid #ef444440',
+                            borderRadius: '12px',
+                            boxShadow: '0 4px 12px #ef444430'
+                        },
+                        progressStyle: {
+                            background: 'linear-gradient(to right, #ef4444, #dc2626)'
+                        }
+                    });
+                }
+
                 if (errors.driver_id) {
                     toast.error(errors.driver_id, {
                         position: "top-right",
@@ -166,7 +187,28 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
             },
             onError: (errors) => {
                 setErrors(errors);
-                // Tampilkan error message sebagai toast jika ada error driver_id
+                
+                if (errors.plat_nomor) {
+                    toast.error(errors.plat_nomor, {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: true,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        style: {
+                            backgroundColor: '#000000',
+                            color: '#ffffff',
+                            border: '1px solid #ef444440',
+                            borderRadius: '12px',
+                            boxShadow: '0 4px 12px #ef444430'
+                        },
+                        progressStyle: {
+                            background: 'linear-gradient(to right, #ef4444, #dc2626)'
+                        }
+                    });
+                }
+
                 if (errors.driver_id) {
                     toast.error(errors.driver_id, {
                         position: "top-right",
@@ -223,14 +265,14 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
         setErrors({});
     };
 
-    // Sync search query dengan filters dari props
+  
     useEffect(() => {
         if (filters.search !== undefined) {
             setSearchQuery(filters.search);
         }
     }, [filters]);
 
-    // Fungsi untuk apply filters dan pagination
+    // pagination
     const applyFilters = (search, page = 1) => {
         const params = {};
         if (search && search.trim() !== '') {
@@ -246,7 +288,6 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
         });
     };
 
-    // Handle search change dengan debouncing
     const handleSearchChange = (value) => {
         setSearchQuery(value);
 
@@ -424,18 +465,24 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
                                                                         ? `${currentTheme.hex.primary}20`
                                                                         : kendaraan.status === 'Pengajuan Perbaikan'
                                                                         ? '#f59e0b20'
+                                                                        : kendaraan.status === 'Pending'
+                                                                        ? '#6366f120'
                                                                         : '#ef444420',
                                                                 color: 
                                                                     kendaraan.status === 'Normal'
                                                                         ? currentTheme.hex.primary
                                                                         : kendaraan.status === 'Pengajuan Perbaikan'
                                                                         ? '#f59e0b'
+                                                                        : kendaraan.status === 'Pending'
+                                                                        ? '#6366f1'
                                                                         : '#ef4444',
                                                                 border: `1px solid ${
                                                                     kendaraan.status === 'Normal'
                                                                         ? `${currentTheme.hex.primary}40`
                                                                         : kendaraan.status === 'Pengajuan Perbaikan'
                                                                         ? '#f59e0b40'
+                                                                        : kendaraan.status === 'Pending'
+                                                                        ? '#6366f140'
                                                                         : '#ef444440'
                                                                 }`
                                                             }}

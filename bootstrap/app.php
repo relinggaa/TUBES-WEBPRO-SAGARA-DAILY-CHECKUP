@@ -19,6 +19,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'admin' => \App\Http\Middleware\EnsureAdmin::class,
             'driver' => \App\Http\Middleware\EnsureDriver::class,
+            'mekanik' => \App\Http\Middleware\EnsureMekanik::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
