@@ -198,4 +198,30 @@ class KendaraanController extends Controller
             'kendaraan' => $kendaraan
         ]);
     }
+
+    public function driverTanyaAI()
+    {
+        $user = Auth::user();
+
+        // Ambil kendaraan yang dimiliki driver dengan relasi kerusakans
+        $kendaraan = Kendaraan::where('driver_id', $user->id)
+            ->with([
+                'driver',
+                'kerusakans' => function ($query) {
+                    $query->latest()->first(); // Ambil kerusakan terbaru
+                }
+            ])
+            ->first();
+
+        // Ambil kerusakan terbaru jika ada
+        $latestKerusakan = null;
+        if ($kendaraan) {
+            $latestKerusakan = $kendaraan->kerusakans()->latest()->first();
+        }
+
+        return Inertia::render('Driver/SagaraAI', [
+            'kendaraan' => $kendaraan,
+            'kerusakan' => $latestKerusakan
+        ]);
+    }
 }

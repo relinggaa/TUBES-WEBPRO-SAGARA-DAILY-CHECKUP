@@ -234,8 +234,17 @@ export default function DashboardDriver({ kendaraan = null, kerusakan = null }) 
       </div>
 
       <div className="max-w-md mx-auto relative z-10">
-        {/* Logout Button */}
-        <div className="flex justify-end mb-4">
+        {/* Tanya AI dan Logout Button */}
+        <div className="flex justify-between items-center mb-4">
+          <Link
+            href="/driver/tanya-ai"
+            className="group/btn relative bg-gradient-to-r from-blue-500 to-cyan-500 backdrop-blur-md border border-white/20 text-white font-semibold px-4 py-2 rounded-full hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2 shadow-lg"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
+            </svg>
+            <span>Tanya AI</span>
+          </Link>
           <button
             onClick={handleLogout}
             className="group/btn relative bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold px-4 py-2 rounded-full hover:bg-white/15 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2"

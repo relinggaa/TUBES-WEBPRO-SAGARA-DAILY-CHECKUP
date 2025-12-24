@@ -51,6 +51,49 @@ class KerusakanController extends Controller
             ->with('success', 'Laporan kerusakan berhasil dikirim! Status kendaraan telah diubah menjadi "Pengajuan Perbaikan".');
     }
 
+    public function storeFromChat(Request $request)
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'kendaraan_id' => 'required|exists:kendaraans,id',
+            'catatan' => 'nullable|string',
+            'kendala' => 'required|array|min:1',
+            'kendala.*.name' => 'required|string',
+            'kendala.*.description' => 'required|string',
+        ], [
+            'kendaraan_id.required' => 'Kendaraan harus dipilih',
+            'kendaraan_id.exists' => 'Kendaraan tidak ditemukan',
+            'kendala.required' => 'Kendala harus diisi',
+            'kendala.min' => 'Minimal harus ada 1 kendala',
+        ]);
+
+        $kendaraan = Kendaraan::where('id', $validated['kendaraan_id'])
+            ->where('driver_id', $user->id)
+            ->first();
+
+        if (!$kendaraan) {
+            return back()->withErrors([
+                'kendaraan_id' => 'Anda tidak memiliki akses ke kendaraan ini.',
+            ]);
+        }
+
+        // Cek apakah sudah ada pengajuan perbaikan yang aktif
+        if ($kendaraan->status === 'Pengajuan Perbaikan' || $kendaraan->status === 'Perbaikan' || $kendaraan->status === 'Pending') {
+            return back()->withErrors([
+                'kendala' => 'Kendaraan Anda sudah memiliki pengajuan perbaikan yang sedang diproses.'
+            ]);
+        }
+
+        Kerusakan::create($validated);
+
+        $kendaraan->status = 'Pengajuan Perbaikan';
+        $kendaraan->save();
+
+        // Return success tanpa redirect untuk tidak refresh halaman
+        return back()->with('success', 'Kendala berhasil dilaporkan!');
+    }
+
     public function cancel(Request $request)
     {
         $user = Auth::user();

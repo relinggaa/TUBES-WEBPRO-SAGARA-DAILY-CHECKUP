@@ -63,6 +63,10 @@ Route::middleware(['driver'])->prefix('driver')->group(function () {
     Route::get('/report', [KendaraanController::class, 'driverReport'])->name('driver.report');
     Route::post('/report', [KerusakanController::class, 'store'])->name('driver.report.store');
 
+    // Route untuk Tanya AI
+    Route::get('/tanya-ai', [KendaraanController::class, 'driverTanyaAI'])->name('driver.tanya-ai');
+    Route::post('/kerusakan/store-from-chat', [KerusakanController::class, 'storeFromChat'])->name('driver.kerusakan.store-from-chat');
+
     // Route untuk batalkan pengajuan perbaikan
     Route::post('/kerusakan/cancel', [KerusakanController::class, 'cancel'])->name('driver.kerusakan.cancel');
 

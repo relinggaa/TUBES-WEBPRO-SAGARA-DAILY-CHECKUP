@@ -136,7 +136,7 @@ export default function GenerateKey({ users = { data: [], links: [], current_pag
         }
     }, [filters]);
 
-    // Handle flash message dengan toast
+   
     useEffect(() => {
         if (flash?.success) {
             toast.success(flash.success, {
