@@ -21,17 +21,11 @@ Route::prefix('admin')->group(function () {
 
 // Admin Protected Routes
 Route::middleware(['admin'])->prefix('admin')->group(function () {
-    Route::get('/dashboard', function () {
-        return inertia('Admin/DashboardAdmin');
-    })->name('admin.dashboard');
-
+    Route::get('/dashboard', [AdminAuthController::class, 'dashboard'])->name('admin.dashboard');
     Route::post('/update-gambar', [AdminAuthController::class, 'updateGambar'])->name('admin.update-gambar');
-
     Route::get('/pengajuan-perbaikan', [KerusakanController::class, 'index'])->name('admin.pengajuan-perbaikan');
     Route::post('/kerusakan/approve', [KerusakanController::class, 'approve'])->name('admin.kerusakan.approve');
-
     Route::get('/laporan-biaya', [App\Http\Controllers\BillController::class, 'index'])->name('admin.laporan-biaya');
-
     Route::prefix('kendaraan')->name('kendaraan.')->group(function () {
         Route::get('/', [KendaraanController::class, 'index'])->name('index');
         Route::post('/', [KendaraanController::class, 'store'])->name('store');
@@ -57,24 +51,16 @@ Route::prefix('driver')->group(function () {
 // Driver Protected Routes
 Route::middleware(['driver'])->prefix('driver')->group(function () {
     Route::get('/dashboard', [KendaraanController::class, 'driverDashboard'])->name('driver.dashboard');
-
     Route::post('/update-gambar', [DriverAuthController::class, 'updateGambar'])->name('driver.update-gambar');
-
     Route::get('/report', [KendaraanController::class, 'driverReport'])->name('driver.report');
     Route::post('/report', [KerusakanController::class, 'store'])->name('driver.report.store');
-
-    // Route untuk Tanya AI
     Route::get('/tanya-ai', [KendaraanController::class, 'driverTanyaAI'])->name('driver.tanya-ai');
     Route::post('/kerusakan/store-from-chat', [KerusakanController::class, 'storeFromChat'])->name('driver.kerusakan.store-from-chat');
-
-    // Route untuk batalkan pengajuan perbaikan
     Route::post('/kerusakan/cancel', [KerusakanController::class, 'cancel'])->name('driver.kerusakan.cancel');
-
-    // Route untuk update kendala kerusakan
     Route::put('/kerusakan/{id}', [KerusakanController::class, 'update'])->name('driver.kerusakan.update');
 });
 
-// Mekanik Auth Routes (Public)
+// Mekanik Auth Routes 
 Route::prefix('mekanik')->group(function () {
     Route::get('/login', [MekanikAuthController::class, 'showLoginForm'])->name('mekanik.login');
     Route::post('/login', [MekanikAuthController::class, 'login'])->name('mekanik.login.post');
@@ -89,17 +75,11 @@ Route::middleware(['mekanik'])->prefix('mekanik')->group(function () {
 
     Route::post('/mark-as-full', [MekanikAuthController::class, 'markAsFull'])->name('mekanik.mark-as-full');
     Route::post('/mark-as-available', [MekanikAuthController::class, 'markAsAvailable'])->name('mekanik.mark-as-available');
-
-    // Route untuk Tanya AI
     Route::get('/tanya-ai', [KendaraanController::class, 'mekanikTanyaAI'])->name('mekanik.tanya-ai');
-
     Route::get('/detailkerusakan/{id}', [KerusakanController::class, 'mekanikDetail'])->name('mekanik.detailkerusakan');
-
     Route::post('/mark-as-pending', [KerusakanController::class, 'markAsPending'])->name('mekanik.mark-as-pending');
-
     Route::get('/bill', function () {
         return inertia('Mekanik/BillMekanik');
     })->name('mekanik.bill');
-
     Route::post('/bill', [App\Http\Controllers\BillController::class, 'store'])->name('mekanik.bill.store');
 });

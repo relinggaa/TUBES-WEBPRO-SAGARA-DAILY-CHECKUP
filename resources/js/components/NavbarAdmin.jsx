@@ -105,19 +105,14 @@ const NavbarAdmin = () => {
         return url.startsWith(path);
     };
 
-  
-    const getThemeColor = (type) => {
-        const colorMap = {
-            purple: { bg: 'purple-500', border: 'purple-500', text: 'purple-300', glow: 'purple-500', gradient: 'from-purple-500 to-purple-600' },
-            red: { bg: 'red-500', border: 'red-500', text: 'red-300', glow: 'red-500', gradient: 'from-red-500 to-red-600' },
-            blue: { bg: 'blue-500', border: 'blue-500', text: 'blue-300', glow: 'blue-500', gradient: 'from-blue-500 to-blue-600' },
-            green: { bg: 'green-500', border: 'green-500', text: 'green-300', glow: 'green-500', gradient: 'from-green-500 to-green-600' },
-            yellow: { bg: 'yellow-500', border: 'yellow-500', text: 'yellow-300', glow: 'yellow-500', gradient: 'from-yellow-500 to-yellow-600' },
-        };
-        return colorMap[currentTheme.primary] || colorMap.purple;
+    // Menggunakan class mappings dari ThemeContext
+    const themeColors = currentTheme.classes?.navbar || {
+        bg: 'purple-500',
+        border: 'purple-500',
+        text: 'purple-300',
+        glow: 'purple-500',
+        gradient: 'from-purple-500 to-purple-600',
     };
-    
-    const themeColors = getThemeColor();
     const glowColor = currentTheme.hex.glow;
 
     return (

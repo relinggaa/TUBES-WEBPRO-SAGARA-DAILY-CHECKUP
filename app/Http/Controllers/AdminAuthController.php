@@ -3,6 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Models\User;
+use App\Models\Kerusakan;
+use App\Models\Bill;
+use App\Models\Keruskaanacc;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -81,12 +84,11 @@ class AdminAuthController extends Controller
 
         $user = Auth::user();
 
-        // Hapus gambar lama jika ada
+       
         if ($user->gambar && strpos($user->gambar, 'http') !== 0) {
             Storage::disk('public')->delete($user->gambar);
         }
 
-        // Simpan gambar baru
         if ($request->hasFile('gambar')) {
             $gambar = $request->file('gambar');
             $gambarPath = $gambar->store('users', 'public');
@@ -96,6 +98,137 @@ class AdminAuthController extends Controller
 
         return redirect()->back()
             ->with('success', 'Foto profil berhasil diupdate!');
+    }
+
+    public function dashboard()
+    {
+        $now = now();
+        $startOfMonth = $now->copy()->startOfMonth();
+        $endOfMonth = $now->copy()->endOfMonth();
+
+        
+        $totalPengajuan = Kerusakan::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->count();
+
+
+        $perbaikanSelesai = Bill::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->count();
+
+
+        $pendingReview = Kerusakan::whereDoesntHave('keruskaanAcc')
+            ->whereHas('kendaraan', function($q) {
+                $q->where('status', 'Pengajuan Perbaikan');
+            })
+            ->count();
+
+  
+        $totalBiaya = Bill::whereBetween('created_at', [$startOfMonth, $endOfMonth])
+            ->sum('total_biaya');
+
+       
+        $totalBiayaFormatted = $totalBiaya >= 1000000 
+            ? number_format($totalBiaya / 1000000, 0) . '+' 
+            : number_format($totalBiaya / 1000, 0) . 'K';
+        $totalBiayaDescription = $totalBiaya >= 1000000 
+            ? 'Jutaan rupiah bulan ini' 
+            : 'Ribu rupiah bulan ini';
+
+        $recentActivities = [];
+        
+        $recentKerusakan = Kerusakan::with(['kendaraan', 'keruskaanAcc'])
+            ->latest()
+            ->get();
+        
+        foreach ($recentKerusakan as $kerusakan) {
+            $timeAgo = $kerusakan->created_at->diffForHumans();
+            $kendaraan = $kerusakan->kendaraan;
+            
+            if ($kerusakan->keruskaanAcc) {
+                $recentActivities[] = [
+                    'id' => 'kerusakan-' . $kerusakan->id,
+                    'activity' => "Perbaikan {$kendaraan->merek} ({$kendaraan->plat_nomor}) telah disetujui",
+                    'time' => $timeAgo,
+                    'type' => 'success',
+                    'created_at' => $kerusakan->created_at->timestamp,
+                    'route' => route('admin.pengajuan-perbaikan')
+                ];
+            } else {
+                $recentActivities[] = [
+                    'id' => 'kerusakan-' . $kerusakan->id,
+                    'activity' => "Pengajuan perbaikan baru: {$kendaraan->merek} ({$kendaraan->plat_nomor})",
+                    'time' => $timeAgo,
+                    'type' => 'info',
+                    'created_at' => $kerusakan->created_at->timestamp,
+                    'route' => route('admin.pengajuan-perbaikan')
+                ];
+            }
+        }
+
+        $recentBills = Bill::with(['keruskaanAcc.kendaraan'])
+            ->latest()
+            ->get();
+        
+        foreach ($recentBills as $bill) {
+            $timeAgo = $bill->created_at->diffForHumans();
+            $kendaraan = $bill->keruskaanAcc->kendaraan;
+            
+            $recentActivities[] = [
+                'id' => 'bill-' . $bill->id,
+                'activity' => "Laporan biaya untuk {$kendaraan->merek} ({$kendaraan->plat_nomor}) telah dibuat",
+                'time' => $timeAgo,
+                'type' => 'info',
+                'created_at' => $bill->created_at->timestamp,
+                'route' => route('admin.laporan-biaya')
+            ];
+        }
+
+      
+        usort($recentActivities, function($a, $b) {
+            return $b['created_at'] - $a['created_at'];
+        });
+
+
+        $chartData = [];
+        for ($i = 6; $i >= 0; $i--) {
+            $date = $now->copy()->subDays($i);
+            $startOfDay = $date->copy()->startOfDay();
+            $endOfDay = $date->copy()->endOfDay();
+            
+            $pengajuanCount = Kerusakan::whereBetween('created_at', [$startOfDay, $endOfDay])
+                ->count();
+            
+            $chartData[] = [
+                'date' => $date->format('d M'),
+                'pengajuan' => $pengajuanCount
+            ];
+        }
+
+        return Inertia::render('Admin/DashboardAdmin', [
+            'stats' => [
+                [
+                    'title' => 'Total Pengajuan',
+                    'value' => (string)$totalPengajuan,
+                    'description' => 'Pengajuan yang masuk bulan ini',
+                ],
+                [
+                    'title' => 'Perbaikan Selesai',
+                    'value' => (string)$perbaikanSelesai,
+                    'description' => 'Perbaikan yang telah diselesaikan',
+                ],
+                [
+                    'title' => 'Pending Review',
+                    'value' => (string)$pendingReview,
+                    'description' => 'Menunggu persetujuan',
+                ],
+                [
+                    'title' => 'Total Biaya',
+                    'value' => $totalBiayaFormatted,
+                    'description' => $totalBiayaDescription,
+                ],
+            ],
+            'recentActivities' => $recentActivities,
+            'chartData' => $chartData,
+        ]);
     }
 }
 

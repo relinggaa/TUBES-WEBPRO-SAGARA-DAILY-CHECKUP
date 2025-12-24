@@ -1,4 +1,5 @@
 import React from 'react';
+import { usePage } from '@inertiajs/react';
 import LayoutAdmin from '../../layout/LayoutAdmin';
 import { useTheme } from '../../contexts/ThemeContext';
 import Header from '../../components/admin/DashboardAdmin/Header';
@@ -9,35 +10,7 @@ import RecentActivities from '../../components/admin/DashboardAdmin/RecentActivi
 
 const DashboardAdmin = () => {
     const { currentTheme } = useTheme();
-    const stats = [
-        {
-            title: 'Total Pengajuan',
-            value: '24',
-            description: 'Pengajuan yang masuk bulan ini',
-        },
-        {
-            title: 'Perbaikan Selesai',
-            value: '18',
-            description: 'Perbaikan yang telah diselesaikan',
-        },
-        {
-            title: 'Pending Review',
-            value: '6',
-            description: 'Menunggu persetujuan',
-        },
-        {
-            title: 'Total Biaya',
-            value: '110+',
-            description: 'Jutaan rupiah bulan ini',
-        },
-    ];
-
-    const recentActivities = [
-        { id: 1, activity: 'Pengajuan perbaikan baru diterima', time: '2 jam lalu', type: 'info' },
-        { id: 2, activity: 'Perbaikan #123 telah disetujui', time: '5 jam lalu', type: 'success' },
-        { id: 3, activity: 'Laporan biaya bulan ini telah dibuat', time: '1 hari lalu', type: 'info' },
-        { id: 4, activity: 'Key baru telah di-generate', time: '2 hari lalu', type: 'warning' },
-    ];
+    const { stats = [], recentActivities = [], chartData = [] } = usePage().props;
 
     return (
         <LayoutAdmin>
@@ -57,8 +30,8 @@ const DashboardAdmin = () => {
                     <QuickActions currentTheme={currentTheme} />
                 </div>
 
-                {/* Chart Section Placeholder */}
-                <Chart currentTheme={currentTheme} />
+                {/* Chart Section */}
+                <Chart currentTheme={currentTheme} chartData={chartData} />
             </div>
         </LayoutAdmin>
     );

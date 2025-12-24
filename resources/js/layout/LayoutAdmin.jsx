@@ -7,53 +7,15 @@ import "react-toastify/dist/ReactToastify.css";
 const LayoutAdmin = ({ children }) => {
     const { currentTheme } = useTheme();
 
-    const getColorClasses = () => {
-        const colorMap = {
-            purple: {
-                orb1: "bg-purple-500/20",
-                orb2: "bg-cyan-500/10",
-                orb3: "bg-purple-600/10",
-                orb4: "bg-purple-400/5",
-                orb5: "bg-cyan-400/5",
-                grid: "#8b5cf6",
-            },
-            red: {
-                orb1: "bg-red-500/20",
-                orb2: "bg-red-500/10",
-                orb3: "bg-red-600/10",
-                orb4: "bg-red-400/5",
-                orb5: "bg-red-400/5",
-                grid: "#ef4444",
-            },
-            blue: {
-                orb1: "bg-blue-500/20",
-                orb2: "bg-blue-500/10",
-                orb3: "bg-blue-600/10",
-                orb4: "bg-blue-400/5",
-                orb5: "bg-blue-400/5",
-                grid: "#3b82f6",
-            },
-            green: {
-                orb1: "bg-green-500/20",
-                orb2: "bg-green-500/10",
-                orb3: "bg-green-600/10",
-                orb4: "bg-green-400/5",
-                orb5: "bg-green-400/5",
-                grid: "#22c55e",
-            },
-            yellow: {
-                orb1: "bg-yellow-500/20",
-                orb2: "bg-yellow-500/10",
-                orb3: "bg-yellow-600/10",
-                orb4: "bg-yellow-400/5",
-                orb5: "bg-yellow-400/5",
-                grid: "#eab308",
-            },
-        };
-        return colorMap[currentTheme.primary] || colorMap.purple;
+    // Menggunakan class mappings dari ThemeContext
+    const colors = currentTheme.classes?.layout || {
+        orb1: "bg-purple-500/20",
+        orb2: "bg-cyan-500/10",
+        orb3: "bg-purple-600/10",
+        orb4: "bg-purple-400/5",
+        orb5: "bg-cyan-400/5",
+        grid: "#8b5cf6",
     };
-
-    const colors = getColorClasses();
 
     return (
         <div className="min-h-screen bg-[#0D0219] relative overflow-hidden">

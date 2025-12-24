@@ -1,10 +1,4 @@
 import React from 'react';
-import { 
-    getThemeBorder, 
-    getThemeBorderHover, 
-    getThemeShadow, 
-    getThemeShadowHover 
-} from '../../Color/GenerateKeyColor';
 
 export default function PageHeader({ 
     currentTheme, 
@@ -25,7 +19,21 @@ export default function PageHeader({
                 }}
             ></div>
             
-            <div className={`relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/80 backdrop-blur-2xl rounded-3xl border ${getThemeBorder(currentTheme, '20')} shadow-2xl ${getThemeShadow(currentTheme, '10')} ${getThemeShadowHover(currentTheme, '20')} ${getThemeBorderHover(currentTheme, '30')} transition-all duration-500 p-8 md:p-10 overflow-hidden`}>
+            <div 
+                className="relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/80 backdrop-blur-2xl rounded-3xl border shadow-2xl transition-all duration-500 p-8 md:p-10 overflow-hidden"
+                style={{
+                    borderColor: `${currentTheme.hex.primary}20`,
+                    boxShadow: `0 10px 25px -5px ${currentTheme.hex.primary}10`
+                }}
+                onMouseEnter={(e) => {
+                    e.currentTarget.style.borderColor = `${currentTheme.hex.primary}30`;
+                    e.currentTarget.style.boxShadow = `0 10px 25px -5px ${currentTheme.hex.primary}20`;
+                }}
+                onMouseLeave={(e) => {
+                    e.currentTarget.style.borderColor = `${currentTheme.hex.primary}20`;
+                    e.currentTarget.style.boxShadow = `0 10px 25px -5px ${currentTheme.hex.primary}10`;
+                }}
+            >
                 {/* Corner Accents */}
                 <div 
                     className="absolute top-0 left-0 w-32 h-32 rounded-tl-3xl -z-10"

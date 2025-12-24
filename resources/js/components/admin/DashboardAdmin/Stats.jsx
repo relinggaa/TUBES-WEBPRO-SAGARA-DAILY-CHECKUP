@@ -1,15 +1,16 @@
 import React from 'react';
-import {
-    getThemeBorder,
-    getThemeBorderHover,
-    getThemeShadow,
-    getThemeShadowHover,
-    getThemeText,
-    getThemeGradient,
-    getThemeGradientSolid
-} from '../../../Color/DashboardAdminColor';
 
 export default function Stats({ stats, currentTheme }) {
+
+    const classes = currentTheme.classes?.stats || {
+        border: 'border-purple-500/20',
+        borderHover: 'hover:border-purple-500/40',
+        shadowHover: 'hover:shadow-purple-500/20',
+        text: 'text-purple-300',
+        textHover: 'group-hover:text-purple-200',
+        gradientFrom: 'from-purple-500',
+        gradientTo: 'to-purple-400',
+    };
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {stats.map((stat, index) => {
@@ -17,7 +18,7 @@ export default function Stats({ stats, currentTheme }) {
                     { from: 'from-blue-500/20', to: 'to-cyan-500/20', glow: 'from-blue-500', textColor: 'text-cyan-300', glowColor: 'rgba(103, 232, 249, 0.6)' },
                     { from: 'from-green-500/20', to: 'to-emerald-500/20', glow: 'from-green-500', textColor: 'text-emerald-300', glowColor: 'rgba(110, 231, 183, 0.6)' },
                     { from: 'from-yellow-500/20', to: 'to-orange-500/20', glow: 'from-yellow-500', textColor: 'text-orange-300', glowColor: 'rgba(251, 146, 60, 0.6)' },
-                    { from: `${getThemeGradient(currentTheme, 'from', '500', '20')}`, to: `${getThemeGradient(currentTheme, 'to', '600', '20')}`, glow: `${getThemeGradientSolid(currentTheme, 'from', '500')}`, textColor: getThemeText(currentTheme, '300'), glowColor: currentTheme.hex.glow },
+                    { from: `${classes.gradientFrom}/20`, to: `${classes.gradientTo}/20`, glow: `${classes.gradientFrom}`, textColor: classes.text, glowColor: currentTheme.hex.glow },
                 ];
                 const gradients = baseGradients;
                 const gradient = gradients[index % gradients.length];
@@ -25,14 +26,14 @@ export default function Stats({ stats, currentTheme }) {
                 return (
                     <div
                         key={index}
-                        className={`group relative bg-gradient-to-br from-gray-900/70 via-gray-900/50 to-gray-800/50 backdrop-blur-xl rounded-2xl p-6 border ${getThemeBorder(currentTheme, '20')} ${getThemeBorderHover(currentTheme, '40')} transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl ${getThemeShadowHover(currentTheme, '20')} overflow-hidden cursor-pointer`}
+                        className={`group relative bg-gradient-to-br from-gray-900/70 via-gray-900/50 to-gray-800/50 backdrop-blur-xl rounded-2xl p-6 border ${classes.border} ${classes.borderHover} transition-all duration-500 hover:scale-[1.02] hover:shadow-2xl ${classes.shadowHover} overflow-hidden cursor-pointer`}
                         style={{ animationDelay: `${index * 100}ms` }}
                     >
                      
                         <div className={`absolute inset-0 bg-gradient-to-br ${gradient.from} ${gradient.to} opacity-0 group-hover:opacity-100 transition-opacity duration-500 z-0`}></div>
                         
                 
-                        <div className={`absolute -inset-0.5 bg-gradient-to-r ${gradient.glow} ${getThemeGradientSolid(currentTheme, 'to', '400')} rounded-2xl opacity-0 group-hover:opacity-20 blur-2xl transition-opacity duration-500 -z-10`}></div>
+                        <div className={`absolute -inset-0.5 bg-gradient-to-r ${gradient.glow} ${classes.gradientTo} rounded-2xl opacity-0 group-hover:opacity-20 blur-2xl transition-opacity duration-500 -z-10`}></div>
                         
                    
                         <div className={`absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl ${gradient.from} to-transparent rounded-tr-2xl opacity-20 z-0`}></div>
@@ -71,7 +72,7 @@ export default function Stats({ stats, currentTheme }) {
                             </div>
                             
                             {/* Title */}
-                            <h3 className={`text-white text-lg font-bold mb-2 ${getThemeText(currentTheme, '200').replace('text-', 'group-hover:text-')} transition-colors relative z-30`}>
+                            <h3 className={`text-white text-lg font-bold mb-2 ${classes.textHover} transition-colors relative z-30`}>
                                 {stat.title}
                             </h3>
                             
@@ -79,43 +80,8 @@ export default function Stats({ stats, currentTheme }) {
                             <p className="text-gray-400 text-sm leading-relaxed group-hover:text-gray-300 transition-colors relative z-30">
                                 {stat.description}
                             </p>
-                            
-                            {/* Progress Bar */}
-                            <div className="mt-5 relative z-30">
-                                <div className="flex items-center justify-between mb-2">
-                                    <span className="text-xs font-medium" style={{ color: gradient.glowColor.replace('0.6', '0.8') }}>Progress</span>
-                                    <span className="text-xs font-bold" style={{ color: gradient.glowColor.replace('0.6', '1') }}>
-                                        {`${(index + 1) * 25}%`}
-                                    </span>
-                                </div>
-                                <div 
-                                    className="h-2.5 rounded-full overflow-hidden relative border"
-                                    style={{ 
-                                        backgroundColor: gradient.glowColor.replace('0.6', '0.15'),
-                                        borderColor: gradient.glowColor.replace('0.6', '0.3')
-                                    }}
-                                >
-                                    <div 
-                                        className="h-full rounded-full transition-all duration-1000 group-hover:w-full relative"
-                                        style={{ 
-                                            width: `${(index + 1) * 25}%`,
-                                            background: `linear-gradient(90deg, ${gradient.glowColor.replace('0.6', '1')}, ${gradient.glowColor.replace('0.6', '0.7')})`,
-                                            boxShadow: `0 0 15px ${gradient.glowColor}, 0 0 30px ${gradient.glowColor.replace('0.6', '0.4')}, inset 0 0 10px ${gradient.glowColor.replace('0.6', '0.5')}`
-                                        }}
-                                    >
-                                     
-                                        <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/40 to-transparent rounded-full animate-pulse"></div>
-                                      
-                                        <div 
-                                            className="absolute inset-0 rounded-full opacity-50"
-                                            style={{
-                                                background: `radial-gradient(circle at center, ${gradient.glowColor.replace('0.6', '0.8')}, transparent)`,
-                                                animation: 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite'
-                                            }}
-                                        ></div>
-                                    </div>
-                                </div>
-                            </div>
+                         
+                          
                         </div>
                     </div>
                 );

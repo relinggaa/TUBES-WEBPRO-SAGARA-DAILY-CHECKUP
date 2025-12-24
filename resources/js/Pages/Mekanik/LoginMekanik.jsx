@@ -11,7 +11,7 @@ export default function LoginMekanik() {
     const [errors, setErrors] = useState({});
     const [isLoading, setIsLoading] = useState(false);
 
-    // Handle flash messages
+
     useEffect(() => {
         if (flash?.success) {
             toast.success(flash.success, {

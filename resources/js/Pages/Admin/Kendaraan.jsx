@@ -4,21 +4,16 @@ import { useTheme } from '../../contexts/ThemeContext';
 import { usePage, router } from '@inertiajs/react';
 import { toast } from 'react-toastify';
 import PageHeader from '../../components/admin/PageHeader';
-import {
-    getThemeBorder,
-    getThemeBorderHover,
-    getThemeShadow,
-    getThemeShadowHover,
-    getThemeBg,
-    getThemeGradient
-} from '../../Color/KendaraanColor';
+import DeleteModal from '../../components/admin/DeleteModal';
 
 export default function Kendaraan({ kendaraans = { data: [], links: [], current_page: 1, last_page: 1, total: 0 }, drivers = [], filters = { search: '' } }) {
     const { currentTheme } = useTheme();
     const { flash } = usePage().props;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [editingKendaraan, setEditingKendaraan] = useState(null);
+    const [deletingKendaraanId, setDeletingKendaraanId] = useState(null);
     const [formData, setFormData] = useState({
         merek: '',
         plat_nomor: '',
@@ -318,15 +313,26 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
     };
 
     const handleDelete = (id) => {
-        if (confirm('Apakah Anda yakin ingin menghapus kendaraan ini?')) {
-            router.delete(`/admin/kendaraan/${id}`, {
+        setDeletingKendaraanId(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = () => {
+        if (deletingKendaraanId) {
+            router.delete(`/admin/kendaraan/${deletingKendaraanId}`, {
                 preserveScroll: true,
                 preserveState: false,
                 onSuccess: () => {
-
+                    setIsDeleteModalOpen(false);
+                    setDeletingKendaraanId(null);
                 }
             });
         }
+    };
+
+    const handleCancelDelete = () => {
+        setIsDeleteModalOpen(false);
+        setDeletingKendaraanId(null);
     };
 
     return (
@@ -344,7 +350,12 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
                 />
 
                 {/* Search Bar */}
-                <div className={`relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/60 backdrop-blur-2xl rounded-2xl border ${getThemeBorder(currentTheme, '20')} shadow-xl p-6`}>
+                <div 
+                    className="relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/60 backdrop-blur-2xl rounded-2xl border shadow-xl p-6 transition-all duration-500"
+                    style={{
+                        borderColor: `${currentTheme.hex.primary}20`
+                    }}
+                >
                     <div className="flex items-center space-x-4">
                         <div className="flex-1 relative">
                             <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -398,7 +409,12 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
 
                 {/* Kendaraan Cards Grid */}
                 {(!kendaraans.data || kendaraans.data.length === 0) ? (
-                    <div className={`relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/60 backdrop-blur-2xl rounded-3xl border ${getThemeBorder(currentTheme, '20')} shadow-2xl p-12 text-center`}>
+                    <div 
+                        className="relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/60 backdrop-blur-2xl rounded-3xl border shadow-2xl p-12 text-center transition-all duration-500"
+                        style={{
+                            borderColor: `${currentTheme.hex.primary}20`
+                        }}
+                    >
                         <div className="flex flex-col items-center justify-center space-y-4">
                             <div
                                 className="w-20 h-20 rounded-full flex items-center justify-center"
@@ -429,7 +445,21 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
                                         }}
                                     ></div>
 
-                                    <div className={`relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/60 backdrop-blur-2xl rounded-2xl border ${getThemeBorder(currentTheme, '20')} ${getThemeBorderHover(currentTheme, '40')} shadow-xl ${getThemeShadow(currentTheme, '10')} ${getThemeShadowHover(currentTheme, '20')} transition-all duration-500 overflow-hidden`}>
+                                    <div 
+                                        className="relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/60 backdrop-blur-2xl rounded-2xl border shadow-xl transition-all duration-500 overflow-hidden"
+                                        style={{
+                                            borderColor: `${currentTheme.hex.primary}20`,
+                                            boxShadow: `0 10px 25px -5px ${currentTheme.hex.primary}10`
+                                        }}
+                                        onMouseEnter={(e) => {
+                                            e.currentTarget.style.borderColor = `${currentTheme.hex.primary}40`;
+                                            e.currentTarget.style.boxShadow = `0 10px 25px -5px ${currentTheme.hex.primary}20`;
+                                        }}
+                                        onMouseLeave={(e) => {
+                                            e.currentTarget.style.borderColor = `${currentTheme.hex.primary}20`;
+                                            e.currentTarget.style.boxShadow = `0 10px 25px -5px ${currentTheme.hex.primary}10`;
+                                        }}
+                                    >
                                         {/* Image Section */}
                                         <div className="relative h-48 bg-gradient-to-br from-gray-800 to-gray-900 overflow-hidden">
                                             {kendaraan.gambar ? (
@@ -562,7 +592,12 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
 
                         {/* Pagination */}
                         {kendaraans.last_page > 1 && (
-                            <div className={`mt-8 flex items-center justify-center space-x-2 bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/60 backdrop-blur-2xl rounded-2xl border ${getThemeBorder(currentTheme, '20')} shadow-xl p-6`}>
+                            <div 
+                                className="mt-8 flex items-center justify-center space-x-2 bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/60 backdrop-blur-2xl rounded-2xl border shadow-xl p-6 transition-all duration-500"
+                                style={{
+                                    borderColor: `${currentTheme.hex.primary}20`
+                                }}
+                            >
                                 {/* Previous Button */}
                                 <button
                                     onClick={(e) => {
@@ -1038,6 +1073,16 @@ export default function Kendaraan({ kendaraans = { data: [], links: [], current_
                         </div>
                     </div>
                 )}
+
+                {/* Delete Modal */}
+                <DeleteModal
+                    isOpen={isDeleteModalOpen}
+                    currentTheme={currentTheme}
+                    title="Hapus Kendaraan"
+                    message="Apakah Anda yakin ingin menghapus kendaraan ini?"
+                    onConfirm={handleConfirmDelete}
+                    onCancel={handleCancelDelete}
+                />
             </div>
         </LayoutAdmin>
     );

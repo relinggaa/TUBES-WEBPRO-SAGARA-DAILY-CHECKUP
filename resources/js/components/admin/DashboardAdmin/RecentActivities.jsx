@@ -1,22 +1,30 @@
-import React from 'react';
-import {
-    getThemeBorder,
-    getThemeBorderHover,
-    getThemeShadow,
-    getThemeShadowHover,
-    getThemeText,
-    getThemeBg,
-    getThemeGradient
-} from '../../../Color/DashboardAdminColor';
+import React, { useState } from 'react';
+import { router } from '@inertiajs/react';
 
 export default function RecentActivities({ recentActivities, currentTheme }) {
+    const [showAll, setShowAll] = useState(false);
+    const displayedActivities = showAll ? recentActivities : recentActivities.slice(0, 5);
+
+    const classes = currentTheme.classes?.recentActivities || {
+        border: 'border-purple-500/20',
+        borderHover: 'hover:border-purple-500/30',
+        shadowHover: 'hover:shadow-purple-500/10',
+        text: 'text-purple-300',
+        textHover: 'group-hover/item:text-purple-200',
+        bg: 'bg-purple-500/20',
+        bgHover: 'group-hover/item:bg-purple-500/20',
+        gradientFrom: 'from-purple-600/20',
+        gradientVia: 'via-purple-500/20',
+        gradientTo: 'to-purple-600/20',
+        bgGlow: 'bg-purple-500/5',
+    };
     return (
         <div className="lg:col-span-2 group relative">
             {/* Background Glow Effect */}
-            <div className={`absolute -inset-0.5 bg-gradient-to-r ${getThemeGradient(currentTheme, 'from', '600', '20')} ${getThemeGradient(currentTheme, 'via', '500', '20')} ${getThemeGradient(currentTheme, 'to', '600', '20')} rounded-3xl blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500 -z-10`}></div>
+            <div className={`absolute -inset-0.5 bg-gradient-to-r ${classes.gradientFrom} ${classes.gradientVia} ${classes.gradientTo} rounded-3xl blur-xl opacity-0 group-hover:opacity-50 transition-opacity duration-500 -z-10`}></div>
             
             {/* Main Card */}
-            <div className={`relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/60 backdrop-blur-2xl rounded-3xl p-6 md:p-8 border ${getThemeBorder(currentTheme, '20')} shadow-2xl ${getThemeShadowHover(currentTheme, '20')} ${getThemeBorderHover(currentTheme, '30')} transition-all duration-500 overflow-hidden`}>
+            <div className={`relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/60 backdrop-blur-2xl rounded-3xl p-6 md:p-8 border ${classes.border} shadow-2xl ${classes.shadowHover} ${classes.borderHover} transition-all duration-500 overflow-hidden`}>
                 {/* Grid Pattern Overlay (hidden) */}
                 <div className="absolute inset-0 opacity-0">
                     <div 
@@ -28,8 +36,8 @@ export default function RecentActivities({ recentActivities, currentTheme }) {
                 </div>
                 
                 {/* Gradient Orbs */}
-                <div className={`absolute top-0 right-0 w-64 h-64 ${getThemeBg(currentTheme, '5')} rounded-full blur-3xl`}></div>
-                <div className={`absolute bottom-0 left-0 w-64 h-64 ${getThemeBg(currentTheme, '5')} rounded-full blur-3xl`}></div>
+                <div className={`absolute top-0 right-0 w-64 h-64 ${classes.bgGlow} rounded-full blur-3xl`}></div>
+                <div className={`absolute bottom-0 left-0 w-64 h-64 ${classes.bgGlow} rounded-full blur-3xl`}></div>
                 
                 <div className="relative z-10">
                     {/* Header */}
@@ -43,7 +51,7 @@ export default function RecentActivities({ recentActivities, currentTheme }) {
                                     borderStyle: 'solid'
                                 }}
                             >
-                                <svg className={`w-5 h-5 ${getThemeText(currentTheme, '300')}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <svg className={`w-5 h-5 ${classes.text}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
                             </div>
@@ -60,7 +68,7 @@ export default function RecentActivities({ recentActivities, currentTheme }) {
                     
                     {/* Activities List */}
                     <div className="space-y-3">
-                        {recentActivities.map((activity, index) => {
+                        {displayedActivities.map((activity, index) => {
                             const typeColors = {
                                 success: { bg: 'bg-green-500', glow: 'rgba(34, 197, 94, 0.4)' },
                                 warning: { bg: 'bg-yellow-500', glow: 'rgba(234, 179, 8, 0.4)' },
@@ -68,10 +76,17 @@ export default function RecentActivities({ recentActivities, currentTheme }) {
                             };
                             const color = typeColors[activity.type] || typeColors.info;
                             
+                            const handleClick = () => {
+                                if (activity.route) {
+                                    router.visit(activity.route);
+                                }
+                            };
+
                             return (
                                 <div
                                     key={activity.id}
-                                    className={`group/item relative flex items-start space-x-4 p-4 bg-gradient-to-r from-gray-800/40 to-gray-800/20 rounded-2xl hover:from-gray-800/60 hover:to-gray-800/40 transition-all duration-300 border border-gray-700/30 ${getThemeBorderHover(currentTheme, '40')} hover:shadow-xl ${getThemeShadowHover(currentTheme, '10')} cursor-pointer overflow-hidden`}
+                                    onClick={handleClick}
+                                    className={`group/item relative flex items-start space-x-4 p-4 bg-gradient-to-r from-gray-800/40 to-gray-800/20 rounded-2xl hover:from-gray-800/60 hover:to-gray-800/40 transition-all duration-300 border border-gray-700/30 ${classes.borderHover} hover:shadow-xl ${classes.shadowHover} cursor-pointer overflow-hidden`}
                                     style={{ animationDelay: `${index * 100}ms` }}
                                 >
                                     {/* Shine Effect */}
@@ -85,7 +100,7 @@ export default function RecentActivities({ recentActivities, currentTheme }) {
                                     
                                     {/* Content */}
                                     <div className="flex-1 min-w-0 relative z-10">
-                                        <p className={`text-white font-semibold ${getThemeText(currentTheme, '200').replace('text-', 'group-hover/item:text-')} transition-colors`}>{activity.activity}</p>
+                                        <p className={`text-white font-semibold ${classes.textHover} transition-colors`}>{activity.activity}</p>
                                         <div className="flex items-center space-x-2 mt-1.5">
                                             <svg className="w-3.5 h-3.5 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -96,8 +111,8 @@ export default function RecentActivities({ recentActivities, currentTheme }) {
                                     
                                     {/* Arrow Icon */}
                                     <div className="flex-shrink-0 mt-1 relative z-10">
-                                        <div className={`w-8 h-8 rounded-lg bg-gray-800/50 ${getThemeBg(currentTheme, '20').replace('bg-', 'group-hover/item:bg-')} flex items-center justify-center transition-all duration-300 group-hover/item:scale-110`}>
-                                            <svg className={`w-4 h-4 text-gray-400 ${getThemeText(currentTheme, '300').replace('text-', 'group-hover/item:text-')} group-hover/item:translate-x-0.5 transition-all duration-300`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <div className={`w-8 h-8 rounded-lg bg-gray-800/50 ${classes.bgHover} flex items-center justify-center transition-all duration-300 group-hover/item:scale-110`}>
+                                            <svg className={`w-4 h-4 text-gray-400 ${classes.textHover} group-hover/item:translate-x-0.5 transition-all duration-300`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                                             </svg>
                                         </div>
@@ -108,37 +123,54 @@ export default function RecentActivities({ recentActivities, currentTheme }) {
                     </div>
                     
                     {/* View All Button */}
-                    <button 
-                        className="mt-6 w-full py-3.5 font-semibold rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 group/btn border transition-all duration-300"
-                        style={{
-                            color: currentTheme.hex.secondary,
-                            borderColor: `${currentTheme.hex.primary}33`,
-                            backgroundColor: `${currentTheme.hex.primary}08`
-                        }}
-                        onMouseEnter={(e) => {
-                            e.currentTarget.style.color = currentTheme.hex.primary;
-                            e.currentTarget.style.borderColor = `${currentTheme.hex.primary}66`;
-                            e.currentTarget.style.backgroundColor = `${currentTheme.hex.primary}14`;
-                        }}
-                        onMouseLeave={(e) => {
-                            e.currentTarget.style.color = currentTheme.hex.secondary;
-                            e.currentTarget.style.borderColor = `${currentTheme.hex.primary}33`;
-                            e.currentTarget.style.backgroundColor = `${currentTheme.hex.primary}08`;
-                        }}
-                    >
-                        <span>Lihat Semua Aktivitas</span>
-                        <svg 
-                            className="w-4 h-4 group-hover/btn:translate-x-1 transition-all duration-300" 
-                            fill="none" 
-                            viewBox="0 0 24 24" 
-                            stroke="currentColor"
+                    {recentActivities.length > 5 && (
+                        <button 
+                            onClick={() => setShowAll(!showAll)}
+                            className="mt-6 w-full py-3.5 font-semibold rounded-xl transition-all duration-300 flex items-center justify-center space-x-2 group/btn border transition-all duration-300"
                             style={{
-                                color: 'inherit'
+                                color: currentTheme.hex.secondary,
+                                borderColor: `${currentTheme.hex.primary}33`,
+                                backgroundColor: `${currentTheme.hex.primary}08`
+                            }}
+                            onMouseEnter={(e) => {
+                                e.currentTarget.style.color = currentTheme.hex.primary;
+                                e.currentTarget.style.borderColor = `${currentTheme.hex.primary}66`;
+                                e.currentTarget.style.backgroundColor = `${currentTheme.hex.primary}14`;
+                            }}
+                            onMouseLeave={(e) => {
+                                e.currentTarget.style.color = currentTheme.hex.secondary;
+                                e.currentTarget.style.borderColor = `${currentTheme.hex.primary}33`;
+                                e.currentTarget.style.backgroundColor = `${currentTheme.hex.primary}08`;
                             }}
                         >
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                    </button>
+                            <span>{showAll ? 'Sembunyikan' : `Lihat Semua Aktivitas (${recentActivities.length})`}</span>
+                            {showAll ? (
+                                <svg 
+                                    className="w-4 h-4 group-hover/btn:translate-y-0.5 transition-all duration-300" 
+                                    fill="none" 
+                                    viewBox="0 0 24 24" 
+                                    stroke="currentColor"
+                                    style={{
+                                        color: 'inherit'
+                                    }}
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" />
+                                </svg>
+                            ) : (
+                                <svg 
+                                    className="w-4 h-4 group-hover/btn:translate-x-1 transition-all duration-300" 
+                                    fill="none" 
+                                    viewBox="0 0 24 24" 
+                                    stroke="currentColor"
+                                    style={{
+                                        color: 'inherit'
+                                    }}
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                </svg>
+                            )}
+                        </button>
+                    )}
                 </div>
             </div>
         </div>

@@ -6,6 +6,7 @@ import DaftarUserTable from '../../components/admin/GenerateKey/DaftarUserTable'
 import Header from '../../components/admin/GenerateKey/Header';
 import CreateModal from '../../components/admin/GenerateKey/CreateModal';
 import Modal from '../../components/admin/GenerateKey/Modal';
+import DeleteModal from '../../components/admin/DeleteModal';
 import { toast } from 'react-toastify';
 
 export default function GenerateKey({ users = { data: [], links: [], current_page: 1, last_page: 1, total: 0 }, filters = { search: '', filter_role: 'all' } }) {
@@ -13,7 +14,9 @@ export default function GenerateKey({ users = { data: [], links: [], current_pag
     const { flash } = usePage().props;
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+    const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState(null);
+    const [deletingUserId, setDeletingUserId] = useState(null);
 
     const [formData, setFormData] = useState({
         username: '',
@@ -115,15 +118,26 @@ export default function GenerateKey({ users = { data: [], links: [], current_pag
     };
 
     const handleDelete = (id) => {
-        if (confirm('Apakah Anda yakin ingin menghapus user ini?')) {
-            router.delete(`/admin/generate-key/${id}`, {
+        setDeletingUserId(id);
+        setIsDeleteModalOpen(true);
+    };
+
+    const handleConfirmDelete = () => {
+        if (deletingUserId) {
+            router.delete(`/admin/generate-key/${deletingUserId}`, {
                 preserveScroll: true,
                 preserveState: false,
                 onSuccess: () => {
-
+                    setIsDeleteModalOpen(false);
+                    setDeletingUserId(null);
                 }
             });
         }
+    };
+
+    const handleCancelDelete = () => {
+        setIsDeleteModalOpen(false);
+        setDeletingUserId(null);
     };
 
 
@@ -254,6 +268,16 @@ export default function GenerateKey({ users = { data: [], links: [], current_pag
                     handleSubmit={handleUpdateSubmit}
                     handleClose={handleCloseUpdateModal}
                     generateRandomKey={generateRandomKey}
+                />
+
+                {/* Delete Modal */}
+                <DeleteModal
+                    isOpen={isDeleteModalOpen}
+                    currentTheme={currentTheme}
+                    title="Hapus User"
+                    message="Apakah Anda yakin ingin menghapus user ini?"
+                    onConfirm={handleConfirmDelete}
+                    onCancel={handleCancelDelete}
                 />
             </div>
         </LayoutAdmin>

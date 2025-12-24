@@ -1,27 +1,35 @@
 import React from 'react';
 import { Link } from '@inertiajs/react';
-import {
-    getThemeBorder,
-    getThemeBorderHover,
-    getThemeShadow,
-    getThemeShadowHover,
-    getThemeText,
-    getThemeBg,
-    getThemeGradient,
-    getThemeGradientSolid
-} from '../../../Color/DashboardAdminColor';
 
 export default function Header({ currentTheme }) {
+
+    const classes = currentTheme.classes?.header || {
+        border: 'border-purple-500/20',
+        borderHover: 'hover:border-purple-500/30',
+        shadow: 'shadow-purple-500/10',
+        shadowHover: 'hover:shadow-purple-500/20',
+        text: 'text-purple-300',
+        bg: 'bg-purple-500/20',
+        bgGlow: 'bg-purple-500/5',
+        gradientFrom: 'from-purple-600/20',
+        gradientVia: 'via-purple-500/20',
+        gradientTo: 'to-purple-600/20',
+        gradientFromSolid: 'from-purple-500',
+        gradientViaSolid: 'via-purple-200',
+        gradientToSolid: 'to-purple-400',
+        gradientFromGlow: 'from-purple-600',
+        gradientToGlow: 'to-purple-400',
+    };
     return (
         <div className="relative group">
             {/* Background Glow Effect */}
-            <div className={`absolute -inset-0.5 bg-gradient-to-r ${getThemeGradient(currentTheme, 'from', '600', '20')} ${getThemeGradient(currentTheme, 'via', '500', '20')} ${getThemeGradient(currentTheme, 'to', '600', '20')} rounded-3xl blur-2xl opacity-50 group-hover:opacity-75 transition-opacity duration-500 -z-10`}></div>
+            <div className={`absolute -inset-0.5 bg-gradient-to-r ${classes.gradientFrom} ${classes.gradientVia} ${classes.gradientTo} rounded-3xl blur-2xl opacity-50 group-hover:opacity-75 transition-opacity duration-500 -z-10`}></div>
             
             {/* Main Card */}
-            <div className={`relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/80 backdrop-blur-2xl rounded-3xl border ${getThemeBorder(currentTheme, '20')} shadow-2xl ${getThemeShadow(currentTheme, '10')} ${getThemeShadowHover(currentTheme, '20')} ${getThemeBorderHover(currentTheme, '30')} transition-all duration-500 p-8 md:p-10 overflow-hidden`}>
+            <div className={`relative bg-gradient-to-br from-gray-900/80 via-gray-900/60 to-gray-800/80 backdrop-blur-2xl rounded-3xl border ${classes.border} shadow-2xl ${classes.shadow} ${classes.shadowHover} ${classes.borderHover} transition-all duration-500 p-8 md:p-10 overflow-hidden`}>
                 {/* Corner Accents */}
-                <div className={`absolute top-0 left-0 w-32 h-32 bg-gradient-to-br ${getThemeGradient(currentTheme, 'from', '500', '10')} to-transparent rounded-tl-3xl`}></div>
-                <div className={`absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl ${getThemeGradient(currentTheme, 'from', '500', '10')} to-transparent rounded-br-3xl`}></div>
+                <div className={`absolute top-0 left-0 w-32 h-32 bg-gradient-to-br ${classes.gradientFrom.replace('/20', '/10')} to-transparent rounded-tl-3xl`}></div>
+                <div className={`absolute bottom-0 right-0 w-32 h-32 bg-gradient-to-tl ${classes.gradientFrom.replace('/20', '/10')} to-transparent rounded-br-3xl`}></div>
                 
                 {/* Grid Pattern Overlay (hidden) */}
                 <div className="absolute inset-0 opacity-0">
@@ -34,8 +42,8 @@ export default function Header({ currentTheme }) {
                 </div>
                 
                 {/* Gradient Orbs */}
-                <div className={`absolute top-0 right-0 w-96 h-96 ${getThemeBg(currentTheme, '5')} rounded-full blur-3xl animate-pulse`}></div>
-                <div className={`absolute bottom-0 left-0 w-96 h-96 ${getThemeBg(currentTheme, '5')} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '1s' }}></div>
+                <div className={`absolute top-0 right-0 w-96 h-96 ${classes.bgGlow} rounded-full blur-3xl animate-pulse`}></div>
+                <div className={`absolute bottom-0 left-0 w-96 h-96 ${classes.bgGlow} rounded-full blur-3xl animate-pulse`} style={{ animationDelay: '1s' }}></div>
                 
                 {/* Shine Effect */}
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
@@ -45,12 +53,12 @@ export default function Header({ currentTheme }) {
                     <div className="flex-1">
                         {/* Badge Section with Animation */}
                         <div className="flex items-center gap-3 mb-4 group">
-                            <span className={`relative px-3 py-1.5 ${currentTheme.colors.button} backdrop-blur-sm ${getThemeText(currentTheme)} text-xs font-bold rounded-full border ${getThemeBorder(currentTheme, '30')} shadow-lg ${getThemeShadow(currentTheme, '20')} ${getThemeShadowHover(currentTheme, '40')} transition-all duration-300 hover:scale-105`}>
+                            <span className={`relative px-3 py-1.5 ${currentTheme.colors.button} backdrop-blur-sm ${classes.text} text-xs font-bold rounded-full border ${classes.border.replace('/20', '/30')} shadow-lg ${classes.shadow.replace('/10', '/20')} ${classes.shadowHover.replace('/20', '/40')} transition-all duration-300 hover:scale-105`}>
                                 <span className="relative z-10 flex items-center space-x-1.5">
                                     <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse"></span>
                                     <span>New</span>
                                 </span>
-                                <span className={`absolute inset-0 rounded-full bg-gradient-to-r ${getThemeGradient(currentTheme, 'from', '500', '20')} to-transparent blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></span>
+                                <span className={`absolute inset-0 rounded-full bg-gradient-to-r ${classes.gradientFrom} to-transparent blur-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300`}></span>
                             </span>
                             <Link 
                                 href="#" 
@@ -82,12 +90,12 @@ export default function Header({ currentTheme }) {
                         
                         {/* Title */}
                         <h1 className="relative text-5xl md:text-7xl font-extrabold mb-4 leading-tight">
-                            <span className={`block bg-gradient-to-r from-white ${getThemeGradientSolid(currentTheme, 'via', '200')} ${getThemeGradientSolid(currentTheme, 'to', '400')} bg-clip-text text-transparent`}>
+                            <span className={`block bg-gradient-to-r from-white ${classes.gradientViaSolid} ${classes.gradientToSolid} bg-clip-text text-transparent`}>
                                 Dashboard Admin
                             </span>
                             
                             {/* Title Glow */}
-                            <span className={`absolute inset-0 bg-gradient-to-r ${getThemeGradient(currentTheme, 'from', '600', '20')} ${getThemeGradient(currentTheme, 'via', '400', '20')} ${getThemeGradient(currentTheme, 'to', '600', '20')} blur-2xl -z-10 opacity-50 animate-pulse`}></span>
+                            <span className={`absolute inset-0 bg-gradient-to-r ${classes.gradientFromGlow}/20 ${classes.gradientToGlow}/20 blur-2xl -z-10 opacity-50 animate-pulse`}></span>
                         </h1>
                         
                         {/* Subtitle */}
@@ -113,7 +121,7 @@ export default function Header({ currentTheme }) {
                     
                     {/* CTA Button */}
                     <div className="mt-8 md:mt-0 md:ml-8">
-                        <button className={`group relative px-8 py-4 text-white rounded-2xl font-bold text-sm transition-all duration-500 shadow-2xl ${getThemeShadow(currentTheme, '40')} ${getThemeShadowHover(currentTheme, '60')} hover:scale-110 flex items-center space-x-3 overflow-hidden`}>
+                        <button className={`group relative px-8 py-4 text-white rounded-2xl font-bold text-sm transition-all duration-500 shadow-2xl ${classes.shadow.replace('/10', '/40')} ${classes.shadowHover.replace('/20', '/60')} hover:scale-110 flex items-center space-x-3 overflow-hidden`}>
                             {/* Button Background Gradient */}
                             <div 
                                 className="absolute inset-0 rounded-2xl z-0 transition-all duration-500"
@@ -145,7 +153,7 @@ export default function Header({ currentTheme }) {
                             </svg>
                             
                             {/* Glow Rings */}
-                            <div className={`absolute -inset-1 bg-gradient-to-r ${getThemeGradientSolid(currentTheme, 'from', '600')} ${getThemeGradientSolid(currentTheme, 'to', '400')} rounded-2xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-500 -z-10`}></div>
+                            <div className={`absolute -inset-1 bg-gradient-to-r ${classes.gradientFromGlow} ${classes.gradientToGlow} rounded-2xl opacity-20 group-hover:opacity-40 blur-xl transition-opacity duration-500 -z-10`}></div>
                         </button>
                     </div>
                 </div>
