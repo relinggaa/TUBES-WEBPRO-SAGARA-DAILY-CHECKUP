@@ -90,6 +90,9 @@ Route::middleware(['mekanik'])->prefix('mekanik')->group(function () {
     Route::post('/mark-as-full', [MekanikAuthController::class, 'markAsFull'])->name('mekanik.mark-as-full');
     Route::post('/mark-as-available', [MekanikAuthController::class, 'markAsAvailable'])->name('mekanik.mark-as-available');
 
+    // Route untuk Tanya AI
+    Route::get('/tanya-ai', [KendaraanController::class, 'mekanikTanyaAI'])->name('mekanik.tanya-ai');
+
     Route::get('/detailkerusakan/{id}', [KerusakanController::class, 'mekanikDetail'])->name('mekanik.detailkerusakan');
 
     Route::post('/mark-as-pending', [KerusakanController::class, 'markAsPending'])->name('mekanik.mark-as-pending');

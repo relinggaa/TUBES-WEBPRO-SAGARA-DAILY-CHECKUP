@@ -154,7 +154,7 @@ export default function ReportDriver({ kendaraan = null }) {
         setIsSubmitting(false);
         console.error('Error submitting report:', errors);
 
-        // Show validation errors
+
         Object.keys(errors).forEach(key => {
           toast.error(errors[key], {
             position: "top-right",

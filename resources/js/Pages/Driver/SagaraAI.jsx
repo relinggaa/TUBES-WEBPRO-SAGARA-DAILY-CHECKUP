@@ -257,7 +257,7 @@ export default function SagaraAI({ kendaraan = null, kerusakan = null }) {
       </div>
 
       <div className="max-w-4xl mx-auto relative z-10">
-        {/* Header dengan Logout dan Back Button */}
+
         <div className="flex justify-between items-center mb-6">
           <Link
             href="/driver/dashboard"

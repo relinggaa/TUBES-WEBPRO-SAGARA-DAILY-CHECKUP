@@ -163,17 +163,17 @@ class KendaraanController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil kendaraan yang dimiliki driver dengan relasi kerusakans
+      
         $kendaraan = Kendaraan::where('driver_id', $user->id)
             ->with([
                 'driver',
                 'kerusakans' => function ($query) {
-                    $query->latest()->first(); // Ambil kerusakan terbaru
+                    $query->latest()->first(); 
                 }
             ])
             ->first();
 
-        // Ambil kerusakan terbaru jika ada
+        
         $latestKerusakan = null;
         if ($kendaraan) {
             $latestKerusakan = $kendaraan->kerusakans()->latest()->first();
@@ -189,7 +189,7 @@ class KendaraanController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil kendaraan yang dimiliki driver
+     
         $kendaraan = Kendaraan::where('driver_id', $user->id)
             ->with('driver')
             ->first();
@@ -203,17 +203,16 @@ class KendaraanController extends Controller
     {
         $user = Auth::user();
 
-        // Ambil kendaraan yang dimiliki driver dengan relasi kerusakans
         $kendaraan = Kendaraan::where('driver_id', $user->id)
             ->with([
                 'driver',
                 'kerusakans' => function ($query) {
-                    $query->latest()->first(); // Ambil kerusakan terbaru
+                    $query->latest()->first(); 
                 }
             ])
             ->first();
 
-        // Ambil kerusakan terbaru jika ada
+       
         $latestKerusakan = null;
         if ($kendaraan) {
             $latestKerusakan = $kendaraan->kerusakans()->latest()->first();
@@ -222,6 +221,24 @@ class KendaraanController extends Controller
         return Inertia::render('Driver/SagaraAI', [
             'kendaraan' => $kendaraan,
             'kerusakan' => $latestKerusakan
+        ]);
+    }
+
+    public function mekanikTanyaAI()
+    {
+        $user = Auth::user();
+
+        $keruskaanAcc = \App\Models\Keruskaanacc::with(['kendaraan', 'kerusakan', 'kendaraan.driver'])
+            ->where('mekanik_id', $user->id)
+            ->whereHas('kendaraan', function ($query) {
+                $query->whereIn('status', ['Perbaikan', 'Pending']);
+            })
+            ->doesntHave('bill')
+            ->latest()
+            ->get();
+
+        return Inertia::render('Mekanik/SagaraAI', [
+            'keruskaanAcc' => $keruskaanAcc
         ]);
     }
 }
