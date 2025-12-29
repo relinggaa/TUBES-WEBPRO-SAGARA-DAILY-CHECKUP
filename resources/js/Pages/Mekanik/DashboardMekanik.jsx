@@ -113,7 +113,7 @@ export default function DashboardMekanik() {
             router.post('/mekanik/mark-as-full', {}, {
                 preserveScroll: true,
                 onSuccess: () => {
-                    // Success message akan ditangani oleh flash message
+
                 },
                 onError: (errors) => {
                     toast.error('Terjadi kesalahan saat mengubah status. Silakan coba lagi.', {
@@ -144,7 +144,7 @@ export default function DashboardMekanik() {
             router.post('/mekanik/mark-as-available', {}, {
                 preserveScroll: true,
                 onSuccess: () => {
-                    // Success message akan ditangani oleh flash message
+
                 },
                 onError: (errors) => {
                     toast.error('Terjadi kesalahan saat mengubah status. Silakan coba lagi.', {
@@ -184,40 +184,42 @@ export default function DashboardMekanik() {
 
             <div className="max-w-md mx-auto relative z-10">
                 {/* Header with Logout Button */}
-                <div className="flex items-center justify-between mb-6">
-                    <h1 className="text-white text-2xl font-bold animate-fade-in">
+                <div className="flex items-center justify-between mb-6 gap-4">
+                    <h1 className="text-white text-xl md:text-2xl font-bold animate-fade-in whitespace-nowrap">
                         Dashboard
                     </h1>
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 md:gap-3">
                         <button
                             onClick={() => setShowBillModal(true)}
-                            className="group/btn relative bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-white/15 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2 whitespace-nowrap"
+                            className="group/btn relative bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-semibold p-2.5 md:px-4 md:py-2 rounded-full hover:bg-white/15 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2"
+                            title="Bill"
                         >
-                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <svg className="w-5 h-5 md:w-4 md:h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            <span>Bill</span>
+                            <span className="hidden md:inline">Bill</span>
                         </button>
                         <Link
                             href="/mekanik/tanya-ai"
-                            className="group/btn relative bg-gradient-to-r from-blue-500 to-cyan-500 backdrop-blur-md border border-white/20 text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2 whitespace-nowrap"
+                            className="group/btn relative bg-gradient-to-r from-blue-500 to-cyan-500 backdrop-blur-md border border-white/20 text-white text-sm font-semibold p-2.5 md:px-4 md:py-2 rounded-full hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2"
+                            title="Tanya AI"
                         >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-5 h-5 md:w-4 md:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
                             </svg>
-                            <span>Tanya AI</span>
+                            <span className="hidden md:inline">Tanya AI</span>
                         </Link>
                         <button
                             onClick={handleLogout}
-                            className="group/btn relative bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-semibold px-4 py-2 rounded-full hover:bg-white/15 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2 whitespace-nowrap"
+                            className="group/btn relative bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-semibold p-2.5 md:px-4 md:py-2 rounded-full hover:bg-white/15 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2"
+                            title="Logout"
                         >
-                            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <svg className="w-5 h-5 md:w-4 md:h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                             </svg>
-                            <span>Logout</span>
+                            <span className="hidden md:inline">Logout</span>
                         </button>
                     </div>
-
                 </div>
 
                 {/* Profile Card */}
@@ -264,14 +266,14 @@ export default function DashboardMekanik() {
                     </button>
 
                     {user?.status === 'full' ? (
-                        <button 
+                        <button
                             onClick={handleMarkAsAvailable}
                             className="w-full bg-gradient-to-r from-emerald-500 to-teal-500 text-white font-semibold py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
                         >
                             Mark As Available
                         </button>
                     ) : (
-                        <button 
+                        <button
                             onClick={handleMarkAsFull}
                             className="w-full bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold py-3 rounded-full shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300"
                         >
