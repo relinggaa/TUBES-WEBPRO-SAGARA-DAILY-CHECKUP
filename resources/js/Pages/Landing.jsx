@@ -20,14 +20,14 @@ export default function Landing() {
 
             {/* Lanyard Layer (Interactive background elements) */}
             <div className="absolute inset-0 z-10 pointer-events-none flex justify-between overflow-hidden">
-                {/* Left Lanyard - Only visible on medium screens and up to avoid cluttering mobile */}
+
                 <div className="hidden xl:block relative w-[25vw] h-full pointer-events-auto">
                     <div className="absolute inset-0 flex items-start justify-center pt-0">
                         <Lanyard position={[0, 2, 20]} gravity={[0, -40, 0]} />
                     </div>
                 </div>
 
-                {/* Right Lanyard - Only visible on medium screens and up */}
+
                 <div className="hidden xl:block relative w-[25vw] h-full pointer-events-auto">
                     <div className="absolute inset-0 flex items-start justify-center pt-0">
                         <LanyardAriq position={[0, 2, 20]} gravity={[0, -40, 0]} />

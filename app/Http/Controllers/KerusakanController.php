@@ -40,10 +40,10 @@ class KerusakanController extends Controller
             ]);
         }
 
-   
+
         Kerusakan::create($validated);
 
-     
+
         $kendaraan->status = 'Pengajuan Perbaikan';
         $kendaraan->save();
 
@@ -78,7 +78,6 @@ class KerusakanController extends Controller
             ]);
         }
 
-        // Cek apakah sudah ada pengajuan perbaikan yang aktif
         if ($kendaraan->status === 'Pengajuan Perbaikan' || $kendaraan->status === 'Perbaikan' || $kendaraan->status === 'Pending') {
             return back()->withErrors([
                 'kendala' => 'Kendaraan Anda sudah memiliki pengajuan perbaikan yang sedang diproses.'
@@ -90,7 +89,7 @@ class KerusakanController extends Controller
         $kendaraan->status = 'Pengajuan Perbaikan';
         $kendaraan->save();
 
-        // Return success tanpa redirect untuk tidak refresh halaman
+
         return back()->with('success', 'Kendala berhasil dilaporkan!');
     }
 
@@ -180,7 +179,7 @@ class KerusakanController extends Controller
 
         $kerusakan = Kerusakan::findOrFail($validated['kerusakan_id']);
 
-     
+
         if ($kerusakan->keruskaanAcc) {
             return redirect()->route('admin.pengajuan-perbaikan')
                 ->with('error', 'Kerusakan ini sudah ditugaskan ke mekanik sebelumnya.');
@@ -225,9 +224,9 @@ class KerusakanController extends Controller
 
 
         $mekaniks = User::where('role', 'Mekanik')
-            ->where(function($query) {
+            ->where(function ($query) {
                 $query->where('status', 'available')
-                      ->orWhereNull('status');
+                    ->orWhereNull('status');
             })
             ->select('id', 'username')
             ->get();
