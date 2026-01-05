@@ -40,6 +40,7 @@ return [
 
         'public' => [
             'driver' => 'local',
+            // Simpan di storage/app/public, akses via symlink public/storage
             'root' => storage_path('app/public'),
             'url' => env('APP_URL').'/storage',
             'visibility' => 'public',
