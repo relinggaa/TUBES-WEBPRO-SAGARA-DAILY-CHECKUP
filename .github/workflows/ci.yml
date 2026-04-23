@@ -11,7 +11,7 @@ permissions:
 
 jobs:
   tests:
-    name: Laravel Tests (PHP 8.2)
+    name: Laravel Tests (PHP 8.4)
     runs-on: ubuntu-latest
 
     steps:
@@ -21,7 +21,7 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: "8.2"
+          php-version: "8.4"
           coverage: none
 
       - name: Setup Node.js
