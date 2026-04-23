@@ -88,14 +88,21 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Validate Sonar variables
+        run: |
+          test -n "${{ vars.SONAR_PROJECT_KEY }}" || (echo "Missing vars.SONAR_PROJECT_KEY" && exit 1)
+          test -n "${{ vars.SONAR_ORGANIZATION }}" || (echo "Missing vars.SONAR_ORGANIZATION" && exit 1)
+          test -n "${{ secrets.SONAR_TOKEN }}" || (echo "Missing secrets.SONAR_TOKEN" && exit 1)
+
       - name: Run SonarQube scan
-        uses: SonarSource/sonarqube-scan-action@v5
+        uses: SonarSource/sonarqube-scan-action@v6
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: https://sonarcloud.io
         with:
           args: >
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
+            -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
             -Dsonar.projectName=${{ github.repository }}
             -Dsonar.sources=app,resources/js,routes
             -Dsonar.tests=tests
