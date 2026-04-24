@@ -71,6 +71,11 @@ const mockActiveTowing = {
 };
 
 beforeEach(() => {
+  Object.defineProperty(window, 'isSecureContext', {
+    value: true,
+    configurable: true,
+  });
+
   window.L = {
     map: vi.fn(() => mockLeafletMap),
     tileLayer: vi.fn(() => ({ addTo: vi.fn() })),

@@ -185,6 +185,15 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
 
   // Get GPS location
   const handleGetLocation = (showError = true) => {
+    // Request geolocation only after explicit user consent.
+    const userConsent = window.confirm("Izinkan aplikasi mengakses lokasi GPS Anda untuk menentukan titik towing?");
+    if (!userConsent) return;
+
+    if (!window.isSecureContext) {
+      if (showError) toast.error("Akses lokasi GPS hanya tersedia pada koneksi aman (HTTPS).", { position: "top-right" });
+      return;
+    }
+
     if (!navigator.geolocation) {
       if (showError) toast.error("Browser tidak mendukung geolokasi.", { position: "top-right" });
       return;
