@@ -1,10 +1,9 @@
 import React from 'react';
-import { render, screen, fireEvent, cleanup, waitFor, act } from '@testing-library/react';
+import { render, screen, fireEvent, cleanup, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi, afterEach } from 'vitest';
-import { toast } from 'react-toastify';
 
 // ============================================================
-// Mock router & inertia - dibuat modular agar bisa diubah per test
+// Mock router & inertia - mockFlash sebagai object yang dimutasi
 // ============================================================
 const mockRouterPost = vi.fn();
 let mockFlash = {};
@@ -25,21 +24,22 @@ vi.mock('@inertiajs/react', () => ({
   }
 }));
 
-// Mock react-toastify
-const mockToastSuccess = vi.fn();
-const mockToastError = vi.fn();
+// Mock react-toastify - gunakan vi.fn() langsung di dalam factory (TIDAK boleh referensi variabel luar)
 vi.mock('react-toastify', () => ({
   toast: {
-    success: mockToastSuccess,
-    error: mockToastError,
+    success: vi.fn(),
+    error: vi.fn(),
   }
 }));
+
+// Import toast SETELAH vi.mock agar mendapat versi yang sudah di-mock
+import { toast } from 'react-toastify';
 
 // Global Window mocks for object URL
 window.URL.createObjectURL = vi.fn(() => 'blob:dummy-url');
 window.URL.revokeObjectURL = vi.fn();
 
-// Import komponen yg akan ditest
+// Import komponen setelah semua mock didefinisikan
 const { default: UploadBill } = await import('../../../Pages/Driver/UploadBill');
 
 // ============================================================
@@ -123,15 +123,9 @@ describe('UploadBill Component', () => {
 
     await selectFile();
 
-    // Tombol X (hapus preview) harus ada
-    const removeBtns = screen.getAllByRole('button');
-    // Cari tombol yang berisi SVG hapus (close icon) di area preview
-    const removePreviewBtn = removeBtns.find(btn =>
-      btn.querySelector('svg path[d*="M6 18L18 6"]') ||
-      btn.className.includes('red') ||
-      (btn.closest('.relative') && btn.querySelector('svg'))
-    );
-    expect(removePreviewBtn).toBeDefined();
+    // Tombol X berwarna merah ada di area preview
+    const removePreviewBtn = document.querySelector('button.bg-red-500\\/80');
+    expect(removePreviewBtn).not.toBeNull();
     fireEvent.click(removePreviewBtn);
 
     await waitFor(() => {
@@ -157,7 +151,6 @@ describe('UploadBill Component', () => {
   });
 
   it('7. onSuccess callback mereset selectedFile dan preview', async () => {
-    // router.post langsung panggil onSuccess
     mockRouterPost.mockImplementation((url, data, options) => {
       options?.onSuccess?.();
     });
@@ -169,14 +162,12 @@ describe('UploadBill Component', () => {
     fireEvent.click(uploadBtn);
 
     await waitFor(() => {
-      // Setelah onSuccess, preview hilang dan dropzone muncul kembali
       expect(screen.queryByAltText('Preview Struk')).toBeNull();
       expect(screen.getByText('Click to upload')).toBeDefined();
     });
   });
 
   it('8. onError callback memanggil toast.error', async () => {
-    // router.post langsung panggil onError
     mockRouterPost.mockImplementation((url, data, options) => {
       options?.onError?.({ gambar: 'File terlalu besar' });
     });
@@ -188,7 +179,7 @@ describe('UploadBill Component', () => {
     fireEvent.click(uploadBtn);
 
     await waitFor(() => {
-      expect(mockToastError).toHaveBeenCalledTimes(1);
+      expect(toast.error).toHaveBeenCalledTimes(1);
     });
   });
 
@@ -198,7 +189,7 @@ describe('UploadBill Component', () => {
     render(<UploadBill riwayatStruk={[]} />);
 
     await waitFor(() => {
-      expect(mockToastSuccess).toHaveBeenCalledWith(
+      expect(toast.success).toHaveBeenCalledWith(
         'Struk berhasil diupload!',
         expect.objectContaining({ position: 'top-right' })
       );
@@ -211,7 +202,7 @@ describe('UploadBill Component', () => {
     render(<UploadBill riwayatStruk={[]} />);
 
     await waitFor(() => {
-      expect(mockToastError).toHaveBeenCalledWith(
+      expect(toast.error).toHaveBeenCalledWith(
         'Upload gagal!',
         expect.objectContaining({ position: 'top-right' })
       );
@@ -221,6 +212,6 @@ describe('UploadBill Component', () => {
   it('11. Link "back" ke dashboard tersedia', () => {
     render(<UploadBill riwayatStruk={[]} />);
     const backLink = document.querySelector('a[href="/driver/dashboard"]');
-    expect(backLink).toBeDefined();
+    expect(backLink).not.toBeNull();
   });
 });
