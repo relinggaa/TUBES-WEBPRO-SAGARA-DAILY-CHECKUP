@@ -60,6 +60,7 @@ beforeEach(() => {
       getCenter: vi.fn(() => ({ lat: -6.2088, lng: 106.8456 })),
       getZoom: vi.fn(() => 16),
       remove: vi.fn(),
+      removeLayer: vi.fn(),
     })),
     tileLayer: vi.fn(() => ({ addTo: vi.fn() })),
     marker: vi.fn(() => ({
@@ -253,7 +254,7 @@ describe('RequestTowing Component', () => {
       fireEvent.change(textArea, { target: { value: '   ' } });
     });
     
-    const ajukanBtn = screen.getByText('Ajukan Request Towing');
+    const ajukanBtn = screen.getByRole('button', { name: /Ajukan Request Towing/i });
     
     expect(ajukanBtn.disabled).toBe(true);
     
@@ -297,7 +298,7 @@ describe('RequestTowing Component', () => {
       expect(screen.getByPlaceholderText(/type manually/i).value).toBe('Jalan Sudirman, Jakarta');
     });
     
-    fireEvent.click(screen.getByText('Ajukan Request Towing'));
+    fireEvent.click(screen.getByRole('button', { name: /Ajukan Request Towing/i }));
     
     await waitFor(() => {
       const options = mockRouterPost.mock.calls[0][2];
