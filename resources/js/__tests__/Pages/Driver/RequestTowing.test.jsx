@@ -190,4 +190,124 @@ describe('RequestTowing Component', () => {
     confirmSpy.mockRestore();
   });
 
+  it('7. Membatalkan pengajuan (confirm false) tidak akan memanggil post', async () => {
+    const confirmSpy = vi.spyOn(window, 'confirm').mockImplementation(() => false);
+    render(<RequestTowing riwayatTowing={[]} activeTowing={mockActiveTowing} />);
+    
+    fireEvent.click(screen.getByTitle('Batalkan'));
+    expect(mockRouterPost).not.toHaveBeenCalled();
+    
+    confirmSpy.mockRestore();
+  });
+
+  it('8. Panggil API reverse geocode tapi throw error fallback ke coordinate', async () => {
+    global.fetch.mockImplementationOnce(() => Promise.reject(new Error('Network Err')));
+    
+    render(<RequestTowing riwayatTowing={[]} activeTowing={null} />);
+    
+    await waitFor(() => {
+      const textArea = screen.getByPlaceholderText('Lokasi will be auto-filled from map, or type manually...');
+      expect(textArea.value).toBe('-6.20880, 106.84560'); // nilai fallback
+    });
+  });
+
+  it('9. Memanggil Geolocation tapi diblokir/error', async () => {
+    const mockGetCurrentPositionError = vi.fn().mockImplementation((success, error) => 
+      error({ message: 'User denied' })
+    );
+    // Simpan aslinya jika perlu
+    global.navigator.geolocation.getCurrentPosition = mockGetCurrentPositionError;
+    
+    render(<RequestTowing riwayatTowing={[]} activeTowing={null} />);
+    
+    const gpsBtn = screen.getByText('Gunakan Lokasi GPS Saya');
+    fireEvent.click(gpsBtn);
+    
+    await waitFor(() => {
+      expect(mockToastError).toHaveBeenCalledWith(expect.stringContaining('Gagal mendapatkan lokasi GPS: User denied'), expect.any(Object));
+    });
+    
+    // Restore
+    global.navigator.geolocation.getCurrentPosition = mockGetCurrentPosition;
+  });
+
+  it('10. Browser tidak mendukung Geolocation', async () => {
+    const originalGeo = global.navigator.geolocation;
+    delete global.navigator.geolocation;
+    
+    render(<RequestTowing riwayatTowing={[]} activeTowing={null} />);
+    
+    const gpsBtn = screen.getByText('Gunakan Lokasi GPS Saya');
+    fireEvent.click(gpsBtn);
+    
+    expect(mockToastError).toHaveBeenCalledWith('Browser tidak mendukung geolokasi.', expect.any(Object));
+    
+    global.navigator.geolocation = originalGeo;
+  });
+
+  it('11. Button Submit tidak bisa berjalan jika Lokasi Blank', async () => {
+    render(<RequestTowing riwayatTowing={[]} activeTowing={null} />);
+    
+    await waitFor(() => {
+      const textArea = screen.getByPlaceholderText('Lokasi will be auto-filled from map, or type manually...');
+      fireEvent.change(textArea, { target: { value: '   ' } });
+    });
+    
+    const ajukanBtn = screen.getByText('Ajukan Request Towing');
+    
+    expect(ajukanBtn.disabled).toBe(true);
+    
+    // Walau diklik paksa, fungsi post tidak dpanggil
+    fireEvent.click(ajukanBtn);
+    expect(mockRouterPost).not.toHaveBeenCalled();
+  });
+
+  it('12. Leaflet move, moveend, dan click trigger test', async () => {
+    render(<RequestTowing riwayatTowing={[]} activeTowing={null} />);
+    
+    let moveCb, moveEndCb, clickCb;
+    
+    await waitFor(() => {
+      const calls = window.L.map.mock.results[0].value.on.mock.calls;
+      moveCb = calls.find(c => c[0] === 'move');
+      moveEndCb = calls.find(c => c[0] === 'moveend');
+      clickCb = calls.find(c => c[0] === 'click');
+      expect(moveCb).toBeDefined();
+    });
+
+    const setViewMock = window.L.map.mock.results[0].value.setView;
+    
+    // Test klik peta
+    clickCb[1]({ latlng: { lat: -6.1, lng: 106.8 } });
+    expect(setViewMock).toHaveBeenCalled();
+    
+    // Test move
+    moveCb[1]();
+    
+    // Test moveend
+    global.fetch.mockClear();
+    moveEndCb[1]();
+    expect(global.fetch).toHaveBeenCalled();
+  });
+
+  it('13. Callback onSuccess dan onError dari Submit', async () => {
+    render(<RequestTowing riwayatTowing={[]} activeTowing={null} />);
+    
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText(/type manually/i).value).toBe('Jalan Sudirman, Jakarta');
+    });
+    
+    fireEvent.click(screen.getByText('Ajukan Request Towing'));
+    
+    await waitFor(() => {
+      const options = mockRouterPost.mock.calls[0][2];
+      expect(options.onSuccess).toBeDefined();
+      expect(options.onError).toBeDefined();
+      
+      // Simulate callbacks
+      options.onSuccess();
+      options.onError();
+    });
+  });
+
 });
