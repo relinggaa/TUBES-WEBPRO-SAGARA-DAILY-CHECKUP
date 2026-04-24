@@ -7,7 +7,7 @@ use App\Http\Controllers\KerusakanController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\DriverAuthController;
 use App\Http\Controllers\MekanikAuthController;
-
+use App\Http\Controllers\StrukBensinController;
 Route::get('/', function () {
     return inertia('Landing');
 })->middleware('guest');
@@ -58,6 +58,9 @@ Route::middleware(['driver'])->prefix('driver')->group(function () {
     Route::post('/kerusakan/store-from-chat', [KerusakanController::class, 'storeFromChat'])->name('driver.kerusakan.store-from-chat');
     Route::post('/kerusakan/cancel', [KerusakanController::class, 'cancel'])->name('driver.kerusakan.cancel');
     Route::put('/kerusakan/{id}', [KerusakanController::class, 'update'])->name('driver.kerusakan.update');
+
+    Route::get('/struk-bensin', [StrukBensinController::class, 'index'])->name('driver.struk-bensin');
+    Route::post('/struk-bensin', [StrukBensinController::class, 'store'])->name('driver.struk-bensin.store');
 });
 
 // Mekanik Auth Routes 
