@@ -52,6 +52,7 @@ const mockRiwayat = [
     lokasi: 'Jl. Gatot Subroto, Jakarta',
     keterangan: 'Ban kempis',
     status: 'Selesai',
+    isproses: false,
     created_at: '2026-04-20T10:30:00Z',
   },
   {
@@ -59,6 +60,7 @@ const mockRiwayat = [
     lokasi: 'Tol Jagorawi KM 15',
     keterangan: '',
     status: 'Pending',
+    isproses: false,
     created_at: '2026-04-22T08:00:00Z',
   },
 ];
@@ -160,7 +162,8 @@ describe('RequestTowing Component', () => {
   it('7. Membatalkan request dari history saat konfirmasi true', async () => {
     render(<RequestTowing riwayatTowing={mockRiwayat} />);
 
-    fireEvent.click(screen.getByTitle('Batalkan'));
+    // Tombol batalkan di history item Pending menggunakan title="Batalkan Pengajuan"
+    fireEvent.click(screen.getByTitle('Batalkan Pengajuan'));
 
     await waitFor(() => {
       expect(mockRouterPost).toHaveBeenCalledWith(
@@ -175,7 +178,8 @@ describe('RequestTowing Component', () => {
     window.confirm = vi.fn(() => false);
     render(<RequestTowing riwayatTowing={mockRiwayat} />);
 
-    fireEvent.click(screen.getByTitle('Batalkan'));
+    // Tombol batalkan di history item Pending menggunakan title="Batalkan Pengajuan"
+    fireEvent.click(screen.getByTitle('Batalkan Pengajuan'));
 
     expect(mockRouterPost).not.toHaveBeenCalled();
   });
@@ -245,7 +249,8 @@ describe('RequestTowing Component', () => {
   });
 
   it('13. Menampilkan tombol batalkan pada active towing status Pending', () => {
-    render(<RequestTowing activeTowing={{ id: 10, lokasi: 'Depok', status: 'Pending' }} />);
-    expect(screen.getByTitle('Batalkan')).toBeDefined();
+    render(<RequestTowing activeTowing={{ id: 10, lokasi: 'Depok', status: 'Pending', isproses: false }} />);
+    // Tombol di active card adalah tombol penuh dengan teks "Batalkan Pengajuan"
+    expect(screen.getByRole('button', { name: /batalkan pengajuan/i })).toBeDefined();
   });
 });
