@@ -67,8 +67,8 @@ describe('UploadBill Component', () => {
   it('1. Merender halaman UploadBill dengan benar', () => {
     render(<UploadBill riwayatStruk={[]} />);
     
-    // Title halaman
-    expect(screen.getByText('Upload Struk Bensin')).toBeDefined();
+    // Title halaman (juga tulisan di tombol)
+    expect(screen.getAllByText('Upload Struk Bensin').length).toBeGreaterThan(0);
     // Bagian Daftarkan Struk
     expect(screen.getByText('Daftarkan Struk Baru')).toBeDefined();
     // Teks default dropzone
