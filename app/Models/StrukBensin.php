@@ -9,6 +9,11 @@ class StrukBensin extends Model
     protected $fillable = [
         'user_id',
         'gambar',
+        'is_accept',
+    ];
+
+    protected $casts = [
+        'is_accept' => 'boolean',
     ];
 
     public function user()

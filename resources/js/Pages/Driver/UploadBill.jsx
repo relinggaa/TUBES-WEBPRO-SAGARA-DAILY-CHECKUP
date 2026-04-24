@@ -67,6 +67,35 @@ export default function UploadBill({ riwayatStruk = [] }) {
     });
   };
 
+  const handleCancelPengajuan = (strukId) => {
+    router.post(
+      "/driver/struk-bensin/cancel",
+      { struk_bensin_id: strukId },
+      { preserveScroll: true }
+    );
+  };
+
+  const getStatusInfo = (isAccept) => {
+    if (isAccept === true) {
+      return {
+        label: "Success",
+        className: "bg-emerald-500/20 text-emerald-300 border border-emerald-400/30",
+      };
+    }
+
+    if (isAccept === false) {
+      return {
+        label: "Ditolak",
+        className: "bg-red-500/20 text-red-300 border border-red-400/30",
+      };
+    }
+
+    return {
+      label: "Menunggu",
+      className: "bg-amber-500/20 text-amber-300 border border-amber-400/30",
+    };
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-900 p-4 md:p-8 relative overflow-hidden">
       {/* Background Effect */}
@@ -185,6 +214,7 @@ export default function UploadBill({ riwayatStruk = [] }) {
                 // Formatting date nicely
                 const dateObj = new Date(struk.created_at);
                 const filePath = buildStoragePath(struk.gambar);
+                const status = getStatusInfo(struk.is_accept);
                 const formattedDate = dateObj.toLocaleDateString('id-ID', {
                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
                 });
@@ -219,6 +249,9 @@ export default function UploadBill({ riwayatStruk = [] }) {
                          <p className="text-white font-semibold text-base mb-1 truncate">
                              Struk #{struk.id}
                          </p>
+                         <span className={`inline-flex w-fit px-2 py-1 rounded-lg text-xs font-semibold mb-2 ${status.className}`}>
+                            {status.label}
+                         </span>
                          <div className="flex items-center gap-2 text-blue-200 text-xs sm:text-sm">
                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
@@ -233,13 +266,21 @@ export default function UploadBill({ riwayatStruk = [] }) {
                          </div>
                       </div>
 
-                      {/* Download/View Action (Visual only) */}
-                      <a href={filePath} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-300 hover:bg-blue-500 hover:text-white flex items-center justify-center transition-colors">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                          </svg>
-                      </a>
+                      <div className="flex items-center gap-2">
+                        <a href={filePath} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-300 hover:bg-blue-500 hover:text-white flex items-center justify-center transition-colors">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                            </svg>
+                        </a>
+                        <button
+                          onClick={() => handleCancelPengajuan(struk.id)}
+                          disabled={struk.is_accept !== null}
+                          className="px-3 py-2 rounded-lg text-xs font-semibold bg-red-500/20 text-red-300 border border-red-400/30 hover:bg-red-500/30 transition disabled:opacity-40 disabled:cursor-not-allowed"
+                        >
+                          Batalkan
+                        </button>
+                      </div>
                     </div>
                   </div>
                 );

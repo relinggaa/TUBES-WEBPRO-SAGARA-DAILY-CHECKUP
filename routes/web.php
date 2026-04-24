@@ -2,12 +2,12 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GenerateKeyController;
+use App\Http\Controllers\BensinController;
 use App\Http\Controllers\KendaraanController;
 use App\Http\Controllers\KerusakanController;
 use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\DriverAuthController;
 use App\Http\Controllers\MekanikAuthController;
-use App\Http\Controllers\StrukBensinController;
 use App\Http\Controllers\TowingController;
 
 Route::get('/', function () {
@@ -61,8 +61,9 @@ Route::middleware(['driver'])->prefix('driver')->group(function () {
     Route::post('/kerusakan/cancel', [KerusakanController::class, 'cancel'])->name('driver.kerusakan.cancel');
     Route::put('/kerusakan/{id}', [KerusakanController::class, 'update'])->name('driver.kerusakan.update');
 
-    Route::get('/struk-bensin', [StrukBensinController::class, 'index'])->name('driver.struk-bensin');
-    Route::post('/struk-bensin', [StrukBensinController::class, 'store'])->name('driver.struk-bensin.store');
+    Route::get('/struk-bensin', [BensinController::class, 'index'])->name('driver.struk-bensin');
+    Route::post('/struk-bensin', [BensinController::class, 'store'])->name('driver.struk-bensin.store');
+    Route::post('/struk-bensin/cancel', [BensinController::class, 'cancel'])->name('driver.struk-bensin.cancel');
     Route::get('/towing', [TowingController::class, 'index'])->name('driver.towing');
     Route::post('/towing', [TowingController::class, 'store'])->name('driver.towing.store');
     Route::post('/towing/cancel', [TowingController::class, 'cancel'])->name('driver.towing.cancel');
