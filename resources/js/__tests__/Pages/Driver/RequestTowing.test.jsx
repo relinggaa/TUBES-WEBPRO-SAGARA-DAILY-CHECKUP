@@ -6,7 +6,6 @@ const mockRouterPost = vi.fn();
 const mockUsePage = vi.fn(() => ({ props: { flash: {} } }));
 const mockToastSuccess = vi.fn();
 const mockToastError = vi.fn();
-const mockGetCurrentPosition = vi.fn();
 
 vi.mock('@inertiajs/react', () => ({
   Link: ({ children, href, className }) => (
@@ -71,11 +70,6 @@ const mockActiveTowing = {
 };
 
 beforeEach(() => {
-  Object.defineProperty(window, 'isSecureContext', {
-    value: true,
-    configurable: true,
-  });
-
   window.L = {
     map: vi.fn(() => mockLeafletMap),
     tileLayer: vi.fn(() => ({ addTo: vi.fn() })),
@@ -92,12 +86,6 @@ beforeEach(() => {
     })
   );
 
-  Object.defineProperty(global.navigator, 'geolocation', {
-    value: { getCurrentPosition: mockGetCurrentPosition },
-    writable: true,
-    configurable: true,
-  });
-
   mockUsePage.mockReturnValue({ props: { flash: {} } });
   window.confirm = vi.fn(() => true);
 });
@@ -110,10 +98,10 @@ afterEach(() => {
 const { default: RequestTowing } = await import('../../../Pages/Driver/RequestTowing');
 
 describe('RequestTowing Component', () => {
-  it('1. Merender halaman request towing dan tombol GPS', () => {
+  it('1. Merender halaman request towing', () => {
     render(<RequestTowing />);
     expect(screen.getByText('Request Towing')).toBeDefined();
-    expect(screen.getByText('Gunakan Lokasi GPS Saya')).toBeDefined();
+    expect(screen.getByText(/geser peta untuk mengubah titik penjemputan towing/i)).toBeDefined();
   });
 
   it('2. Menampilkan form pengajuan saat tidak ada activeTowing', () => {
@@ -137,36 +125,14 @@ describe('RequestTowing Component', () => {
     expect(screen.getByText('Menunggu')).toBeDefined();
   });
 
-  it('5. Mengisi lokasi dari GPS (reverse geocode) saat sukses', async () => {
-    mockGetCurrentPosition.mockImplementation((success) => {
-      success({ coords: { latitude: -6.9175, longitude: 107.6191 } });
-    });
-
+  it('5. Mengisi lokasi dari reverse geocode awal peta', async () => {
     render(<RequestTowing />);
-    fireEvent.click(screen.getByText('Gunakan Lokasi GPS Saya'));
-
     await waitFor(() => {
       expect(screen.getByDisplayValue('Jl. Sudirman No.1, Jakarta Pusat')).toBeDefined();
     });
   });
 
-  it('6. Menampilkan toast error saat browser tidak support geolocation', () => {
-    Object.defineProperty(global.navigator, 'geolocation', {
-      value: undefined,
-      writable: true,
-      configurable: true,
-    });
-
-    render(<RequestTowing />);
-    fireEvent.click(screen.getByText('Gunakan Lokasi GPS Saya'));
-
-    expect(mockToastError).toHaveBeenCalledWith(
-      'Browser tidak mendukung geolokasi.',
-      expect.objectContaining({ position: 'top-right' })
-    );
-  });
-
-  it('7. Memanggil router.post saat submit pengajuan towing', async () => {
+  it('6. Memanggil router.post saat submit pengajuan towing', async () => {
     render(<RequestTowing />);
 
     fireEvent.change(screen.getByPlaceholderText(/lokasi will be auto-filled/i), {
@@ -191,7 +157,7 @@ describe('RequestTowing Component', () => {
     });
   });
 
-  it('8. Membatalkan request dari history saat konfirmasi true', async () => {
+  it('7. Membatalkan request dari history saat konfirmasi true', async () => {
     render(<RequestTowing riwayatTowing={mockRiwayat} />);
 
     fireEvent.click(screen.getByTitle('Batalkan'));
@@ -205,7 +171,7 @@ describe('RequestTowing Component', () => {
     });
   });
 
-  it('9. Tidak membatalkan request saat konfirmasi false', () => {
+  it('8. Tidak membatalkan request saat konfirmasi false', () => {
     window.confirm = vi.fn(() => false);
     render(<RequestTowing riwayatTowing={mockRiwayat} />);
 
@@ -214,7 +180,7 @@ describe('RequestTowing Component', () => {
     expect(mockRouterPost).not.toHaveBeenCalled();
   });
 
-  it('10. Menampilkan flash success dan flash error sebagai toast', async () => {
+  it('9. Menampilkan flash success dan flash error sebagai toast', async () => {
     mockUsePage.mockReturnValue({
       props: { flash: { success: 'Sukses', error: 'Gagal' } },
     });
@@ -227,7 +193,7 @@ describe('RequestTowing Component', () => {
     });
   });
 
-  it('11. Memproses callback moveend map untuk update lokasi', async () => {
+  it('10. Memproses callback moveend map untuk update lokasi', async () => {
     render(<RequestTowing />);
 
     const moveendHandler = mockMapOn.mock.calls.find(([eventName]) => eventName === 'moveend')?.[1];
@@ -241,7 +207,7 @@ describe('RequestTowing Component', () => {
     });
   });
 
-  it('12. Reset form saat submit sukses', async () => {
+  it('11. Reset form saat submit sukses', async () => {
     mockRouterPost.mockImplementation((_url, _payload, options) => {
       options?.onSuccess?.();
     });
@@ -262,7 +228,7 @@ describe('RequestTowing Component', () => {
     });
   });
 
-  it('13. Selesai loading submit saat onError dipanggil', async () => {
+  it('12. Selesai loading submit saat onError dipanggil', async () => {
     mockRouterPost.mockImplementation((_url, _payload, options) => {
       options?.onError?.({ lokasi: 'error' });
     });
@@ -278,7 +244,7 @@ describe('RequestTowing Component', () => {
     });
   });
 
-  it('14. Menampilkan tombol batalkan pada active towing status Pending', () => {
+  it('13. Menampilkan tombol batalkan pada active towing status Pending', () => {
     render(<RequestTowing activeTowing={{ id: 10, lokasi: 'Depok', status: 'Pending' }} />);
     expect(screen.getByTitle('Batalkan')).toBeDefined();
   });

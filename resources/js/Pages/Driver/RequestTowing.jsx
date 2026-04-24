@@ -22,7 +22,6 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
   const [lokasi, setLokasi] = useState("");
   const [keterangan, setKeterangan] = useState("");
   const [coords, setCoords] = useState(null); // { lat, lng }
-  const [isLoadingLocation, setIsLoadingLocation] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
 
@@ -182,55 +181,6 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
       }
     };
   }, []);
-
-  // Get GPS location
-  const handleGetLocation = (showError = true) => {
-    // Request geolocation only after explicit user consent.
-    const userConsent = window.confirm("Izinkan aplikasi mengakses lokasi GPS Anda untuk menentukan titik towing?");
-    if (!userConsent) return;
-
-    if (!window.isSecureContext) {
-      if (showError) toast.error("Akses lokasi GPS hanya tersedia pada koneksi aman (HTTPS).", { position: "top-right" });
-      return;
-    }
-
-    if (!navigator.geolocation) {
-      if (showError) toast.error("Browser tidak mendukung geolokasi.", { position: "top-right" });
-      return;
-    }
-    setIsLoadingLocation(true);
-    navigator.geolocation.getCurrentPosition(
-      async (pos) => {
-        const lat = pos.coords.latitude;
-        const lng = pos.coords.longitude;
-        setCoords({ lat, lng });
-
-        const L = window.L;
-        if (leafletMapRef.current && L) {
-          leafletMapRef.current.setView([lat, lng], 16);
-          if (markerRef.current) markerRef.current.setLatLng([lat, lng]);
-        }
-
-        // Langsung paksa panggil reverse geocode agar form terisi
-        reverseGeocode(lat, lng);
-
-        setIsLoadingLocation(false);
-      },
-      (err) => {
-        setIsLoadingLocation(false);
-        if (showError) toast.error("Gagal mendapatkan lokasi GPS: " + err.message, { position: "top-right" });
-      },
-      { enableHighAccuracy: true, timeout: 10000 }
-    );
-  };
-
-  // Auto-fetch location once map is loaded
-  useEffect(() => {
-    if (mapLoaded && !coords && !activeTowing) {
-      handleGetLocation(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mapLoaded]);
 
   const handleSubmit = () => {
     if (!lokasi.trim()) {
@@ -405,33 +355,8 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
             )}
           </div>
 
-          <p className="text-indigo-300 text-xs text-center mb-4">💡 Geser peta untuk mengubah titik penjemputan towing, atau gunakan GPS</p>
-
-          {/* GPS Button */}
-          <button
-            onClick={() => handleGetLocation(true)}
-            disabled={isLoadingLocation}
-            className="w-full group relative bg-gradient-to-r from-indigo-500 via-purple-500 to-indigo-600 text-white font-bold py-3 px-4 rounded-xl shadow-xl hover:shadow-2xl hover:shadow-indigo-500/30 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 overflow-hidden disabled:opacity-60 disabled:cursor-not-allowed disabled:hover:translate-y-0"
-          >
-            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-200%] group-hover:translate-x-[200%] transition-transform duration-1000"></div>
-            {isLoadingLocation ? (
-              <>
-                <svg className="animate-spin h-5 w-5 text-white" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
-                </svg>
-                <span className="relative">Mendapatkan Lokasi GPS...</span>
-              </>
-            ) : (
-              <>
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 group-hover:scale-110 transition-transform relative" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
-                <span className="relative">Gunakan Lokasi GPS Saya</span>
-              </>
-            )}
-          </button>
+          <p className="text-indigo-300 text-xs text-center mb-1">💡 Geser peta untuk mengubah titik penjemputan towing.</p>
+          <p className="text-indigo-400/90 text-xs text-center">Lokasi diisi otomatis dari titik tengah peta, lalu bisa Anda edit manual.</p>
         </div>
 
         {/* Form Card */}
