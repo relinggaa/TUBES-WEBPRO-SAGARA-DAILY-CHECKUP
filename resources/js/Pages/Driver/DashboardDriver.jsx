@@ -234,25 +234,60 @@ export default function DashboardDriver({ kendaraan = null, kerusakan = null }) 
       </div>
 
       <div className="max-w-md mx-auto relative z-10">
-        {/* Tanya AI dan Logout Button */}
-        <div className="flex justify-between items-center mb-4">
+        {/* Navigation Bar */}
+        <div className="flex items-center justify-between bg-white/10 backdrop-blur-xl border border-white/20 rounded-2xl p-2 mb-6 shadow-2xl relative overflow-hidden gap-2">
+          {/* Subtle glow effect */}
+          <div className="absolute inset-0 bg-gradient-to-r from-blue-500/10 via-cyan-500/10 to-blue-500/10 animate-pulse pointer-events-none"></div>
+
+          {/* Tanya AI */}
           <Link
             href="/driver/tanya-ai"
-            className="group/btn relative bg-gradient-to-r from-blue-500 to-cyan-500 backdrop-blur-md border border-white/20 text-white font-semibold px-4 py-2 rounded-full hover:bg-gradient-to-r hover:from-blue-600 hover:to-cyan-600 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2 shadow-lg"
+            className="flex-1 group relative bg-gradient-to-r from-blue-500 to-cyan-500 text-white font-semibold px-2 py-2 rounded-xl hover:shadow-lg hover:shadow-cyan-500/30 transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-2 z-10"
+            title="Tanya AI"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
             </svg>
-            <span>Tanya AI</span>
+            <span className="text-sm font-bold truncate">Tanya AI</span>
           </Link>
+
+          {/* Towing Button */}
+          <Link
+            href="/driver/towing"
+            className="flex-1 group relative bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold px-2 py-2 rounded-xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-1.5 shadow-sm z-10"
+            title="Towing"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" className="w-5 h-5 text-indigo-300 group-hover:scale-110 transition-transform">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M8 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4ZM18 20a2 2 0 1 0 0-4 2 2 0 0 0 0 4Z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 16H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v6h4l3 3v4a1 1 0 0 1-1 1h-2M10 16h6" />
+            </svg>
+            <span className="text-xs sm:text-sm font-medium truncate">Towing</span>
+          </Link>
+
+          {/* Bensin Button */}
+          <Link
+            href="/driver/struk-bensin"
+            className="flex-1 group relative bg-white/10 hover:bg-white/20 border border-white/10 text-white font-semibold px-2 py-2 rounded-xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center gap-1.5 shadow-sm z-10"
+            title="Upload Struk Bensin"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-amber-300 group-hover:scale-110 transition-transform">
+              <path strokeLinecap="round" strokeLinejoin="round" d="M5 6v12a2 2 0 0 0 2 2h4a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2H7a2 2 0 0 0-2 2Z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M13 14h3a2 2 0 0 0 2-2v-2a2 2 0 0 0-2-2h-3v6Z" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M18 10v4" />
+              <path strokeLinecap="round" strokeLinejoin="round" d="M6 10h4" />
+            </svg>
+            <span className="text-xs sm:text-sm font-medium truncate">Bensin</span>
+          </Link>
+
+          {/* Logout Button */}
           <button
             onClick={handleLogout}
-            className="group/btn relative bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold px-4 py-2 rounded-full hover:bg-white/15 transition-all duration-300 hover:scale-105 active:scale-95 flex items-center gap-2"
+            className="group relative bg-white/10 hover:bg-red-500/80 border border-white/10 text-white px-3 py-2 rounded-xl transition-all duration-300 hover:-translate-y-0.5 active:translate-y-0 flex items-center justify-center shadow-sm z-10"
+            title="Logout"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <svg className="w-5 h-5 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
-            <span>Logout</span>
           </button>
         </div>
 
