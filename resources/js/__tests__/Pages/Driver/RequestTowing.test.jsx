@@ -221,4 +221,60 @@ describe('RequestTowing Component', () => {
       expect(mockToastError).toHaveBeenCalledWith('Gagal', expect.any(Object));
     });
   });
+
+  it('11. Memproses callback moveend map untuk update lokasi', async () => {
+    render(<RequestTowing />);
+
+    const moveendHandler = mockMapOn.mock.calls.find(([eventName]) => eventName === 'moveend')?.[1];
+    expect(typeof moveendHandler).toBe('function');
+
+    moveendHandler();
+
+    await waitFor(() => {
+      expect(global.fetch).toHaveBeenCalled();
+      expect(screen.getByDisplayValue('Jl. Sudirman No.1, Jakarta Pusat')).toBeDefined();
+    });
+  });
+
+  it('12. Reset form saat submit sukses', async () => {
+    mockRouterPost.mockImplementation((_url, _payload, options) => {
+      options?.onSuccess?.();
+    });
+
+    render(<RequestTowing />);
+
+    fireEvent.change(screen.getByPlaceholderText(/lokasi will be auto-filled/i), {
+      target: { value: 'Jl. Cikini Raya' },
+    });
+    fireEvent.change(screen.getByPlaceholderText(/ban kempis di tengah jalan tol/i), {
+      target: { value: 'Keterangan awal' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /ajukan request towing/i }));
+
+    await waitFor(() => {
+      expect(screen.getByPlaceholderText(/lokasi will be auto-filled/i).value).toBe('');
+      expect(screen.getByPlaceholderText(/ban kempis di tengah jalan tol/i).value).toBe('');
+    });
+  });
+
+  it('13. Selesai loading submit saat onError dipanggil', async () => {
+    mockRouterPost.mockImplementation((_url, _payload, options) => {
+      options?.onError?.({ lokasi: 'error' });
+    });
+
+    render(<RequestTowing />);
+    fireEvent.change(screen.getByPlaceholderText(/lokasi will be auto-filled/i), {
+      target: { value: 'Jl. Asia Afrika' },
+    });
+    fireEvent.click(screen.getByRole('button', { name: /ajukan request towing/i }));
+
+    await waitFor(() => {
+      expect(screen.getByRole('button', { name: /ajukan request towing/i })).toBeDefined();
+    });
+  });
+
+  it('14. Menampilkan tombol batalkan pada active towing status Pending', () => {
+    render(<RequestTowing activeTowing={{ id: 10, lokasi: 'Depok', status: 'Pending' }} />);
+    expect(screen.getByTitle('Batalkan')).toBeDefined();
+  });
 });

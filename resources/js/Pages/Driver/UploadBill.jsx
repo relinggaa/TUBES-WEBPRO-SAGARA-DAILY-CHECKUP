@@ -2,6 +2,17 @@ import React, { useState, useEffect } from "react";
 import { Link, usePage, router } from "@inertiajs/react";
 import { toast } from "react-toastify";
 
+const buildStoragePath = (value) => {
+  if (!value || typeof value !== "string") return "/storage/";
+  const normalized = value.replace(/^\/+/, "");
+  const safePath = normalized
+    .split("/")
+    .map((segment) => segment.replace(/[^a-zA-Z0-9._-]/g, ""))
+    .filter(Boolean)
+    .join("/");
+  return `/storage/${safePath}`;
+};
+
 export default function UploadBill({ riwayatStruk = [] }) {
   const { flash } = usePage().props;
   const [selectedFile, setSelectedFile] = useState(null);
@@ -173,6 +184,7 @@ export default function UploadBill({ riwayatStruk = [] }) {
               {riwayatStruk.map((struk, index) => {
                 // Formatting date nicely
                 const dateObj = new Date(struk.created_at);
+                const filePath = buildStoragePath(struk.gambar);
                 const formattedDate = dateObj.toLocaleDateString('id-ID', {
                    weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' 
                 });
@@ -196,7 +208,7 @@ export default function UploadBill({ riwayatStruk = [] }) {
                       {/* Image Thumbnail */}
                       <div className="w-20 h-20 rounded-xl overflow-hidden shadow-inner border border-white/10 bg-white/5 flex-shrink-0">
                         <img 
-                          src={`/storage/${struk.gambar}`} 
+                          src={filePath}
                           alt="Struk" 
                           className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
                         />
@@ -222,7 +234,7 @@ export default function UploadBill({ riwayatStruk = [] }) {
                       </div>
 
                       {/* Download/View Action (Visual only) */}
-                      <a href={`/storage/${struk.gambar}`} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-300 hover:bg-blue-500 hover:text-white flex items-center justify-center transition-colors">
+                      <a href={filePath} target="_blank" rel="noreferrer" className="w-10 h-10 rounded-full bg-blue-500/20 text-blue-300 hover:bg-blue-500 hover:text-white flex items-center justify-center transition-colors">
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />

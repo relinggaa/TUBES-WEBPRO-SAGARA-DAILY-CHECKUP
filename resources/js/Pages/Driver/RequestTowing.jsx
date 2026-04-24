@@ -2,6 +2,19 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, usePage, router } from "@inertiajs/react";
 import { toast } from "react-toastify";
 
+const LEAFLET_CSS_URL = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
+const LEAFLET_JS_URL = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js";
+const NOMINATIM_REVERSE_URL = "https://nominatim.openstreetmap.org/reverse";
+
+const isTrustedExternalUrl = (value, expectedHost) => {
+  try {
+    const parsedUrl = new URL(value);
+    return parsedUrl.protocol === "https:" && parsedUrl.host === expectedHost;
+  } catch {
+    return false;
+  }
+};
+
 export default function RequestTowing({ riwayatTowing = [], activeTowing = null }) {
   const { flash } = usePage().props;
 
@@ -21,14 +34,16 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
   // Reverse geocode globally available
   const reverseGeocode = async (lat, lng) => {
     try {
-      const res = await fetch(
-        `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lng}&format=json`,
-        {
-          headers: {
-            "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
-          }
-        }
-      );
+      const reverseUrl = new URL(NOMINATIM_REVERSE_URL);
+      reverseUrl.searchParams.set("lat", String(lat));
+      reverseUrl.searchParams.set("lon", String(lng));
+      reverseUrl.searchParams.set("format", "json");
+
+      const res = await fetch(reverseUrl.toString(), {
+        headers: {
+          "Accept-Language": "id-ID,id;q=0.9,en-US;q=0.8,en;q=0.7",
+        },
+      });
       const data = await res.json();
       const addr = data.display_name || `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
       setLokasi(addr);
@@ -71,22 +86,27 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
 
     const loadLeaflet = async () => {
       // Inject Leaflet CSS
-      if (!document.getElementById("leaflet-css")) {
-        const link = document.createElement("link"); // NOSONAR
+      if (!document.getElementById("leaflet-css") && isTrustedExternalUrl(LEAFLET_CSS_URL, "unpkg.com")) {
+        const link = document.createElement("link");
         link.id = "leaflet-css";
         link.rel = "stylesheet";
-        link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"; // NOSONAR
-        document.head.appendChild(link); // NOSONAR
+        link.href = LEAFLET_CSS_URL;
+        link.referrerPolicy = "no-referrer";
+        document.head.appendChild(link);
       }
 
       // Inject Leaflet JS
       if (!window.L) {
+        if (!isTrustedExternalUrl(LEAFLET_JS_URL, "unpkg.com")) {
+          throw new Error("Invalid Leaflet script URL");
+        }
         await new Promise((resolve, reject) => {
-          const script = document.createElement("script"); // NOSONAR
-          script.src = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"; // NOSONAR
+          const script = document.createElement("script");
+          script.src = LEAFLET_JS_URL;
           script.onload = resolve;
           script.onerror = reject;
-          document.head.appendChild(script); // NOSONAR
+          script.referrerPolicy = "no-referrer";
+          document.head.appendChild(script);
         });
       }
 
@@ -114,7 +134,7 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
           transform: rotate(-45deg);
           box-shadow: 0 4px 14px rgba(99,102,241,0.6);
           border: 3px solid white;
-        "></div>`, // NOSONAR
+        "></div>`,
         iconSize: [36, 36],
         iconAnchor: [18, 36],
         popupAnchor: [0, -36],
