@@ -291,9 +291,9 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
 
         {/* Active Towing Alert */}
         {activeTowing && (
-          <div className="bg-indigo-500/20 backdrop-blur-xl border border-indigo-400/40 rounded-2xl p-5 shadow-xl relative overflow-hidden animate-slide-up">
+          <div className="bg-indigo-500/20 backdrop-blur-xl border border-indigo-400/40 rounded-2xl p-5 shadow-xl relative overflow-hidden">
             <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500/10 rounded-full blur-2xl"></div>
-            <div className="flex items-start gap-4">
+            <div className="flex items-start gap-4 mb-4">
               <div className="w-12 h-12 rounded-xl bg-indigo-500/30 border border-indigo-400/40 flex items-center justify-center flex-shrink-0">
                 <span className="text-2xl">🚨</span>
               </div>
@@ -312,18 +312,27 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
                   {statusConfig[activeTowing.status]?.label}
                 </div>
               </div>
-              {activeTowing.status === "Pending" && (
-                <button
-                  onClick={() => handleCancel(activeTowing.id)}
-                  className="flex-shrink-0 w-10 h-10 rounded-xl bg-red-500/20 hover:bg-red-500/40 border border-red-400/30 text-red-400 hover:text-red-300 flex items-center justify-center transition-all"
-                  title="Batalkan"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                  </svg>
-                </button>
-              )}
             </div>
+
+            {/* Tombol Batalkan Pengajuan - tampil hanya jika isproses = false */}
+            {!activeTowing.isproses ? (
+              <button
+                onClick={() => handleCancel(activeTowing.id)}
+                className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-red-500/20 hover:bg-red-500/30 border border-red-400/40 hover:border-red-400/70 text-red-300 hover:text-red-200 font-semibold text-sm transition-all duration-200 active:scale-95"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                Batalkan Pengajuan
+              </button>
+            ) : (
+              <div className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-white/5 border border-white/10 text-indigo-300/60 text-sm">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                </svg>
+                Tidak dapat dibatalkan — sedang diproses
+              </div>
+            )}
           </div>
         )}
 
@@ -544,12 +553,12 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
                         </div>
                       </div>
 
-                      {/* Cancel button only for Pending status in history */}
-                      {item.status === "Pending" && item.id !== activeTowing?.id && (
+                      {/* Batalkan di history: hanya jika status Pending dan isproses = false */}
+                      {item.status === "Pending" && !item.isproses && (
                         <button
                           onClick={() => handleCancel(item.id)}
                           className="flex-shrink-0 w-9 h-9 rounded-xl bg-red-500/20 hover:bg-red-500/40 border border-red-400/30 text-red-400 hover:text-red-300 flex items-center justify-center transition-all"
-                          title="Batalkan"
+                          title="Batalkan Pengajuan"
                         >
                           <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />

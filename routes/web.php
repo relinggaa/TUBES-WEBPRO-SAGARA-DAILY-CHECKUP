@@ -8,6 +8,7 @@ use App\Http\Controllers\AdminAuthController;
 use App\Http\Controllers\DriverAuthController;
 use App\Http\Controllers\MekanikAuthController;
 use App\Http\Controllers\StrukBensinController;
+use App\Http\Controllers\TowingController;
 
 Route::get('/', function () {
     return inertia('Landing');
@@ -62,9 +63,9 @@ Route::middleware(['driver'])->prefix('driver')->group(function () {
 
     Route::get('/struk-bensin', [StrukBensinController::class, 'index'])->name('driver.struk-bensin');
     Route::post('/struk-bensin', [StrukBensinController::class, 'store'])->name('driver.struk-bensin.store');
-    Route::get('/towing', function () {
-        return inertia('Driver/RequestTowing');
-    })->name('driver.towing');
+    Route::get('/towing', [TowingController::class, 'index'])->name('driver.towing');
+    Route::post('/towing', [TowingController::class, 'store'])->name('driver.towing.store');
+    Route::post('/towing/cancel', [TowingController::class, 'cancel'])->name('driver.towing.cancel');
 });
 
 // Mekanik Auth Routes 
