@@ -22,7 +22,7 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: "8.4"
-          coverage: none
+          coverage: pcov
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -52,8 +52,15 @@ jobs:
       - name: Build frontend assets for tests
         run: npm run build
 
-      - name: Run test suite
-        run: php artisan test
+      - name: Run test suite with coverage
+        run: php artisan test --coverage-clover=coverage/clover.xml
+
+      - name: Upload PHP coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: php-coverage-report
+          path: coverage/clover.xml
+          retention-days: 1
 
   frontend-build:
     name: Frontend Build (Node 20)
@@ -119,10 +126,16 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Download coverage report
+      - name: Download JS coverage report
         uses: actions/download-artifact@v4
         with:
           name: lcov-report
+          path: coverage
+
+      - name: Download PHP coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: php-coverage-report
           path: coverage
 
       - name: SonarCloud Scan
@@ -132,8 +145,9 @@ jobs:
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
             -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.php.coverage.reportPaths=coverage/clover.xml
             -Dsonar.sources=resources/js,app
-            -Dsonar.tests=resources/js/__tests__
+            -Dsonar.tests=resources/js/__tests__,tests
             -Dsonar.exclusions=vendor/**,node_modules/**,public/**,storage/**,bootstrap/cache/**,resources/js/__tests__/**
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
