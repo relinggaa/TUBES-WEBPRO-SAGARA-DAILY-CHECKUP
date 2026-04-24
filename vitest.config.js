@@ -7,5 +7,15 @@ export default defineConfig({
     environment: 'jsdom',
     globals: true,
     include: ['resources/js/__tests__/**/*.{test,spec}.{js,jsx}'],
+    coverage: {
+      provider: 'v8',
+      reporter: ['lcov', 'text'],
+      reportsDirectory: './coverage',
+      include: ['resources/js/**/*.{js,jsx}'],
+      exclude: [
+        'resources/js/__tests__/**',
+        'resources/js/bootstrap.js',
+      ],
+    },
   },
 });

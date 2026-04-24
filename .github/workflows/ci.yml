@@ -92,8 +92,18 @@ jobs:
       - name: Install Node dependencies
         run: npm ci
 
-      - name: Run frontend unit tests
-        run: npm run test -- --run
+      - name: Install coverage provider
+        run: npm install --save-dev @vitest/coverage-v8
+
+      - name: Run frontend unit tests with coverage
+        run: npm run test -- --run --coverage
+
+      - name: Upload coverage report
+        uses: actions/upload-artifact@v4
+        with:
+          name: lcov-report
+          path: coverage/lcov.info
+          retention-days: 1
 
   sonarcloud:
     name: SonarCloud Scan
@@ -109,11 +119,21 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Download coverage report
+        uses: actions/download-artifact@v4
+        with:
+          name: lcov-report
+          path: coverage
+
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@e44258b109568baa0df60ed515909fc6c72cba92 # v2.3.0
         with:
           args: >
             -Dsonar.projectKey=${{ vars.SONAR_PROJECT_KEY }}
             -Dsonar.organization=${{ vars.SONAR_ORGANIZATION }}
+            -Dsonar.javascript.lcov.reportPaths=coverage/lcov.info
+            -Dsonar.sources=resources/js,app
+            -Dsonar.tests=resources/js/__tests__
+            -Dsonar.exclusions=vendor/**,node_modules/**,public/**,storage/**,bootstrap/cache/**,resources/js/__tests__/**
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
