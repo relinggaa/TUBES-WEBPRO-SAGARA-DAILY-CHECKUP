@@ -5,6 +5,8 @@ import { toast } from 'react-toastify';
 
 const NavbarAdmin = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [pengajuanMenuOpen, setPengajuanMenuOpen] = useState(false);
+    const [mobilePengajuanOpen, setMobilePengajuanOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
@@ -14,6 +16,7 @@ const NavbarAdmin = () => {
     const { themeColor, changeTheme, currentTheme, themeConfig } = useTheme();
     const dropdownRef = useRef(null);
     const userMenuButtonRef = useRef(null);
+    const pengajuanDropdownRef = useRef(null);
 
 
     useEffect(() => {
@@ -41,6 +44,25 @@ const NavbarAdmin = () => {
             document.removeEventListener('click', handleClickOutside);
         };
     }, [isUserMenuOpen]);
+
+    useEffect(() => {
+        if (!pengajuanMenuOpen) return;
+
+        const handleClickOutside = (event) => {
+            if (!pengajuanDropdownRef.current?.contains(event.target)) {
+                setPengajuanMenuOpen(false);
+            }
+        };
+
+        const timeoutId = setTimeout(() => {
+            document.addEventListener('click', handleClickOutside);
+        }, 0);
+
+        return () => {
+            clearTimeout(timeoutId);
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, [pengajuanMenuOpen]);
    
     const user = props?.auth?.user || props?.user || (props && Object.keys(props).length > 0 ? props : null);
     
@@ -94,7 +116,13 @@ const NavbarAdmin = () => {
         { name: 'Dashboard', href: '/admin/dashboard' },
         { name: 'Generate Key', href: '/admin/generate-key' },
         { name: 'Kendaraan', href: '/admin/kendaraan' },
-        { name: 'Pengajuan Perbaikan', href: '/admin/pengajuan-perbaikan' },
+        {
+            name: 'Pengajuan',
+            children: [
+                { name: 'Pengajuan Perbaikan', href: '/admin/pengajuan-perbaikan' },
+                { name: 'Pengajuan Towing', href: '/admin/pengajuan-towing' },
+            ],
+        },
         { name: 'Laporan Biaya', href: '/admin/laporan-biaya' },
     ];
 
@@ -103,6 +131,16 @@ const NavbarAdmin = () => {
             return url === '/';
         }
         return url.startsWith(path);
+    };
+
+    const isNavItemActive = (item) => {
+        if (item.href) {
+            return isActive(item.href);
+        }
+        if (item.children) {
+            return item.children.some((c) => isActive(c.href));
+        }
+        return false;
     };
 
     // Menggunakan class mappings dari ThemeContext
@@ -147,22 +185,94 @@ const NavbarAdmin = () => {
 
             
                     <div className="hidden md:flex md:items-center md:space-x-2">
-                        {menuItems.map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                className={`relative text-sm font-medium transition-all duration-300 px-4 py-2 rounded-full group ${
-                                    isActive(item.href)
-                                        ? `bg-gradient-to-r ${currentTheme.colors.button} text-white shadow-lg shadow-${themeColors.glow}/20`
-                                        : 'text-white/80 hover:text-white hover:bg-white/5'
-                                }`}
-                            >
-                                {item.name}
-                                {isActive(item.href) && (
-                                    <span className={`absolute inset-0 rounded-full bg-gradient-to-r from-${themeColors.bg}/20 to-transparent blur-xl -z-10`}></span>
-                                )}
-                            </Link>
-                        ))}
+                        {menuItems.map((item) => {
+                            if (item.children) {
+                                const submenuActive = item.children.some((c) => isActive(c.href));
+                                return (
+                                    <div key={item.name} className="relative" ref={pengajuanDropdownRef}>
+                                        <button
+                                            type="button"
+                                            aria-expanded={pengajuanMenuOpen}
+                                            aria-haspopup="true"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setPengajuanMenuOpen((o) => !o);
+                                            }}
+                                            className={`relative flex items-center gap-1 text-sm font-medium transition-all duration-300 px-4 py-2 rounded-full group ${
+                                                submenuActive || pengajuanMenuOpen
+                                                    ? `bg-gradient-to-r ${currentTheme.colors.button} text-white shadow-lg shadow-${themeColors.glow}/20`
+                                                    : 'text-white/80 hover:text-white hover:bg-white/5'
+                                            }`}
+                                        >
+                                            <span>{item.name}</span>
+                                            <svg
+                                                className={`w-4 h-4 transition-transform shrink-0 ${pengajuanMenuOpen ? 'rotate-180' : ''}`}
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                            {submenuActive && !pengajuanMenuOpen && (
+                                                <span className={`absolute inset-0 rounded-full bg-gradient-to-r from-${themeColors.bg}/20 to-transparent blur-xl -z-10`}></span>
+                                            )}
+                                        </button>
+                                        {pengajuanMenuOpen && (
+                                            <div
+                                                className="absolute left-0 top-full mt-2 min-w-[15rem] bg-[#1E1730]/95 backdrop-blur-xl rounded-2xl py-2 z-[60]"
+                                                style={{
+                                                    borderColor: `${currentTheme.hex.primary}33`,
+                                                    boxShadow: `0 20px 40px -12px ${currentTheme.hex.primary}44`,
+                                                    borderWidth: '1px',
+                                                    borderStyle: 'solid',
+                                                }}
+                                                role="menu"
+                                            >
+                                                {item.children.map((sub) => (
+                                                    <Link
+                                                        key={sub.href}
+                                                        href={sub.href}
+                                                        role="menuitem"
+                                                        className={`block px-4 py-3 text-sm font-medium rounded-lg mx-2 transition-colors ${
+                                                            isActive(sub.href)
+                                                                ? 'text-white shadow-md'
+                                                                : 'text-white/85 hover:bg-white/[0.07] hover:text-white'
+                                                        }`}
+                                                        style={
+                                                            isActive(sub.href)
+                                                                ? {
+                                                                      background: `linear-gradient(to right, ${currentTheme.hex.primary}35, ${currentTheme.hex.secondary}25)`,
+                                                                  }
+                                                                : {}
+                                                        }
+                                                        onClick={() => setPengajuanMenuOpen(false)}
+                                                    >
+                                                        {sub.name}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            }
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={`relative text-sm font-medium transition-all duration-300 px-4 py-2 rounded-full group ${
+                                        isNavItemActive(item)
+                                            ? `bg-gradient-to-r ${currentTheme.colors.button} text-white shadow-lg shadow-${themeColors.glow}/20`
+                                            : 'text-white/80 hover:text-white hover:bg-white/5'
+                                    }`}
+                                >
+                                    {item.name}
+                                    {isNavItemActive(item) && (
+                                        <span className={`absolute inset-0 rounded-full bg-gradient-to-r from-${themeColors.bg}/20 to-transparent blur-xl -z-10`}></span>
+                                    )}
+                                </Link>
+                            );
+                        })}
                         
            
                         <div className={`relative ml-4 pl-4 border-l border-${themeColors.border}/20`} style={{ position: 'relative', zIndex: 100 }}>
@@ -443,20 +553,72 @@ const NavbarAdmin = () => {
             {isMobileMenuOpen && (
                 <div className={`md:hidden mt-4 mx-4 bg-[#1E1730]/95 backdrop-blur-xl rounded-2xl px-4 py-3 border border-${themeColors.border}/20 shadow-2xl animate-in slide-in-from-top-2 duration-300 relative z-40`}>
                     <div className="space-y-1">
-                        {menuItems.map((item) => (
-                            <Link
-                                key={item.href}
-                                href={item.href}
-                                onClick={() => setIsMobileMenuOpen(false)}
-                                className={`block text-base font-medium transition-all duration-200 rounded-lg ${
-                                    isActive(item.href)
-                                        ? `bg-gradient-to-r ${currentTheme.colors.button} text-white px-4 py-3 shadow-lg shadow-${themeColors.glow}/20`
-                                        : 'text-white/80 hover:text-white hover:bg-white/5 px-4 py-3'
-                                }`}
-                            >
-                                {item.name}
-                            </Link>
-                        ))}
+                        {menuItems.map((item) => {
+                            if (item.children) {
+                                const submenuActive = item.children.some((c) => isActive(c.href));
+                                return (
+                                    <div key={item.name}>
+                                        <button
+                                            type="button"
+                                            onClick={() => setMobilePengajuanOpen((o) => !o)}
+                                            className={`w-full flex items-center justify-between text-base font-medium transition-all duration-200 rounded-lg ${
+                                                submenuActive
+                                                    ? `bg-gradient-to-r ${currentTheme.colors.button} text-white px-4 py-3 shadow-lg shadow-${themeColors.glow}/20`
+                                                    : 'text-white/90 hover:bg-white/5 px-4 py-3 text-left'
+                                            }`}
+                                        >
+                                            <span>{item.name}</span>
+                                            <svg
+                                                className={`w-5 h-5 shrink-0 transition-transform ${mobilePengajuanOpen ? 'rotate-180' : ''}`}
+                                                fill="none"
+                                                viewBox="0 0 24 24"
+                                                stroke="currentColor"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
+                                        </button>
+                                        {mobilePengajuanOpen && (
+                                            <div
+                                                className="ml-4 pl-4 py-2 space-y-1 border-l mt-1"
+                                                style={{ borderColor: `${currentTheme.hex.primary}55` }}
+                                            >
+                                                {item.children.map((sub) => (
+                                                    <Link
+                                                        key={sub.href}
+                                                        href={sub.href}
+                                                        onClick={() => {
+                                                            setIsMobileMenuOpen(false);
+                                                            setMobilePengajuanOpen(false);
+                                                        }}
+                                                        className={`block text-sm font-medium transition-all rounded-lg px-4 py-2.5 ${
+                                                            isActive(sub.href)
+                                                                ? `bg-gradient-to-r ${currentTheme.colors.button} text-white shadow-md`
+                                                                : 'text-white/85 hover:bg-white/[0.07]'
+                                                        }`}
+                                                    >
+                                                        {sub.name}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            }
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    onClick={() => setIsMobileMenuOpen(false)}
+                                    className={`block text-base font-medium transition-all duration-200 rounded-lg ${
+                                        isNavItemActive(item)
+                                            ? `bg-gradient-to-r ${currentTheme.colors.button} text-white px-4 py-3 shadow-lg shadow-${themeColors.glow}/20`
+                                            : 'text-white/80 hover:text-white hover:bg-white/5 px-4 py-3'
+                                    }`}
+                                >
+                                    {item.name}
+                                </Link>
+                            );
+                        })}
                         
                         {/* User Info & Logout - Mobile */}
                         <div className={`pt-4 mt-4 border-t border-${themeColors.border}/20 space-y-2`}>

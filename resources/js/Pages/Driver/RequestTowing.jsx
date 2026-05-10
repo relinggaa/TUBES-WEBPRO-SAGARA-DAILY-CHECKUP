@@ -15,14 +15,22 @@ const isTrustedExternalUrl = (value, expectedHost) => {
   }
 };
 
-export default function RequestTowing({ riwayatTowing = [], activeTowing = null }) {
+const emptyRiwayatPaginated = { data: [], links: [], total: 0 };
+
+export default function RequestTowing({ riwayatTowing = emptyRiwayatPaginated, activeTowing = null }) {
   const { flash } = usePage().props;
+
+  const historyItems = Array.isArray(riwayatTowing) ? riwayatTowing : (riwayatTowing?.data ?? []);
+  const historyLinks = Array.isArray(riwayatTowing) ? [] : (riwayatTowing?.links ?? []);
+  const historyTotal = Array.isArray(riwayatTowing) ? riwayatTowing.length : (riwayatTowing?.total ?? historyItems.length);
+  const historyEmpty = historyTotal === 0;
 
   // Form state
   const [lokasi, setLokasi] = useState("");
   const [keterangan, setKeterangan] = useState("");
   const [coords, setCoords] = useState(null); // { lat, lng }
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [gettingLocation, setGettingLocation] = useState(false);
   const [mapLoaded, setMapLoaded] = useState(false);
 
   // Map refs
@@ -182,6 +190,70 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
     };
   }, []);
 
+  const handleUseCurrentLocation = () => {
+    if (!navigator.geolocation) {
+      toast.error("Perangkat ini tidak mendukung geolokasi.", {
+        position: "top-right",
+        autoClose: 4000,
+        style: {
+          backgroundColor: "#1e293b",
+          color: "#ffffff",
+          border: "1px solid #ef444440",
+          borderRadius: "12px",
+        },
+      });
+      return;
+    }
+    setGettingLocation(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const lat = pos.coords.latitude;
+        const lng = pos.coords.longitude;
+        const map = leafletMapRef.current;
+        if (map) {
+          const zoom = Math.max(map.getZoom(), 15);
+          map.setView([lat, lng], zoom, { animate: true });
+        } else {
+          setCoords({ lat, lng });
+          reverseGeocode(lat, lng);
+        }
+        setGettingLocation(false);
+        toast.success("Lokasi saat ini diterapkan.", {
+          position: "top-right",
+          autoClose: 2500,
+          style: {
+            backgroundColor: "#1e293b",
+            color: "#ffffff",
+            border: "1px solid #3b82f640",
+            borderRadius: "12px",
+          },
+        });
+      },
+      (err) => {
+        setGettingLocation(false);
+        let message = "Tidak dapat mengambil lokasi.";
+        if (err.code === 1) {
+          message = "Izin akses lokasi ditolak. Aktifkan di pengaturan browser Anda.";
+        } else if (err.code === 2) {
+          message = "Informasi lokasi tidak tersedia.";
+        } else if (err.code === 3) {
+          message = "Permintaan lokasi kedaluwarsa. Coba lagi.";
+        }
+        toast.error(message, {
+          position: "top-right",
+          autoClose: 4000,
+          style: {
+            backgroundColor: "#1e293b",
+            color: "#ffffff",
+            border: "1px solid #ef444440",
+            borderRadius: "12px",
+          },
+        });
+      },
+      { enableHighAccuracy: true, timeout: 15000, maximumAge: 0 }
+    );
+  };
+
   const handleSubmit = () => {
     if (!lokasi.trim()) {
       toast.error("Lokasi harus diisi!", { position: "top-right", autoClose: 3000 });
@@ -333,6 +405,14 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
                 Tidak dapat dibatalkan — sedang diproses
               </div>
             )}
+
+            {activeTowing.status === "Diproses" && (
+              <p className="text-cyan-200/95 text-xs mt-3 pt-3 border-t border-white/10 leading-relaxed">
+                Di halaman <span className="font-semibold text-white">Dashboard</span>, kendaraan Anda tampil sebagai{" "}
+                <span className="font-semibold">Pengajuan Perbaikan</span>
+                dengan kendala sesuai lokasi dan keterangan towing yang Anda kirim, agar tim dapat menindaklanjuti satu jalur pengajuan.
+              </p>
+            )}
           </div>
         )}
 
@@ -363,6 +443,33 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
               </div>
             )}
           </div>
+
+          {!activeTowing && (
+            <button
+              type="button"
+              onClick={handleUseCurrentLocation}
+              disabled={gettingLocation}
+              className="w-full flex items-center justify-center gap-2 text-sm font-semibold text-indigo-100 hover:text-white bg-indigo-500/25 hover:bg-indigo-500/35 border border-indigo-400/40 hover:border-indigo-300/60 rounded-xl px-4 py-3 mb-4 transition-all disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.99]"
+            >
+              {gettingLocation ? (
+                <>
+                  <svg className="animate-spin h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" aria-hidden>
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" />
+                  </svg>
+                  <span>Mencari lokasi...</span>
+                </>
+              ) : (
+                <>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden>
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a2 2 0 01-2.828 0L6.344 17.677M12 21a9 9 0 100-18 9 9 0 000 18z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 12h.01" />
+                  </svg>
+                  <span>Gunakan lokasi saat ini</span>
+                </>
+              )}
+            </button>
+          )}
 
           <p className="text-indigo-300 text-xs text-center mb-1">💡 Geser peta untuk mengubah titik penjemputan towing.</p>
           <p className="text-indigo-400/90 text-xs text-center">Lokasi diisi otomatis dari titik tengah peta, lalu bisa Anda edit manual.</p>
@@ -412,12 +519,13 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
               {/* Keterangan Field */}
               <div>
                 <label className="block text-indigo-200 text-sm font-medium mb-2">
-                  Keterangan Tambahan (opsional)
+                  Keterangan Tambahan   <span className="text-red-400">*</span>
                 </label>
                 <textarea
                   value={keterangan}
                   onChange={(e) => setKeterangan(e.target.value)}
                   rows="3"
+                  required
                   className="w-full rounded-xl border border-white/20 bg-white/10 backdrop-blur-sm py-3 px-4 text-white placeholder-indigo-300/60 shadow-lg outline-none focus:border-indigo-400/60 focus:ring-2 focus:ring-indigo-400/30 transition-all resize-none text-sm"
                   placeholder="Contoh: Ban kempis di tengah jalan tol..."
                 />
@@ -480,7 +588,7 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
             History Towing
           </h3>
 
-          {riwayatTowing.length === 0 ? (
+          {historyEmpty ? (
             <div className="bg-white/10 backdrop-blur-md rounded-2xl p-8 shadow-xl border border-white/10 text-center">
               <div className="w-16 h-16 rounded-full flex items-center justify-center bg-indigo-500/20 mx-auto mb-3">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" className="w-8 h-8 text-indigo-300">
@@ -493,7 +601,15 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
             </div>
           ) : (
             <div className="space-y-3">
-              {riwayatTowing.map((item, index) => {
+              {historyTotal > historyItems.length && (
+                <p className="text-indigo-300/90 text-xs px-2">
+                  Total {historyTotal} riwayat
+                  {riwayatTowing?.from != null && riwayatTowing?.to != null && (
+                    <span className="text-indigo-400/80"> · halaman #{riwayatTowing?.current_page ?? 1}</span>
+                  )}
+                </p>
+              )}
+              {historyItems.map((item, index) => {
                 const cfg = statusConfig[item.status] || statusConfig.Pending;
                 const dateObj = new Date(item.created_at);
                 const formattedDate = dateObj.toLocaleDateString("id-ID", {
@@ -569,6 +685,27 @@ export default function RequestTowing({ riwayatTowing = [], activeTowing = null 
                   </div>
                 );
               })}
+              {historyLinks.length > 1 && (
+                <nav className="flex flex-wrap gap-2 justify-center items-center pt-4 pb-2" aria-label="Pagination riwayat towing">
+                  {historyLinks.map((link, idx) =>
+                    link.url ? (
+                      <Link
+                        key={`h-${idx}`}
+                        href={link.url}
+                        preserveScroll
+                        className={`px-3 py-2 rounded-xl text-xs font-semibold transition-all border ${
+                          link.active
+                            ? "bg-gradient-to-r from-indigo-500 to-violet-600 text-white border-transparent shadow-lg shadow-indigo-500/30"
+                            : "border-white/15 text-white/85 hover:bg-white/10 hover:border-white/25"
+                        }`}
+                        dangerouslySetInnerHTML={{ __html: link.label }}
+                      />
+                    ) : (
+                      <span key={`hs-${idx}`} className="px-3 py-2 text-xs text-white/35" dangerouslySetInnerHTML={{ __html: link.label }} />
+                    )
+                  )}
+                </nav>
+              )}
             </div>
           )}
         </div>

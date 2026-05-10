@@ -69,6 +69,7 @@ const mockActiveTowing = {
   id: 3,
   lokasi: 'Jl. MH Thamrin, Jakarta',
   status: 'Diproses',
+  isproses: true,
 };
 
 beforeEach(() => {

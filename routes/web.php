@@ -26,6 +26,8 @@ Route::middleware(['admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminAuthController::class, 'dashboard'])->name('admin.dashboard');
     Route::post('/update-gambar', [AdminAuthController::class, 'updateGambar'])->name('admin.update-gambar');
     Route::get('/pengajuan-perbaikan', [KerusakanController::class, 'index'])->name('admin.pengajuan-perbaikan');
+    Route::get('/pengajuan-towing', [TowingController::class, 'adminIndex'])->name('admin.pengajuan-towing');
+    Route::post('/towing/update-status', [TowingController::class, 'adminUpdateStatus'])->name('admin.towing.update-status');
     Route::post('/kerusakan/approve', [KerusakanController::class, 'approve'])->name('admin.kerusakan.approve');
     Route::get('/laporan-biaya', [App\Http\Controllers\BillController::class, 'index'])->name('admin.laporan-biaya');
     Route::prefix('kendaraan')->name('kendaraan.')->group(function () {

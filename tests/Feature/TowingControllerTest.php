@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Kendaraan;
+use App\Models\Kerusakan;
 use App\Models\Towing;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -9,7 +11,7 @@ use Tests\TestCase;
 
 /**
  * Feature tests for TowingController.
- * Methods: index, store, cancel
+ * Methods: index, store, cancel, adminIndex, adminUpdateStatus
  */
 class TowingControllerTest extends TestCase
 {
@@ -50,6 +52,16 @@ class TowingControllerTest extends TestCase
             'keterangan' => null,
             'status'     => 'Pending',
             'isproses'   => false,
+        ], $extra));
+    }
+
+    private function createKendaraan(User $driver, array $extra = []): Kendaraan
+    {
+        return Kendaraan::create(array_merge([
+            'merek'      => 'Test',
+            'plat_nomor' => 'B' . substr(uniqid('', true), -8),
+            'driver_id'  => $driver->id,
+            'status'     => 'Normal',
         ], $extra));
     }
 
@@ -123,7 +135,8 @@ class TowingControllerTest extends TestCase
         $this->actingAs($driver)
             ->get(route('driver.towing'))
             ->assertInertia(fn ($page) => $page
-                ->count('riwayatTowing', 3)
+                ->where('riwayatTowing.total', 3)
+                ->has('riwayatTowing.data', 3)
             );
     }
 
@@ -155,7 +168,8 @@ class TowingControllerTest extends TestCase
         $this->actingAs($driver1)
             ->get(route('driver.towing'))
             ->assertInertia(fn ($page) => $page
-                ->count('riwayatTowing', 1)
+                ->where('riwayatTowing.total', 1)
+                ->has('riwayatTowing.data', 1)
             );
     }
 
@@ -482,5 +496,168 @@ class TowingControllerTest extends TestCase
             ->assertStatus(302);
 
         $this->assertDatabaseHas('towings', ['id' => $towing->id]);
+    }
+
+    // =========================================================================
+    // admin (admin.pengajuan-towing, admin.towing.update-status)
+    // =========================================================================
+
+    public function test_admin_pengajuan_towing_renders_with_pagination(): void
+    {
+        $admin  = $this->makeAdmin();
+        $driver = $this->makeDriver();
+        $this->createTowing($driver, ['lokasi' => 'Jl. Alfa Bandung']);
+
+        $this->actingAs($admin)
+            ->get(route('admin.pengajuan-towing'))
+            ->assertStatus(200)
+            ->assertInertia(fn ($page) => $page
+                ->component('Driver/TowingAdmin')
+                ->has('towings.data', 1)
+                ->has('towings.data.0', fn ($tow) => $tow
+                    ->where('driver_id', $driver->id)
+                    ->etc()
+                )
+                ->has('filters')
+            );
+    }
+
+    public function test_admin_pengajuan_towing_search_filters_by_lokasi(): void
+    {
+        $admin   = $this->makeAdmin();
+        $driver  = $this->makeDriver();
+        $shown   = $this->createTowing($driver, ['lokasi' => 'Jl. XYZ Khusus Pencarian']);
+        $driver2 = $this->makeDriver();
+        $hidden  = $this->createTowing($driver2, ['lokasi' => 'Jl. ZZZ Lain']);
+
+        $this->actingAs($admin)
+            ->get(route('admin.pengajuan-towing', ['search' => 'Khusus Pencarian']))
+            ->assertOk()
+            ->assertInertia(fn ($page) => $page
+                ->where('towings.total', 1)
+                ->where('towings.data.0.id', $shown->id)
+            );
+
+        $this->assertNotEquals($shown->id, $hidden->id);
+    }
+
+    public function test_admin_update_status_pending_to_diproses(): void
+    {
+        $admin  = $this->makeAdmin();
+        $driver = $this->makeDriver();
+        $towing = $this->createTowing($driver, ['status' => 'Pending', 'isproses' => false]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.towing.update-status'), [
+                'towing_id' => $towing->id,
+                'action'    => 'process',
+            ])
+            ->assertSessionHas('success');
+
+        $towing->refresh();
+        $this->assertSame('Diproses', $towing->status);
+        $this->assertTrue($towing->isproses);
+    }
+
+    public function test_admin_process_towing_sets_kendaraan_pengajuan_dan_kerusakan_dari_towing(): void
+    {
+        $admin     = $this->makeAdmin();
+        $driver    = $this->makeDriver();
+        $kendaraan = $this->createKendaraan($driver, ['status' => 'Normal']);
+        $towing    = $this->createTowing($driver, [
+            'status'     => 'Pending',
+            'isproses'   => false,
+            'keterangan' => 'Mobil mogok di tol',
+            'lokasi'     => 'KM 42 arah Bandung',
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.towing.update-status'), [
+                'towing_id' => $towing->id,
+                'action'    => 'process',
+            ])
+            ->assertSessionHas('success');
+
+        $kendaraan->refresh();
+        $this->assertSame('Pengajuan Perbaikan', $kendaraan->status);
+
+        $kerusakan = Kerusakan::where('kendaraan_id', $kendaraan->id)->latest()->first();
+        $this->assertNotNull($kerusakan);
+        $this->assertStringContainsString('Mobil mogok di tol', (string) $kerusakan->catatan);
+        $this->assertStringContainsString('KM 42', (string) $kerusakan->catatan);
+        $this->assertIsArray($kerusakan->kendala);
+        $this->assertSame('Pengajuan Towing', $kerusakan->kendala[0]['name']);
+        $this->assertStringContainsString('KM 42 arah Bandung', (string) $kerusakan->kendala[0]['description']);
+    }
+
+    public function test_admin_process_towing_appends_kerusakan_jika_kendaraan_sudah_pengajuan(): void
+    {
+        $admin     = $this->makeAdmin();
+        $driver    = $this->makeDriver();
+        $kendaraan = $this->createKendaraan($driver, ['status' => 'Pengajuan Perbaikan']);
+        Kerusakan::create([
+            'kendaraan_id' => $kendaraan->id,
+            'catatan'      => 'Ada suara keras',
+            'kendala'      => [['name' => 'Rem', 'description' => 'Bunyi']],
+        ]);
+
+        $towing = $this->createTowing($driver, [
+            'status'     => 'Pending',
+            'keterangan' => 'Butuh derek',
+        ]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.towing.update-status'), [
+                'towing_id' => $towing->id,
+                'action'    => 'process',
+            ]);
+
+        $kendaraan->refresh();
+        $this->assertSame('Pengajuan Perbaikan', $kendaraan->status);
+        $this->assertSame(1, Kerusakan::where('kendaraan_id', $kendaraan->id)->count());
+
+        $latest = Kerusakan::where('kendaraan_id', $kendaraan->id)->latest()->first();
+        $this->assertCount(2, $latest->kendala ?? []);
+        $this->assertStringContainsString('Butuh derek', (string) $latest->catatan);
+    }
+
+    public function test_admin_process_towing_tidak_ubah_kendaraan_saat_status_perbaikan(): void
+    {
+        $admin     = $this->makeAdmin();
+        $driver    = $this->makeDriver();
+        $kendaraan = $this->createKendaraan($driver, ['status' => 'Perbaikan']);
+        $towing    = $this->createTowing($driver, ['status' => 'Pending', 'isproses' => false]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.towing.update-status'), [
+                'towing_id' => $towing->id,
+                'action'    => 'process',
+            ]);
+
+        $kendaraan->refresh();
+        $this->assertSame('Perbaikan', $kendaraan->status);
+        $this->assertSame(0, Kerusakan::where('kendaraan_id', $kendaraan->id)->count());
+    }
+
+    public function test_admin_update_status_diproses_to_selesai(): void
+    {
+        $admin  = $this->makeAdmin();
+        $driver = $this->makeDriver();
+        $towing = $this->createTowing($driver, ['status' => 'Diproses', 'isproses' => true]);
+
+        $this->actingAs($admin)
+            ->post(route('admin.towing.update-status'), [
+                'towing_id' => $towing->id,
+                'action'    => 'complete',
+            ])
+            ->assertSessionHas('success');
+
+        $towing->refresh();
+        $this->assertSame('Selesai', $towing->status);
+    }
+
+    public function test_admin_pengajuan_towing_blocked_for_guest(): void
+    {
+        $this->get(route('admin.pengajuan-towing'))->assertRedirect();
     }
 }
