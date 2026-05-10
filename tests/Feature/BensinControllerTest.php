@@ -44,6 +44,8 @@ class BensinControllerTest extends TestCase
         return StrukBensin::create(array_merge([
             'user_id' => $driver->id,
             'gambar' => 'struk_bensin/test.jpg',
+            'bank' => 'BRI',
+            'no_rekening' => '1234567890',
             'is_accept' => null,
         ], $extra));
     }
@@ -111,14 +113,62 @@ class BensinControllerTest extends TestCase
         $this->actingAs($driver)
             ->post(route('driver.struk-bensin.store'), [
                 'gambar' => UploadedFile::fake()->image('struk.jpg'),
+                'bank' => 'BCA',
+                'no_rekening' => '7770011223344',
             ])
             ->assertSessionHas('success');
 
         $struk = StrukBensin::where('user_id', $driver->id)->first();
 
         $this->assertNotNull($struk);
+        $this->assertSame('BCA', $struk->bank);
+        $this->assertSame('7770011223344', $struk->no_rekening);
         $this->assertNull($struk->is_accept);
         Storage::disk('public')->assertExists($struk->gambar);
+    }
+
+    /** [VALIDATION] Gagal upload jika bank tidak dikirim. */
+    public function test_store_fails_without_bank(): void
+    {
+        Storage::fake('public');
+        $driver = $this->makeDriver();
+
+        $this->actingAs($driver)
+            ->post(route('driver.struk-bensin.store'), [
+                'gambar' => UploadedFile::fake()->image('struk.jpg'),
+                'no_rekening' => '123',
+            ])
+            ->assertSessionHasErrors('bank');
+    }
+
+    /** [VALIDATION] Gagal upload jika bank tidak termasuk daftar. */
+    public function test_store_fails_with_invalid_bank(): void
+    {
+        Storage::fake('public');
+        $driver = $this->makeDriver();
+
+        $this->actingAs($driver)
+            ->post(route('driver.struk-bensin.store'), [
+                'gambar' => UploadedFile::fake()->image('struk.jpg'),
+                'bank' => 'BANK XYZ',
+                'no_rekening' => '123',
+            ])
+            ->assertSessionHasErrors('bank');
+    }
+
+    /** [VALIDATION] Gagal upload jika nomor rekening kosong. */
+    public function test_store_fails_without_no_rekening(): void
+    {
+        Storage::fake('public');
+        $driver = $this->makeDriver();
+
+        $this->actingAs($driver)
+            ->post(route('driver.struk-bensin.store'), [
+                'gambar' => UploadedFile::fake()->image('struk.jpg'),
+                'bank' => 'MANDIRI',
+                'no_rekening' => '   ',
+            ])
+            ->assertSessionHasErrors('no_rekening');
     }
 
     /** [VALIDATION] Gagal upload jika gambar tidak dikirim. */
@@ -173,6 +223,8 @@ class BensinControllerTest extends TestCase
         $this->actingAs($admin)
             ->post(route('driver.struk-bensin.store'), [
                 'gambar' => UploadedFile::fake()->image('struk.jpg'),
+                'bank' => 'BNI',
+                'no_rekening' => '1',
             ])
             ->assertStatus(302);
 

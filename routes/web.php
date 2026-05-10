@@ -30,6 +30,8 @@ Route::middleware(['admin'])->prefix('admin')->group(function () {
     Route::post('/towing/update-status', [TowingController::class, 'adminUpdateStatus'])->name('admin.towing.update-status');
     Route::post('/kerusakan/approve', [KerusakanController::class, 'approve'])->name('admin.kerusakan.approve');
     Route::get('/laporan-biaya', [App\Http\Controllers\BillController::class, 'index'])->name('admin.laporan-biaya');
+    Route::get('/laporan-bensin', [BensinController::class, 'adminIndex'])->name('admin.laporan-bensin');
+    Route::post('/laporan-bensin/reimburse', [BensinController::class, 'adminReimburse'])->name('admin.laporan-bensin.reimburse');
     Route::prefix('kendaraan')->name('kendaraan.')->group(function () {
         Route::get('/', [KendaraanController::class, 'index'])->name('index');
         Route::post('/', [KendaraanController::class, 'store'])->name('store');

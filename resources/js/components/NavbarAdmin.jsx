@@ -7,6 +7,8 @@ const NavbarAdmin = () => {
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [pengajuanMenuOpen, setPengajuanMenuOpen] = useState(false);
     const [mobilePengajuanOpen, setMobilePengajuanOpen] = useState(false);
+    const [laporanMenuOpen, setLaporanMenuOpen] = useState(false);
+    const [mobileLaporanOpen, setMobileLaporanOpen] = useState(false);
     const [isUserMenuOpen, setIsUserMenuOpen] = useState(false);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
     const [showImageModal, setShowImageModal] = useState(false);
@@ -17,6 +19,7 @@ const NavbarAdmin = () => {
     const dropdownRef = useRef(null);
     const userMenuButtonRef = useRef(null);
     const pengajuanDropdownRef = useRef(null);
+    const laporanDropdownRef = useRef(null);
 
 
     useEffect(() => {
@@ -63,6 +66,25 @@ const NavbarAdmin = () => {
             document.removeEventListener('click', handleClickOutside);
         };
     }, [pengajuanMenuOpen]);
+
+    useEffect(() => {
+        if (!laporanMenuOpen) return;
+
+        const handleClickOutside = (event) => {
+            if (!laporanDropdownRef.current?.contains(event.target)) {
+                setLaporanMenuOpen(false);
+            }
+        };
+
+        const timeoutId = setTimeout(() => {
+            document.addEventListener('click', handleClickOutside);
+        }, 0);
+
+        return () => {
+            clearTimeout(timeoutId);
+            document.removeEventListener('click', handleClickOutside);
+        };
+    }, [laporanMenuOpen]);
    
     const user = props?.auth?.user || props?.user || (props && Object.keys(props).length > 0 ? props : null);
     
@@ -123,7 +145,14 @@ const NavbarAdmin = () => {
                 { name: 'Pengajuan Towing', href: '/admin/pengajuan-towing' },
             ],
         },
-        { name: 'Laporan Biaya', href: '/admin/laporan-biaya' },
+        {
+            name: 'Laporan Biaya',
+            dropdownKey: 'laporan',
+            children: [
+                { name: 'Biaya Servis', href: '/admin/laporan-biaya' },
+                { name: 'Biaya Bensin', href: '/admin/laporan-bensin' },
+            ],
+        },
     ];
 
     const isActive = (path) => {
@@ -188,37 +217,45 @@ const NavbarAdmin = () => {
                         {menuItems.map((item) => {
                             if (item.children) {
                                 const submenuActive = item.children.some((c) => isActive(c.href));
+                                const isPengajuan = item.dropdownKey !== 'laporan';
+                                const isLaporan = item.dropdownKey === 'laporan';
+                                const menuOpen = isLaporan ? laporanMenuOpen : pengajuanMenuOpen;
+                                const setMenuOpen = isLaporan ? setLaporanMenuOpen : setPengajuanMenuOpen;
+                                const dropRef = isLaporan ? laporanDropdownRef : pengajuanDropdownRef;
+
                                 return (
-                                    <div key={item.name} className="relative" ref={pengajuanDropdownRef}>
+                                    <div key={item.name} className="relative" ref={dropRef}>
                                         <button
                                             type="button"
-                                            aria-expanded={pengajuanMenuOpen}
+                                            aria-expanded={menuOpen}
                                             aria-haspopup="true"
                                             onClick={(e) => {
                                                 e.preventDefault();
                                                 e.stopPropagation();
-                                                setPengajuanMenuOpen((o) => !o);
+                                                setMenuOpen((o) => !o);
+                                                if (isLaporan) setPengajuanMenuOpen(false);
+                                                else setLaporanMenuOpen(false);
                                             }}
                                             className={`relative flex items-center gap-1 text-sm font-medium transition-all duration-300 px-4 py-2 rounded-full group ${
-                                                submenuActive || pengajuanMenuOpen
+                                                submenuActive || menuOpen
                                                     ? `bg-gradient-to-r ${currentTheme.colors.button} text-white shadow-lg shadow-${themeColors.glow}/20`
                                                     : 'text-white/80 hover:text-white hover:bg-white/5'
                                             }`}
                                         >
                                             <span>{item.name}</span>
                                             <svg
-                                                className={`w-4 h-4 transition-transform shrink-0 ${pengajuanMenuOpen ? 'rotate-180' : ''}`}
+                                                className={`w-4 h-4 transition-transform shrink-0 ${menuOpen ? 'rotate-180' : ''}`}
                                                 fill="none"
                                                 viewBox="0 0 24 24"
                                                 stroke="currentColor"
                                             >
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                             </svg>
-                                            {submenuActive && !pengajuanMenuOpen && (
+                                            {submenuActive && !menuOpen && (
                                                 <span className={`absolute inset-0 rounded-full bg-gradient-to-r from-${themeColors.bg}/20 to-transparent blur-xl -z-10`}></span>
                                             )}
                                         </button>
-                                        {pengajuanMenuOpen && (
+                                        {menuOpen && (
                                             <div
                                                 className="absolute left-0 top-full mt-2 min-w-[15rem] bg-[#1E1730]/95 backdrop-blur-xl rounded-2xl py-2 z-[60]"
                                                 style={{
@@ -246,7 +283,7 @@ const NavbarAdmin = () => {
                                                                   }
                                                                 : {}
                                                         }
-                                                        onClick={() => setPengajuanMenuOpen(false)}
+                                                        onClick={() => setMenuOpen(false)}
                                                     >
                                                         {sub.name}
                                                     </Link>
@@ -556,11 +593,15 @@ const NavbarAdmin = () => {
                         {menuItems.map((item) => {
                             if (item.children) {
                                 const submenuActive = item.children.some((c) => isActive(c.href));
+                                const isLaporan = item.dropdownKey === 'laporan';
+                                const mobileOpen = isLaporan ? mobileLaporanOpen : mobilePengajuanOpen;
+                                const setMobileOpen = isLaporan ? setMobileLaporanOpen : setMobilePengajuanOpen;
+
                                 return (
                                     <div key={item.name}>
                                         <button
                                             type="button"
-                                            onClick={() => setMobilePengajuanOpen((o) => !o)}
+                                            onClick={() => setMobileOpen((o) => !o)}
                                             className={`w-full flex items-center justify-between text-base font-medium transition-all duration-200 rounded-lg ${
                                                 submenuActive
                                                     ? `bg-gradient-to-r ${currentTheme.colors.button} text-white px-4 py-3 shadow-lg shadow-${themeColors.glow}/20`
@@ -569,7 +610,7 @@ const NavbarAdmin = () => {
                                         >
                                             <span>{item.name}</span>
                                             <svg
-                                                className={`w-5 h-5 shrink-0 transition-transform ${mobilePengajuanOpen ? 'rotate-180' : ''}`}
+                                                className={`w-5 h-5 shrink-0 transition-transform ${mobileOpen ? 'rotate-180' : ''}`}
                                                 fill="none"
                                                 viewBox="0 0 24 24"
                                                 stroke="currentColor"
@@ -577,7 +618,7 @@ const NavbarAdmin = () => {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                                             </svg>
                                         </button>
-                                        {mobilePengajuanOpen && (
+                                        {mobileOpen && (
                                             <div
                                                 className="ml-4 pl-4 py-2 space-y-1 border-l mt-1"
                                                 style={{ borderColor: `${currentTheme.hex.primary}55` }}
@@ -588,7 +629,7 @@ const NavbarAdmin = () => {
                                                         href={sub.href}
                                                         onClick={() => {
                                                             setIsMobileMenuOpen(false);
-                                                            setMobilePengajuanOpen(false);
+                                                            setMobileOpen(false);
                                                         }}
                                                         className={`block text-sm font-medium transition-all rounded-lg px-4 py-2.5 ${
                                                             isActive(sub.href)

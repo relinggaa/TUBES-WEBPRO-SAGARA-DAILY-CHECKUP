@@ -49,13 +49,19 @@ const mockRiwayatStruk = [
   {
     id: 1,
     gambar: 'struk_bensin/dummy1.jpg',
-    created_at: '2026-04-24T10:00:00Z'
+    bank: 'BCA',
+    no_rekening: '111',
+    is_accept: null,
+    created_at: '2026-04-24T10:00:00Z',
   },
   {
     id: 2,
     gambar: 'struk_bensin/dummy2.jpg',
-    created_at: '2026-04-23T08:30:00Z'
-  }
+    bank: 'GOPAY',
+    no_rekening: '08123456789',
+    is_accept: true,
+    created_at: '2026-04-23T08:30:00Z',
+  },
 ];
 
 // Helper: pilih file di input
@@ -65,6 +71,11 @@ async function selectFile(filename = 'struk.png', type = 'image/png') {
   fireEvent.change(inputEl, { target: { files: [file] } });
   await waitFor(() => screen.getByAltText('Preview Struk'));
   return file;
+}
+
+function fillNoRekening(value = '1234567890') {
+  const input = document.getElementById('upload-no-rekening');
+  fireEvent.change(input, { target: { value } });
 }
 
 // ============================================================
@@ -105,7 +116,7 @@ describe('UploadBill Component', () => {
     expect(screen.getByText('Struk #2')).toBeDefined();
   });
 
-  it('4. Memunculkan file preview setelah input file dan tombol upload aktif', async () => {
+  it('4. Memunculkan file preview setelah input file; tombol upload aktif jika no rekening diisi', async () => {
     render(<UploadBill riwayatStruk={[]} />);
 
     await selectFile();
@@ -114,7 +125,11 @@ describe('UploadBill Component', () => {
     expect(imgPreview).toBeDefined();
     expect(imgPreview.src).toContain('blob:dummy-url');
 
-    const uploadBtn = screen.getByRole('button', { name: /upload struk bensin/i });
+    let uploadBtn = screen.getByRole('button', { name: /upload struk bensin/i });
+    expect(uploadBtn.disabled).toBe(true);
+
+    fillNoRekening('9876543210');
+    uploadBtn = screen.getByRole('button', { name: /upload struk bensin/i });
     expect(uploadBtn.disabled).toBe(false);
   });
 
@@ -122,6 +137,7 @@ describe('UploadBill Component', () => {
     render(<UploadBill riwayatStruk={[]} />);
 
     await selectFile();
+    fillNoRekening();
 
     // Tombol X berwarna merah ada di area preview
     const removePreviewBtn = document.querySelector('button.bg-red-500\\/80');
@@ -139,6 +155,7 @@ describe('UploadBill Component', () => {
     render(<UploadBill riwayatStruk={[]} />);
 
     const file = await selectFile();
+    fillNoRekening('5550011');
     const uploadBtn = screen.getByRole('button', { name: /upload struk bensin/i });
     fireEvent.click(uploadBtn);
 
@@ -148,6 +165,8 @@ describe('UploadBill Component', () => {
     const formDataSent = mockRouterPost.mock.calls[0][1];
     expect(formDataSent instanceof FormData).toBe(true);
     expect(formDataSent.get('gambar')).toBe(file);
+    expect(formDataSent.get('bank')).toBe('BRI');
+    expect(formDataSent.get('no_rekening')).toBe('5550011');
   });
 
   it('7. onSuccess callback mereset selectedFile dan preview', async () => {
@@ -157,6 +176,7 @@ describe('UploadBill Component', () => {
 
     render(<UploadBill riwayatStruk={[]} />);
     await selectFile();
+    fillNoRekening();
 
     const uploadBtn = screen.getByRole('button', { name: /upload struk bensin/i });
     fireEvent.click(uploadBtn);
@@ -174,6 +194,7 @@ describe('UploadBill Component', () => {
 
     render(<UploadBill riwayatStruk={[]} />);
     await selectFile();
+    fillNoRekening();
 
     const uploadBtn = screen.getByRole('button', { name: /upload struk bensin/i });
     fireEvent.click(uploadBtn);
