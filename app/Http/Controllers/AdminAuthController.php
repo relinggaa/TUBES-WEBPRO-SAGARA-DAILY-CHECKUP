@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Kerusakan;
 use App\Models\Bill;
 use App\Models\Keruskaanacc;
+use App\Models\AppSetting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -98,6 +99,41 @@ class AdminAuthController extends Controller
 
         return redirect()->back()
             ->with('success', 'Foto profil berhasil diupdate!');
+    }
+
+    public function updateLogo(Request $request)
+    {
+        $request->validate([
+            'logo' => 'required|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+        ], [
+            'logo.required' => 'File logo harus diisi',
+            'logo.image'   => 'File harus berupa gambar',
+            'logo.mimes'   => 'Logo harus berformat jpeg, png, jpg, gif, svg, atau webp',
+            'logo.max'     => 'Ukuran logo maksimal 2MB',
+        ]);
+
+        // Hapus logo lama jika ada
+        $oldLogo = AppSetting::get('logo');
+        if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
+            Storage::disk('public')->delete($oldLogo);
+        }
+
+        $path = $request->file('logo')->store('logos', 'public');
+        AppSetting::set('logo', $path);
+
+        return redirect()->back()->with('success', 'Logo berhasil diupdate!');
+    }
+
+    public function resetLogo()
+    {
+        $oldLogo = AppSetting::get('logo');
+        if ($oldLogo && Storage::disk('public')->exists($oldLogo)) {
+            Storage::disk('public')->delete($oldLogo);
+        }
+
+        AppSetting::set('logo', null);
+
+        return redirect()->back()->with('success', 'Logo berhasil direset ke default!');
     }
 
     public function dashboard()

@@ -14,8 +14,15 @@ const NavbarAdmin = () => {
     const [showImageModal, setShowImageModal] = useState(false);
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewUrl, setPreviewUrl] = useState(null);
+    // Logo states
+    const [showLogoModal, setShowLogoModal] = useState(false);
+    const [selectedLogoFile, setSelectedLogoFile] = useState(null);
+    const [logoPreviewUrl, setLogoPreviewUrl] = useState(null);
+    const [isUploadingLogo, setIsUploadingLogo] = useState(false);
     const { url, props } = usePage();
     const { themeColor, changeTheme, currentTheme, themeConfig } = useTheme();
+    const appLogo = props?.appLogo || null;
+    const appName = props?.appName || 'Sagara Daily Checkup';
     const dropdownRef = useRef(null);
     const userMenuButtonRef = useRef(null);
     const pengajuanDropdownRef = useRef(null);
@@ -134,6 +141,52 @@ const NavbarAdmin = () => {
         });
     };
 
+    // --- Logo handlers ---
+    const handleLogoFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            setSelectedLogoFile(file);
+            setLogoPreviewUrl(URL.createObjectURL(file));
+        }
+    };
+
+    const handleLogoUpload = () => {
+        if (!selectedLogoFile) return;
+        setIsUploadingLogo(true);
+        const formData = new FormData();
+        formData.append('logo', selectedLogoFile);
+
+        router.post('/admin/update-logo', formData, {
+            preserveScroll: true,
+            preserveState: false,
+            onSuccess: () => {
+                setShowLogoModal(false);
+                setSelectedLogoFile(null);
+                setLogoPreviewUrl(null);
+                setIsUploadingLogo(false);
+                toast.success('Logo berhasil diupdate!', { position: 'top-right', autoClose: 3000, hideProgressBar: true });
+            },
+            onError: (errors) => {
+                setIsUploadingLogo(false);
+                toast.error('Gagal mengupload logo. Pastikan file adalah gambar (maks. 2MB).', {
+                    position: 'top-right', autoClose: 5000, hideProgressBar: true,
+                });
+            }
+        });
+    };
+
+    const handleLogoReset = () => {
+        if (!confirm('Reset logo ke default (icon bawaan)?')) return;
+        router.post('/admin/reset-logo', {}, {
+            preserveScroll: true,
+            preserveState: false,
+            onSuccess: () => {
+                setShowLogoModal(false);
+                toast.success('Logo berhasil direset!', { position: 'top-right', autoClose: 3000, hideProgressBar: true });
+            }
+        });
+    };
+
     const menuItems = [
         { name: 'Dashboard', href: '/admin/dashboard' },
         { name: 'Generate Key', href: '/admin/generate-key' },
@@ -194,21 +247,40 @@ const NavbarAdmin = () => {
                 <div className={`bg-[#1E1730]/90 backdrop-blur-xl rounded-full px-6 py-3 flex justify-between items-center border border-${themeColors.border}/20 shadow-2xl shadow-${themeColors.glow}/10 hover:shadow-${themeColors.glow}/20 transition-all duration-300 relative`} style={{ overflow: 'visible' }}>
         
                     <Link href="/admin/dashboard" className="flex items-center space-x-3 group">
-                 
-                        <div className={`w-10 h-10 flex items-center justify-center rounded-lg bg-gradient-to-br from-${themeColors.bg}/20 to-${themeColors.bg}/30 group-hover:from-${themeColors.bg}/30 group-hover:to-${themeColors.bg}/40 transition-all duration-300 group-hover:scale-110`}>
-                            <svg 
-                                className="w-6 h-6 text-white drop-shadow-lg transition-all duration-300" 
-                                style={{ filter: `drop-shadow(0 0 8px ${currentTheme.hex.primary}80)` }}
-                                fill="none" 
-                                viewBox="0 0 24 24" 
-                                stroke="currentColor" 
-                                strokeWidth="1.5"
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-                            </svg>
+                        {/* Logo area - klik untuk ganti logo */}
+                        <div
+                            onClick={(e) => { e.preventDefault(); setShowLogoModal(true); }}
+                            title="Klik untuk ganti logo"
+                            className={`w-10 h-10 flex items-center justify-center rounded-lg bg-gradient-to-br from-${themeColors.bg}/20 to-${themeColors.bg}/30 group-hover:from-${themeColors.bg}/30 group-hover:to-${themeColors.bg}/40 transition-all duration-300 group-hover:scale-110 cursor-pointer overflow-hidden relative`}
+                            style={{ border: `1px solid ${currentTheme.hex.primary}30` }}
+                        >
+                            {appLogo ? (
+                                <img
+                                    src={`/storage/${appLogo}`}
+                                    alt="Logo"
+                                    className="w-full h-full object-contain p-0.5"
+                                />
+                            ) : (
+                                <svg
+                                    className="w-6 h-6 text-white drop-shadow-lg transition-all duration-300"
+                                    style={{ filter: `drop-shadow(0 0 8px ${currentTheme.hex.primary}80)` }}
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    strokeWidth="1.5"
+                                >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+                                </svg>
+                            )}
+                            {/* Edit overlay */}
+                            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 rounded-lg">
+                                <svg className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                            </div>
                         </div>
                         <span className={`text-white text-lg font-semibold bg-gradient-to-r from-white to-${themeColors.text} bg-clip-text text-transparent group-hover:from-${themeColors.text} group-hover:to-white transition-all duration-300`}>
-                            Sagara Daily Checkup
+                            {appName}
                         </span>
                     </Link>
 
@@ -443,6 +515,23 @@ const NavbarAdmin = () => {
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                                             </svg>
                                             <span>Ganti Foto Profil</span>
+                                        </button>
+                                        {/* Tombol Ganti Logo */}
+                                        <button
+                                            type="button"
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                                setShowLogoModal(true);
+                                                setIsUserMenuOpen(false);
+                                            }}
+                                            className="w-full px-4 py-2.5 text-left text-sm text-white/80 hover:text-white hover:bg-white/5 rounded-lg transition-all duration-200 flex items-center space-x-2 group"
+                                            style={{ position: 'relative', zIndex: 101, pointerEvents: 'auto', cursor: 'pointer' }}
+                                        >
+                                            <svg className="w-4 h-4 group-hover:scale-110 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <span>Ganti Logo Aplikasi</span>
                                         </button>
                                         <div className="relative" style={{ zIndex: 101, position: 'relative', overflow: 'visible' }}>
                                             <button 
@@ -822,7 +911,155 @@ const NavbarAdmin = () => {
                     </div>
                 </div>
             )}
-            
+
+            {/* Modal Ganti Logo */}
+            {showLogoModal && (
+                <div
+                    className="fixed inset-0 z-[9999] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm"
+                    onClick={() => {
+                        setShowLogoModal(false);
+                        setSelectedLogoFile(null);
+                        setLogoPreviewUrl(null);
+                    }}
+                >
+                    <div
+                        className="relative bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 rounded-3xl p-8 max-w-md w-full border shadow-2xl"
+                        style={{
+                            borderColor: `${currentTheme.hex.primary}40`,
+                            boxShadow: `0 25px 50px -12px ${currentTheme.hex.primary}40`
+                        }}
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        {/* Close */}
+                        <button
+                            onClick={() => {
+                                setShowLogoModal(false);
+                                setSelectedLogoFile(null);
+                                setLogoPreviewUrl(null);
+                            }}
+                            className="absolute top-4 right-4 w-10 h-10 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center transition-all"
+                        >
+                            <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+
+                        <h3 className="text-white text-2xl font-bold mb-2">Ganti Logo Aplikasi</h3>
+                        <p className="text-white/50 text-sm mb-6">Logo akan tampil di navbar dan seluruh halaman admin</p>
+
+                        {/* Preview Logo */}
+                        <div className="flex justify-center mb-6">
+                            <div
+                                className="relative w-32 h-32 rounded-2xl overflow-hidden border-4 flex items-center justify-center shadow-xl"
+                                style={{
+                                    borderColor: `${currentTheme.hex.primary}40`,
+                                    background: `linear-gradient(135deg, ${currentTheme.hex.primary}15, ${currentTheme.hex.secondary}10)`
+                                }}
+                            >
+                                {(logoPreviewUrl || appLogo) ? (
+                                    <img
+                                        src={logoPreviewUrl || `/storage/${appLogo}`}
+                                        alt="Logo Preview"
+                                        className="w-full h-full object-contain p-2"
+                                    />
+                                ) : (
+                                    <div className="flex flex-col items-center gap-2">
+                                        <svg className="w-12 h-12 text-white/30" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        <span className="text-white/30 text-xs">Default</span>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+
+                        {/* Status logo saat ini */}
+                        {appLogo && !logoPreviewUrl && (
+                            <div className="mb-4 flex items-center gap-2 px-3 py-2 rounded-xl" style={{ background: `${currentTheme.hex.primary}18` }}>
+                                <svg className="w-4 h-4 shrink-0" style={{ color: currentTheme.hex.primary }} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                </svg>
+                                <span className="text-white/70 text-xs">Logo kustom sedang aktif</span>
+                                <button
+                                    type="button"
+                                    onClick={handleLogoReset}
+                                    className="ml-auto text-xs font-semibold hover:underline"
+                                    style={{ color: currentTheme.hex.primary }}
+                                >
+                                    Reset ke default
+                                </button>
+                            </div>
+                        )}
+
+                        {/* File Input */}
+                        <div className="mb-6">
+                            <label className="block w-full cursor-pointer" htmlFor="logo-upload">
+                                <input
+                                    type="file"
+                                    accept="image/*"
+                                    onChange={handleLogoFileChange}
+                                    className="hidden"
+                                    id="logo-upload"
+                                />
+                                <div
+                                    className="w-full backdrop-blur-md border-2 border-dashed rounded-2xl p-5 text-center hover:bg-white/5 transition-all"
+                                    style={{ borderColor: `${currentTheme.hex.primary}50` }}
+                                >
+                                    <svg className="w-8 h-8 mx-auto mb-2" style={{ color: currentTheme.hex.primary }} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                                    </svg>
+                                    <p className="text-white/70 text-sm">
+                                        {selectedLogoFile ? (
+                                            <span className="font-semibold" style={{ color: currentTheme.hex.primary }}>{selectedLogoFile.name}</span>
+                                        ) : (
+                                            <>
+                                                <span className="font-semibold" style={{ color: currentTheme.hex.primary }}>Klik untuk pilih file</span>
+                                                <span className="text-white/40"> atau seret ke sini</span>
+                                            </>
+                                        )}
+                                    </p>
+                                    <p className="text-white/30 text-xs mt-1">PNG, JPG, GIF, SVG, WEBP — maks. 2MB</p>
+                                </div>
+                            </label>
+                        </div>
+
+                        {/* Action Buttons */}
+                        <div className="flex gap-3">
+                            <button
+                                onClick={() => {
+                                    setShowLogoModal(false);
+                                    setSelectedLogoFile(null);
+                                    setLogoPreviewUrl(null);
+                                }}
+                                className="flex-1 bg-white/10 backdrop-blur-md border text-white font-semibold py-3 rounded-full hover:bg-white/15 transition-all"
+                                style={{ borderColor: `${currentTheme.hex.primary}40` }}
+                            >
+                                Batal
+                            </button>
+                            <button
+                                onClick={handleLogoUpload}
+                                disabled={!selectedLogoFile || isUploadingLogo}
+                                className="flex-1 text-white font-bold py-3 rounded-full hover:scale-105 transition-all disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:scale-100 flex items-center justify-center gap-2"
+                                style={{
+                                    background: `linear-gradient(to right, ${currentTheme.hex.primary}, ${currentTheme.hex.secondary})`,
+                                    boxShadow: `0 10px 25px -5px ${currentTheme.hex.primary}40`
+                                }}
+                            >
+                                {isUploadingLogo ? (
+                                    <>
+                                        <svg className="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"/>
+                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"/>
+                                        </svg>
+                                        Mengupload...
+                                    </>
+                                ) : 'Simpan Logo'}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
         </nav>
     );
 };

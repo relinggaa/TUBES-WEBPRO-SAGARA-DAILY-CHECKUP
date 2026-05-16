@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\AppSetting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -39,17 +40,25 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user() ? [
-                    'id' => $request->user()->id,
+                    'id'       => $request->user()->id,
                     'username' => $request->user()->username,
-                    'role' => $request->user()->role,
-                    'gambar' => $request->user()->gambar,
-                    'status' => $request->user()->status,
+                    'role'     => $request->user()->role,
+                    'gambar'   => $request->user()->gambar,
+                    'status'   => $request->user()->status,
                 ] : null,
             ],
             'flash' => [
                 'success' => $request->session()->get('success'),
-                'error' => $request->session()->get('error'),
+                'error'   => $request->session()->get('error'),
             ],
+            'appLogo' => (function () {
+                try { return AppSetting::get('logo'); }
+                catch (\Exception $e) { return null; }
+            })(),
+            'appName' => (function () {
+                try { return AppSetting::get('app_name', 'Sagara Daily Checkup'); }
+                catch (\Exception $e) { return 'Sagara Daily Checkup'; }
+            })(),
         ];
     }
 }

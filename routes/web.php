@@ -25,6 +25,8 @@ Route::prefix('admin')->group(function () {
 Route::middleware(['admin'])->prefix('admin')->group(function () {
     Route::get('/dashboard', [AdminAuthController::class, 'dashboard'])->name('admin.dashboard');
     Route::post('/update-gambar', [AdminAuthController::class, 'updateGambar'])->name('admin.update-gambar');
+    Route::post('/update-logo', [AdminAuthController::class, 'updateLogo'])->name('admin.update-logo');
+    Route::post('/reset-logo', [AdminAuthController::class, 'resetLogo'])->name('admin.reset-logo');
     Route::get('/pengajuan-perbaikan', [KerusakanController::class, 'index'])->name('admin.pengajuan-perbaikan');
     Route::get('/pengajuan-towing', [TowingController::class, 'adminIndex'])->name('admin.pengajuan-towing');
     Route::post('/towing/update-status', [TowingController::class, 'adminUpdateStatus'])->name('admin.towing.update-status');
