@@ -273,6 +273,7 @@ class KerusakanControllerTest extends TestCase
             'mekanik_id'   => $mekanik->id,
         ]);
         $this->assertEquals('Perbaikan', $kendaraan->fresh()->status);
+         dump('Pengajuan perbaikan berhasil disetujui dan ditugaskan ke mekanik!');
     }
 
     /** [VALIDATION] Missing kerusakan_id. */
@@ -293,6 +294,7 @@ class KerusakanControllerTest extends TestCase
         $this->actingAs($admin)->post(route('admin.kerusakan.approve'), [
             'kerusakan_id' => $kerusakan->id,
         ])->assertSessionHasErrors('mekanik_id');
+         dump('Mekanik tidak di temukan.');
     }
 
     /** [EDGE CASE] Approving already-approved kerusakan returns error. */
@@ -316,6 +318,7 @@ class KerusakanControllerTest extends TestCase
             'mekanik_id'   => $mekanik->id,
         ])->assertRedirect(route('admin.pengajuan-perbaikan'))
             ->assertSessionHas('error');
+        dump('Kerusakan ini sudah ditugaskan ke mekanik sebelumnya.');
     }
 
     /** [EDGE CASE] Mekanik_id belongs to non-Mekanik user. */
