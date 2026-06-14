@@ -34,8 +34,8 @@ class AdminAuthControllerTest extends TestCase
     {
         return User::create(array_merge([
             'username' => 'user_' . $role . '_' . uniqid(),
-            'role'     => $role,
-            'key'      => strtoupper(bin2hex(random_bytes(4))),
+            'role' => $role,
+            'key' => strtoupper(bin2hex(random_bytes(4))),
         ], $overrides));
     }
 
@@ -53,7 +53,7 @@ class AdminAuthControllerTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
-        $response->assertInertia(fn ($page) => $page->component('Admin/LoginAdmin'));
+        $response->assertInertia(fn($page) => $page->component('Admin/LoginAdmin'));
     }
 
     /**
@@ -103,12 +103,13 @@ class AdminAuthControllerTest extends TestCase
         // Act
         $response = $this->post(route('admin.login.post'), [
             'username' => $admin->username,
-            'key'      => 'ABCD1234',
+            'key' => 'ABCD1234',
         ]);
 
         // Assert
         $response->assertRedirect(route('admin.dashboard'));
         $this->assertAuthenticatedAs($admin);
+        dump("Login Berhasil (Semua syarat terpenuhi).");
     }
 
     /**
@@ -119,11 +120,12 @@ class AdminAuthControllerTest extends TestCase
         // Act
         $response = $this->post(route('admin.login.post'), [
             'username' => '',
-            'key'      => 'ABCD1234',
+            'key' => 'ABCD1234',
         ]);
 
         // Assert
         $response->assertSessionHasErrors('username');
+        dump("Input tidak valid (gagal di \$request->validate).");
     }
 
     /**
@@ -134,7 +136,7 @@ class AdminAuthControllerTest extends TestCase
         // Act
         $response = $this->post(route('admin.login.post'), [
             'username' => 'someadmin',
-            'key'      => '',
+            'key' => '',
         ]);
 
         // Assert
@@ -149,7 +151,7 @@ class AdminAuthControllerTest extends TestCase
         // Act
         $response = $this->post(route('admin.login.post'), [
             'username' => 'someadmin',
-            'key'      => 'SHORT',   // only 5 chars
+            'key' => 'SHORT',   // only 5 chars
         ]);
 
         // Assert
@@ -167,12 +169,13 @@ class AdminAuthControllerTest extends TestCase
         // Act
         $response = $this->post(route('admin.login.post'), [
             'username' => 'nonexistent',
-            'key'      => 'WRONGKEY',
+            'key' => 'WRONGKEY',
         ]);
 
         // Assert
         $response->assertSessionHasErrors('key');
         $this->assertGuest();
+        dump("User tidak ditemukan di database.");
     }
 
     /**
@@ -186,12 +189,13 @@ class AdminAuthControllerTest extends TestCase
         // Act
         $response = $this->post(route('admin.login.post'), [
             'username' => $driver->username,
-            'key'      => 'DRIV1234',
+            'key' => 'DRIV1234',
         ]);
 
         // Assert
         $response->assertSessionHasErrors('key');
         $this->assertGuest();
+        dump("User ditemukan, tapi bukan Admin.");
     }
 
     /**
@@ -205,7 +209,7 @@ class AdminAuthControllerTest extends TestCase
         // Act – send lowercase key
         $response = $this->post(route('admin.login.post'), [
             'username' => $admin->username,
-            'key'      => 'abcd1234',
+            'key' => 'abcd1234',
         ]);
 
         // Assert
@@ -376,10 +380,11 @@ class AdminAuthControllerTest extends TestCase
 
         // Assert
         $response->assertStatus(200);
-        $response->assertInertia(fn ($page) => $page->component('Admin/DashboardAdmin')
-            ->has('stats')
-            ->has('recentActivities')
-            ->has('chartData')
+        $response->assertInertia(
+            fn($page) => $page->component('Admin/DashboardAdmin')
+                ->has('stats')
+                ->has('recentActivities')
+                ->has('chartData')
         );
     }
 
@@ -423,10 +428,11 @@ class AdminAuthControllerTest extends TestCase
         $response = $this->actingAs($admin)->get(route('admin.dashboard'));
 
         // Assert – stats should all be "0"
-        $response->assertInertia(fn ($page) => $page
-            ->where('stats.0.value', '0')  // totalPengajuan
-            ->where('stats.1.value', '0')  // perbaikanSelesai
-            ->where('stats.2.value', '0')  // pendingReview
+        $response->assertInertia(
+            fn($page) => $page
+                ->where('stats.0.value', '0')  // totalPengajuan
+                ->where('stats.1.value', '0')  // perbaikanSelesai
+                ->where('stats.2.value', '0')  // pendingReview
         );
     }
 }
